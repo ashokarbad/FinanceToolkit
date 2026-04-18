@@ -46,13 +46,13 @@ struct ContentView: View {
             // Deep navy top → richer navy mid → darkest navy bottom
             LinearGradient(
                 gradient: Gradient(stops: [
-                    .init(color: Color(hex: "#0C447C"), location: 0.0),
+                    .init(color: Color(hex: "#FAC775"), location: 0.0),
                     .init(color: Color(hex: "#0A3A6B"), location: 0.35),
                     .init(color: Color(hex: "#063159"), location: 0.65),
                     .init(color: Color(hex: "#042C53"), location: 1.0)
                 ]),
-                startPoint: .top,
-                endPoint: .bottom
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
 
