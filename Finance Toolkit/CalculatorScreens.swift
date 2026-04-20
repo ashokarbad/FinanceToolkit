@@ -134,7 +134,15 @@ struct LoanCalculatorView: View {
                 SectionHeader(systemImage: "banknote.fill", title: "Inputs", color: accent)
                 HStack { Text("Principal"); Spacer(); TextField("Principal", value: $vm.principal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Annual Rate %"); Spacer(); TextField("Rate", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                Stepper("Tenure: \(vm.tenureMonths) months", value: $vm.tenureMonths, in: 1...600)
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $vm.tenureMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
             }
             Section {
                 ResultCard(systemImage: "house.fill", accentColor: accent) {
@@ -195,6 +203,7 @@ struct SIPCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#BA7517")
     @State private var showInfoSheet = false
+    @State private var sipMonths: Int = 0
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -202,7 +211,15 @@ struct SIPCalculatorView: View {
             Section {
                 SectionHeader(systemImage: "calendar.badge.plus", title: "Inputs", color: accent)
                 HStack { Text("Monthly Investment"); Spacer(); TextField("Amount", value: $vm.sipMonthly, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                Stepper("Years: \(vm.sipYears)", value: $vm.sipYears, in: 1...50)
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $sipMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
                 HStack { Text("Expected Return %"); Spacer(); TextField("%", value: $vm.sipExpectedReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
             }
             Section {
@@ -218,8 +235,13 @@ struct SIPCalculatorView: View {
         }
         .keyboardDoneToolbar()
         .tint(accent)
+        .onAppear {
+            sipMonths = max(0, vm.sipYears) * 12
+        }
+        .onChange(of: sipMonths) { _ in
+            vm.sipYears = max(0, sipMonths) / 12
+        }
         .onChange(of: vm.sipMonthly) { _ in vm.recalculateAll() }
-        .onChange(of: vm.sipYears) { _ in vm.recalculateAll() }
         .onChange(of: vm.sipExpectedReturnPercent) { _ in vm.recalculateAll() }
         .navigationTitle("SIP Calculator")
         .navigationBarTitleDisplayMode(.large)
@@ -262,6 +284,7 @@ struct SWPCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#BA7517")
     @State private var showInfoSheet = false
+    @State private var swpMonths: Int = 0
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -269,8 +292,16 @@ struct SWPCalculatorView: View {
             Section {
                 SectionHeader(systemImage: "arrow.down.left.circle.fill", title: "Inputs", color: accent)
                 HStack { Text("Corpus"); Spacer(); TextField("Corpus", value: $vm.swpCorpus, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $swpMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
                 HStack { Text("Monthly Withdrawal"); Spacer(); TextField("Withdrawal", value: $vm.swpMonthlyWithdrawal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                Stepper("Years: \(vm.swpYears)", value: $vm.swpYears, in: 1...50)
                 HStack { Text("Expected Return %"); Spacer(); TextField("%", value: $vm.swpExpectedReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
             }
             Section {
@@ -286,9 +317,14 @@ struct SWPCalculatorView: View {
         }
         .keyboardDoneToolbar()
         .tint(accent)
+        .onAppear {
+            swpMonths = max(0, vm.swpYears) * 12
+        }
+        .onChange(of: swpMonths) { _ in
+            vm.swpYears = max(0, swpMonths) / 12
+        }
         .onChange(of: vm.swpCorpus) { _ in vm.recalculateAll() }
         .onChange(of: vm.swpMonthlyWithdrawal) { _ in vm.recalculateAll() }
-        .onChange(of: vm.swpYears) { _ in vm.recalculateAll() }
         .onChange(of: vm.swpExpectedReturnPercent) { _ in vm.recalculateAll() }
         .navigationTitle("SWP Calculator")
         .navigationBarTitleDisplayMode(.large)
@@ -331,6 +367,7 @@ struct FDCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#BA7517")
     @State private var showInfoSheet = false
+    @State private var fdMonths: Int = 0
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -338,9 +375,17 @@ struct FDCalculatorView: View {
             Section {
                 SectionHeader(systemImage: "building.columns.fill", title: "Inputs", color: accent)
                 HStack { Text("Principal"); Spacer(); TextField("Principal", value: $vm.fdPrincipal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                Stepper("Years: \(vm.fdYears)", value: $vm.fdYears, in: 1...30)
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $fdMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
                 HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.fdAnnualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                Stepper("Compounding / Year: \(vm.fdCompoundingPerYear)", value: $vm.fdCompoundingPerYear, in: 1...12)
+                HStack { Text("Compounding / Year"); Spacer(); TextField("Times", value: $vm.fdCompoundingPerYear, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
             }
             Section {
                 ResultCard(systemImage: "building.columns.fill", accentColor: accent) {
@@ -355,8 +400,13 @@ struct FDCalculatorView: View {
         }
         .keyboardDoneToolbar()
         .tint(accent)
+        .onAppear {
+            fdMonths = max(0, vm.fdYears) * 12
+        }
+        .onChange(of: fdMonths) { _ in
+            vm.fdYears = max(0, fdMonths) / 12
+        }
         .onChange(of: vm.fdPrincipal) { _ in vm.recalculateAll() }
-        .onChange(of: vm.fdYears) { _ in vm.recalculateAll() }
         .onChange(of: vm.fdAnnualRatePercent) { _ in vm.recalculateAll() }
         .onChange(of: vm.fdCompoundingPerYear) { _ in vm.recalculateAll() }
         .navigationTitle("FD Calculator")
@@ -400,6 +450,7 @@ struct RDCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#BA7517")
     @State private var showInfoSheet = false
+    @State private var rdMonths: Int = 0
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -407,9 +458,17 @@ struct RDCalculatorView: View {
             Section {
                 SectionHeader(systemImage: "clock.fill", title: "Inputs", color: accent)
                 HStack { Text("Monthly Deposit"); Spacer(); TextField("Deposit", value: $vm.rdMonthlyDeposit, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                Stepper("Years: \(vm.rdYears)", value: $vm.rdYears, in: 1...30)
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $rdMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
                 HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.rdAnnualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                Stepper("Compounding / Year: \(vm.rdCompoundingPerYear)", value: $vm.rdCompoundingPerYear, in: 1...12)
+                HStack { Text("Compounding / Year"); Spacer(); TextField("Times", value: $vm.rdCompoundingPerYear, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
             }
             Section {
                 ResultCard(systemImage: "chart.bar.fill", accentColor: accent) {
@@ -424,8 +483,13 @@ struct RDCalculatorView: View {
         }
         .keyboardDoneToolbar()
         .tint(accent)
+        .onAppear {
+            rdMonths = max(0, vm.rdYears) * 12
+        }
+        .onChange(of: rdMonths) { _ in
+            vm.rdYears = max(0, rdMonths) / 12
+        }
         .onChange(of: vm.rdMonthlyDeposit) { _ in vm.recalculateAll() }
-        .onChange(of: vm.rdYears) { _ in vm.recalculateAll() }
         .onChange(of: vm.rdAnnualRatePercent) { _ in vm.recalculateAll() }
         .onChange(of: vm.rdCompoundingPerYear) { _ in vm.recalculateAll() }
         .navigationTitle("RD Calculator")
@@ -469,6 +533,7 @@ struct LumpSumMFView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#BA7517")
     @State private var showInfoSheet = false
+    @State private var lumpSumMonths: Int = 0
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -476,7 +541,15 @@ struct LumpSumMFView: View {
             Section {
                 SectionHeader(systemImage: "chart.pie.fill", title: "Inputs", color: accent)
                 HStack { Text("Lump Sum Amount"); Spacer(); TextField("Amount", value: $vm.lumpSumAmount, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                Stepper("Years: \(vm.lumpSumYears)", value: $vm.lumpSumYears, in: 0...50)
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $lumpSumMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
                 HStack { Text("Expected Return %"); Spacer(); TextField("%", value: $vm.lumpSumExpectedReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
             }
             Section {
@@ -492,8 +565,13 @@ struct LumpSumMFView: View {
         }
         .keyboardDoneToolbar()
         .tint(accent)
+        .onAppear {
+            lumpSumMonths = max(0, vm.lumpSumYears) * 12
+        }
+        .onChange(of: lumpSumMonths) { _ in
+            vm.lumpSumYears = max(0, lumpSumMonths) / 12
+        }
         .onChange(of: vm.lumpSumAmount) { _ in vm.recalculateAll() }
-        .onChange(of: vm.lumpSumYears) { _ in vm.recalculateAll() }
         .onChange(of: vm.lumpSumExpectedReturnPercent) { _ in vm.recalculateAll() }
         .navigationTitle("MF Lump Sum")
         .navigationBarTitleDisplayMode(.large)
@@ -652,7 +730,7 @@ struct NPSCalculatorView: View {
             Section {
                 SectionHeader(systemImage: "shield.fill", title: "Inputs", color: accent)
                 HStack { Text("Monthly Contribution"); Spacer(); TextField("Amount", value: $vm.npsMonthlyContribution, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                Stepper("Years: \(vm.npsYears)", value: $vm.npsYears, in: 1...50)
+                HStack { Text("Years"); Spacer(); TextField("Years", value: $vm.npsYears, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
                 HStack { Text("Expected Return %"); Spacer(); TextField("%", value: $vm.npsExpectedReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Annuity % at Maturity"); Spacer(); TextField("%", value: $vm.npsAnnuityPercentAtMaturity, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Annuity Return %"); Spacer(); TextField("%", value: $vm.npsAnnuityReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
@@ -777,7 +855,7 @@ struct PFCalculatorView: View {
             }
             .pickerStyle(.segmented)
             contributionInputs
-            Stepper("Years: \(vm.pfYears)", value: $vm.pfYears, in: 1...40)
+            HStack { Text("Years"); Spacer(); TextField("Years", value: $vm.pfYears, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
             HStack {
                 Text("Expected Return %")
                 Spacer()
@@ -827,7 +905,7 @@ struct GratuityCalculatorView: View {
             Section {
                 SectionHeader(systemImage: "gift.fill", title: "Inputs", color: accent)
                 HStack { Text("Last Drawn Basic"); Spacer(); TextField("Basic", value: $vm.gratuityLastDrawnBasic, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                HStack { Text("Years of Service"); Spacer(); TextField("Years", value: $vm.gratuityYearsOfService, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Years of Service"); Spacer(); TextField("Years", value: $vm.gratuityYearsOfService, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
             }
             Section {
                 ResultCard(systemImage: "gift.fill", accentColor: accent) {
@@ -867,6 +945,655 @@ struct GratuityCalculatorView: View {
                             .font(.body)
                             .foregroundStyle(.secondary)
                         Text("Tip: Service of 5 or more years is generally required for eligibility (with exceptions).")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
+    }
+}
+
+// MARK: - Vehicle/Personal Loan (Down Payment, Processing Fee)
+struct VehiclePersonalLoanView: View {
+    @EnvironmentObject var vm: CalculatorViewModel
+    let title: String
+    private let accent = Color(hex: "#185FA5")
+    @State private var showInfoSheet = false
+    @State private var downPayment: Double = 0
+    @State private var processingFeePercent: Double = 0
+    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+
+    private var netLoanAmount: Double { max(vm.principal - downPayment, 0) }
+    private var processingFeeAmount: Double { netLoanAmount * (processingFeePercent / 100.0) }
+    private var emi: Double {
+        let r = vm.annualRatePercent / 12.0 / 100.0
+        let n = Double(vm.tenureMonths)
+        guard r > 0, n > 0 else { return netLoanAmount / max(n, 1) }
+        let numerator = netLoanAmount * r * pow(1 + r, n)
+        let denominator = pow(1 + r, n) - 1
+        return numerator / denominator
+    }
+    private var totalPayment: Double { emi * Double(vm.tenureMonths) + processingFeeAmount }
+    private var totalInterest: Double { max(totalPayment - netLoanAmount - processingFeeAmount, 0) }
+
+    var body: some View {
+        Form {
+            Section {
+                SectionHeader(systemImage: "banknote.fill", title: "Inputs", color: accent)
+                HStack { Text("On-road / Principal"); Spacer(); TextField("Amount", value: $vm.principal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Down Payment"); Spacer(); TextField("Amount", value: $downPayment, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Processing Fee %"); Spacer(); TextField("%", value: $processingFeePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $vm.tenureMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Section {
+                ResultCard(systemImage: "car.fill", accentColor: accent) {
+                    ResultRow(label: "Net Loan Amount", value: netLoanAmount.formatted(.currency(code: currency)))
+                    ResultRow(label: "Processing Fee", value: processingFeeAmount.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "EMI", value: emi.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: emi)
+                    ResultRow(label: "Total Interest", value: totalInterest.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Total Outflow", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: totalPayment)
+                    Divider().padding(.vertical, 4)
+                }
+            }
+        }
+        .keyboardDoneToolbar()
+        .tint(accent)
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("\(title) Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("This calculator considers down payment and processing fee. EMI is computed on the net loan amount (On-road/Principal − Down Payment). Processing fee is added to total outflow.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: A larger down payment reduces EMI and total interest.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
+    }
+}
+
+// MARK: - Education Loan (Moratorium)
+struct EducationLoanView: View {
+    @EnvironmentObject var vm: CalculatorViewModel
+    private let accent = Color(hex: "#185FA5")
+    @State private var showInfoSheet = false
+    @State private var moratoriumMonths: Int = 0
+    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+
+    private var principalAfterMoratorium: Double {
+        let r = vm.annualRatePercent / 12.0 / 100.0
+        return vm.principal * pow(1 + r, Double(moratoriumMonths))
+    }
+    private var emi: Double {
+        let r = vm.annualRatePercent / 12.0 / 100.0
+        let n = Double(max(vm.tenureMonths - moratoriumMonths, 1))
+        let p = principalAfterMoratorium
+        guard r > 0, n > 0 else { return p / max(n, 1) }
+        let numerator = p * r * pow(1 + r, n)
+        let denominator = pow(1 + r, n) - 1
+        return numerator / denominator
+    }
+    private var totalPayment: Double { emi * Double(max(vm.tenureMonths - moratoriumMonths, 0)) }
+    private var totalInterest: Double { max(totalPayment - vm.principal, 0) }
+
+    var body: some View {
+        Form {
+            Section {
+                SectionHeader(systemImage: "book.fill", title: "Inputs", color: accent)
+                HStack { Text("Principal"); Spacer(); TextField("Amount", value: $vm.principal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $vm.tenureMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
+                HStack { Text("Moratorium"); Spacer(); TextField("Months", value: $moratoriumMonths, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad); Text("months").foregroundStyle(.secondary) }
+            }
+            Section {
+                ResultCard(systemImage: "book.fill", accentColor: accent) {
+                    ResultRow(label: "Principal after Moratorium", value: principalAfterMoratorium.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "EMI", value: emi.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: emi)
+                    ResultRow(label: "Total Interest (approx)", value: totalInterest.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Total Paid (EMIs)", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: totalPayment)
+                    Divider().padding(.vertical, 4)
+                }
+            }
+        }
+        .keyboardDoneToolbar()
+        .tint(accent)
+        .onChange(of: vm.principal) { _ in vm.recalculateAll() }
+        .onChange(of: vm.annualRatePercent) { _ in vm.recalculateAll() }
+        .onChange(of: vm.tenureMonths) { _ in vm.recalculateAll() }
+        .onChange(of: moratoriumMonths) { _ in vm.recalculateAll() }
+        .navigationTitle("Education Loan")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Education Loan Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("This calculator supports a moratorium period where interest accrues and EMIs start later. Principal grows during moratorium and EMIs are computed on the increased amount.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Paying interest during moratorium can reduce future EMIs.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
+    }
+}
+
+// MARK: - Credit Line / Overdraft
+struct CreditLineOverdraftView: View {
+    @EnvironmentObject var vm: CalculatorViewModel
+    private let accent = Color(hex: "#185FA5")
+    @State private var showInfoSheet = false
+    @State private var creditLimit: Double = 500_000
+    @State private var utilizationPercent: Double = 40
+    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+
+    private var utilizedAmount: Double { creditLimit * (utilizationPercent / 100.0) }
+    private var monthlyInterest: Double { utilizedAmount * (vm.annualRatePercent / 100.0) / 12.0 }
+
+    var body: some View {
+        Form {
+            Section {
+                SectionHeader(systemImage: "creditcard.fill", title: "Inputs", color: accent)
+                HStack { Text("Credit Limit"); Spacer(); TextField("Amount", value: $creditLimit, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Utilization %"); Spacer(); TextField("%", value: $utilizationPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+            }
+            Section {
+                ResultCard(systemImage: "creditcard.fill", accentColor: accent) {
+                    ResultRow(label: "Utilized Amount", value: utilizedAmount.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Monthly Interest (approx)", value: monthlyInterest.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: monthlyInterest)
+                    Divider().padding(.vertical, 4)
+                }
+            }
+        }
+        .keyboardDoneToolbar()
+        .tint(accent)
+        .navigationTitle("Credit Line / Overdraft")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Credit Line / Overdraft Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("Interest is charged on the utilized balance only. This view estimates monthly interest based on average utilization and annual rate.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Reducing average utilization lowers monthly interest cost.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
+    }
+}
+
+// MARK: - Business Loan (Processing Fee)
+struct BusinessLoanView: View {
+    @EnvironmentObject var vm: CalculatorViewModel
+    private let accent = Color(hex: "#185FA5")
+    @State private var showInfoSheet = false
+    @State private var processingFeePercent: Double = 0
+    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+
+    private var processingFeeAmount: Double { vm.principal * (processingFeePercent / 100.0) }
+    private var emi: Double {
+        let r = vm.annualRatePercent / 12.0 / 100.0
+        let n = Double(vm.tenureMonths)
+        let p = vm.principal
+        guard r > 0, n > 0 else { return p / max(n, 1) }
+        let numerator = p * r * pow(1 + r, n)
+        let denominator = pow(1 + r, n) - 1
+        return numerator / denominator
+    }
+    private var totalPayment: Double { emi * Double(vm.tenureMonths) + processingFeeAmount }
+    private var totalInterest: Double { max((emi * Double(vm.tenureMonths)) - vm.principal, 0) }
+
+    var body: some View {
+        Form {
+            Section {
+                SectionHeader(systemImage: "briefcase.fill", title: "Inputs", color: accent)
+                HStack { Text("Principal"); Spacer(); TextField("Amount", value: $vm.principal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Processing Fee %"); Spacer(); TextField("%", value: $processingFeePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $vm.tenureMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Section {
+                ResultCard(systemImage: "briefcase.fill", accentColor: accent) {
+                    ResultRow(label: "Processing Fee", value: processingFeeAmount.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "EMI", value: emi.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: emi)
+                    ResultRow(label: "Total Interest", value: totalInterest.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Total Outflow", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: totalPayment)
+                    Divider().padding(.vertical, 4)
+                }
+            }
+        }
+        .keyboardDoneToolbar()
+        .tint(accent)
+        .navigationTitle("Business Loan")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Business Loan Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("Includes processing fee in total outflow. EMI is based on principal at the selected rate and tenure.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Compare processing fee and pre-closure charges across lenders.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
+    }
+}
+
+// MARK: - Gold Loan (LTV)
+struct GoldLoanView: View {
+    @EnvironmentObject var vm: CalculatorViewModel
+    private let accent = Color(hex: "#185FA5")
+    @State private var showInfoSheet = false
+    @State private var goldValue: Double = 300_000
+    @State private var ltvPercent: Double = 75
+    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+
+    private var principalFromLTV: Double { max(goldValue * (ltvPercent / 100.0), 0) }
+    private var emi: Double {
+        let r = vm.annualRatePercent / 12.0 / 100.0
+        let n = Double(vm.tenureMonths)
+        let p = principalFromLTV
+        guard r > 0, n > 0 else { return p / max(n, 1) }
+        let numerator = p * r * pow(1 + r, n)
+        let denominator = pow(1 + r, n) - 1
+        return numerator / denominator
+    }
+    private var totalPayment: Double { emi * Double(vm.tenureMonths) }
+    private var totalInterest: Double { max(totalPayment - principalFromLTV, 0) }
+
+    var body: some View {
+        Form {
+            Section {
+                SectionHeader(systemImage: "indianrupeesign.circle.fill", title: "Inputs", color: accent)
+                HStack { Text("Gold Value"); Spacer(); TextField("Amount", value: $goldValue, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("LTV %"); Spacer(); TextField("%", value: $ltvPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $vm.tenureMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Section {
+                ResultCard(systemImage: "indianrupeesign.circle.fill", accentColor: accent) {
+                    ResultRow(label: "Eligible Principal (LTV)", value: principalFromLTV.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "EMI", value: emi.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: emi)
+                    ResultRow(label: "Total Interest", value: totalInterest.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Total Paid", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: totalPayment)
+                    Divider().padding(.vertical, 4)
+                }
+            }
+        }
+        .keyboardDoneToolbar()
+        .tint(accent)
+        .navigationTitle("Gold Loan")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Gold Loan Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("Principal is derived using LTV% of the gold value. EMI is computed on the eligible principal.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Higher LTV increases eligibility but raises EMI and interest.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
+    }
+}
+
+// MARK: - Loan Against Property (LAP)
+struct LAPLoanView: View {
+    @EnvironmentObject var vm: CalculatorViewModel
+    private let accent = Color(hex: "#185FA5")
+    @State private var showInfoSheet = false
+    @State private var propertyValue: Double = 5_000_000
+    @State private var ltvPercent: Double = 70
+    @State private var processingFeePercent: Double = 0
+    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+
+    private var principalFromLTV: Double { max(propertyValue * (ltvPercent / 100.0), 0) }
+    private var processingFeeAmount: Double { principalFromLTV * (processingFeePercent / 100.0) }
+    private var emi: Double {
+        let r = vm.annualRatePercent / 12.0 / 100.0
+        let n = Double(vm.tenureMonths)
+        let p = principalFromLTV
+        guard r > 0, n > 0 else { return p / max(n, 1) }
+        let numerator = p * r * pow(1 + r, n)
+        let denominator = pow(1 + r, n) - 1
+        return numerator / denominator
+    }
+    private var totalPayment: Double { emi * Double(vm.tenureMonths) + processingFeeAmount }
+    private var totalInterest: Double { max((emi * Double(vm.tenureMonths)) - principalFromLTV, 0) }
+
+    var body: some View {
+        Form {
+            Section {
+                SectionHeader(systemImage: "building.2.fill", title: "Inputs", color: accent)
+                HStack { Text("Property Value"); Spacer(); TextField("Amount", value: $propertyValue, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("LTV %"); Spacer(); TextField("%", value: $ltvPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Processing Fee %"); Spacer(); TextField("%", value: $processingFeePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $vm.tenureMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Section {
+                ResultCard(systemImage: "building.2.fill", accentColor: accent) {
+                    ResultRow(label: "Eligible Principal (LTV)", value: principalFromLTV.formatted(.currency(code: currency)))
+                    ResultRow(label: "Processing Fee", value: processingFeeAmount.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "EMI", value: emi.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: emi)
+                    ResultRow(label: "Total Interest", value: totalInterest.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Total Outflow", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: totalPayment)
+                    Divider().padding(.vertical, 4)
+                }
+            }
+        }
+        .keyboardDoneToolbar()
+        .tint(accent)
+        .navigationTitle("Loan Against Property (LAP)")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("LAP Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("Principal eligibility is derived from property value and LTV%. Processing fee is added to total outflow.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: LTV caps vary by lender and property type.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
+    }
+}
+
+// MARK: - Agricultural Loan (Monthly EMI, optional moratorium)
+struct AgriculturalLoanView: View {
+    @EnvironmentObject var vm: CalculatorViewModel
+    private let accent = Color(hex: "#185FA5")
+    @State private var showInfoSheet = false
+    @State private var moratoriumMonths: Int = 0
+    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+
+    private var emi: Double {
+        let r = vm.annualRatePercent / 12.0 / 100.0
+        let n = Double(max(vm.tenureMonths - moratoriumMonths, 1))
+        let p = vm.principal * pow(1 + r, Double(moratoriumMonths))
+        guard r > 0, n > 0 else { return p / max(n, 1) }
+        let numerator = p * r * pow(1 + r, n)
+        let denominator = pow(1 + r, n) - 1
+        return numerator / denominator
+    }
+    private var totalPayment: Double { emi * Double(max(vm.tenureMonths - moratoriumMonths, 0)) }
+
+    var body: some View {
+        Form {
+            Section {
+                SectionHeader(systemImage: "leaf.fill", title: "Inputs", color: accent)
+                HStack { Text("Principal"); Spacer(); TextField("Amount", value: $vm.principal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $vm.tenureMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
+                HStack { Text("Moratorium"); Spacer(); TextField("Months", value: $moratoriumMonths, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad); Text("months").foregroundStyle(.secondary) }
+            }
+            Section {
+                ResultCard(systemImage: "leaf.fill", accentColor: accent) {
+                    ResultRow(label: "EMI (monthly)", value: emi.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: emi)
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Total Paid (EMIs)", value: totalPayment.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                }
+            }
+        }
+        .keyboardDoneToolbar()
+        .tint(accent)
+        .onChange(of: vm.principal) { _ in vm.recalculateAll() }
+        .onChange(of: vm.annualRatePercent) { _ in vm.recalculateAll() }
+        .onChange(of: vm.tenureMonths) { _ in vm.recalculateAll() }
+        .onChange(of: moratoriumMonths) { _ in vm.recalculateAll() }
+        .navigationTitle("Agricultural Loan")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Agricultural Loan Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("This version uses monthly EMIs and optionally supports a short moratorium. We can extend it to seasonal or annual repayments if needed.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Align repayments with harvest cycles to manage cash flows.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
+    }
+}
+
+// MARK: - Consumer Durable / EMI Loan (No-cost toggle)
+struct ConsumerDurableLoanView: View {
+    @EnvironmentObject var vm: CalculatorViewModel
+    private let accent = Color(hex: "#185FA5")
+    @State private var showInfoSheet = false
+    @State private var price: Double = 50_000
+    @State private var downPayment: Double = 0
+    @State private var processingFeePercent: Double = 0
+    @State private var noCostEMI: Bool = false
+    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+
+    private var netLoanAmount: Double { max(price - downPayment, 0) }
+    private var processingFeeAmount: Double { netLoanAmount * (processingFeePercent / 100.0) }
+    private var emi: Double {
+        if noCostEMI {
+            // Evenly spread principal with zero interest
+            return netLoanAmount / max(Double(vm.tenureMonths), 1)
+        }
+        let r = vm.annualRatePercent / 12.0 / 100.0
+        let n = Double(vm.tenureMonths)
+        let p = netLoanAmount
+        guard r > 0, n > 0 else { return p / max(n, 1) }
+        let numerator = p * r * pow(1 + r, n)
+        let denominator = pow(1 + r, n) - 1
+        return numerator / denominator
+    }
+    private var totalPayment: Double { emi * Double(vm.tenureMonths) + processingFeeAmount }
+    private var impliedInterest: Double {
+        if noCostEMI { return 0 }
+        return max((emi * Double(vm.tenureMonths)) - netLoanAmount, 0)
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                SectionHeader(systemImage: "cart.fill", title: "Inputs", color: accent)
+                HStack { Text("Product Price"); Spacer(); TextField("Amount", value: $price, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Down Payment"); Spacer(); TextField("Amount", value: $downPayment, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Processing Fee %"); Spacer(); TextField("%", value: $processingFeePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                Toggle("No-cost EMI", isOn: $noCostEMI)
+                HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack {
+                    Text("Tenure")
+                    Spacer()
+                    TextField("Months", value: $vm.tenureMonths, format: .number)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                    Text("months")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Section {
+                ResultCard(systemImage: "cart.fill", accentColor: accent) {
+                    ResultRow(label: "Net Loan Amount", value: netLoanAmount.formatted(.currency(code: currency)))
+                    ResultRow(label: "Processing Fee", value: processingFeeAmount.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "EMI", value: emi.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: emi)
+                    if !noCostEMI {
+                        ResultRow(label: "Implied Interest", value: impliedInterest.formatted(.currency(code: currency)))
+                    }
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Total Outflow", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: totalPayment)
+                    Divider().padding(.vertical, 4)
+                }
+            }
+        }
+        .keyboardDoneToolbar()
+        .tint(accent)
+        .navigationTitle("Consumer Durable / EMI Loan")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Consumer Durable / EMI Loan Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("Supports down payment and processing fee. No-cost EMI spreads principal evenly without interest. Otherwise, standard EMI is used.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Check effective cost when no-cost EMI includes processing fees.")
                             .font(.body)
                             .foregroundStyle(.secondary)
                     }

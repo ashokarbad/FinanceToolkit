@@ -18,8 +18,32 @@ struct MainCalculatorView: View {
                 NavigationLink { LoanCalculatorView(title: "Home Loan").environmentObject(vm) } label: {
                     CalcLabel("Home Loan", icon: "house.fill", color: Color(hex: "#185FA5"))
                 }
-                NavigationLink { LoanCalculatorView(title: "Car Loan").environmentObject(vm) } label: {
-                    CalcLabel("Car Loan", icon: "car.fill", color: Color(hex: "#185FA5"))
+                NavigationLink { VehiclePersonalLoanView(title: "Vehicle Loan").environmentObject(vm) } label: {
+                    CalcLabel("Vehicle Loan", icon: "car.fill", color: Color(hex: "#185FA5"))
+                }
+                NavigationLink { VehiclePersonalLoanView(title: "Personal Loan").environmentObject(vm) } label: {
+                    CalcLabel("Personal Loan", icon: "person.fill", color: Color(hex: "#185FA5"))
+                }
+                NavigationLink { EducationLoanView().environmentObject(vm) } label: {
+                    CalcLabel("Education Loan", icon: "book.fill", color: Color(hex: "#185FA5"))
+                }
+                NavigationLink { LoanCalculatorView(title: "Business Loan").environmentObject(vm) } label: {
+                    CalcLabel("Business Loan", icon: "briefcase.fill", color: Color(hex: "#185FA5"))
+                }
+                NavigationLink { LoanCalculatorView(title: "Gold Loan").environmentObject(vm) } label: {
+                    CalcLabel("Gold Loan", icon: "indianrupeesign.circle.fill", color: Color(hex: "#185FA5"))
+                }
+                NavigationLink { LoanCalculatorView(title: "Loan Against Property (LAP)").environmentObject(vm) } label: {
+                    CalcLabel("Loan Against Property (LAP)", icon: "building.2.fill", color: Color(hex: "#185FA5"))
+                }
+                NavigationLink { LoanCalculatorView(title: "Agricultural Loan").environmentObject(vm) } label: {
+                    CalcLabel("Agricultural Loan", icon: "leaf.fill", color: Color(hex: "#185FA5"))
+                }
+                NavigationLink { CreditLineOverdraftView().environmentObject(vm) } label: {
+                    CalcLabel("Credit Line / Overdraft", icon: "creditcard.fill", color: Color(hex: "#185FA5"))
+                }
+                NavigationLink { LoanCalculatorView(title: "Consumer Durable / EMI Loan").environmentObject(vm) } label: {
+                    CalcLabel("Consumer Durable / EMI Loan", icon: "cart.fill", color: Color(hex: "#185FA5"))
                 }
             } header: {
                 SectionHeader("Loans", icon: "banknote", color: Color(hex: "#185FA5"))
@@ -119,3 +143,4 @@ private struct SectionHeader: View {
 #Preview {
     NavigationStack { MainCalculatorView() }
 }
+
