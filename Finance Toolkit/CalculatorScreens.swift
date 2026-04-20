@@ -125,6 +125,7 @@ struct LoanCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     var title: String
     private let accent = Color(hex: "#185FA5")
+    @State private var showInfoSheet = false
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -145,8 +146,6 @@ struct LoanCalculatorView: View {
                     ResultRow(label: "Total Paid", value: vm.loanTotalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.loanTotalPayment)
                     Divider().padding(.vertical, 4)
-                    Text("EMI is the fixed monthly payment. Total Paid = Principal + Interest.")
-                        .font(.footnote).foregroundStyle(.secondary)
                 }
             }
         }
@@ -157,6 +156,36 @@ struct LoanCalculatorView: View {
         .onChange(of: vm.tenureMonths) { _ in vm.recalculateAll() }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInfoSheet = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .tint(accent)
+            }
+        }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Loan Calculator Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("EMI is computed using the standard amortization formula. Enter principal, annual interest rate, and tenure in months. Total Paid = Principal + Total Interest.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Higher prepayments or shorter tenure reduce total interest.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
     }
 }
 
@@ -165,6 +194,7 @@ struct LoanCalculatorView: View {
 struct SIPCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#BA7517")
+    @State private var showInfoSheet = false
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -183,8 +213,6 @@ struct SIPCalculatorView: View {
                     ResultRow(label: "Future Value", value: vm.sipFutureValue.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.sipFutureValue)
                     Divider().padding(.vertical, 4)
-                    Text("Future Value = Invested amount plus compounded returns over the period.")
-                        .font(.footnote).foregroundStyle(.secondary)
                 }
             }
         }
@@ -195,6 +223,36 @@ struct SIPCalculatorView: View {
         .onChange(of: vm.sipExpectedReturnPercent) { _ in vm.recalculateAll() }
         .navigationTitle("SIP Calculator")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInfoSheet = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .tint(accent)
+            }
+        }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("SIP Calculator Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("SIP future value assumes monthly investments compounded at the expected annual return. Results are estimates and not guarantees.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Increasing SIP amount annually can significantly improve long-term corpus.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
     }
 }
 
@@ -203,6 +261,7 @@ struct SIPCalculatorView: View {
 struct SWPCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#BA7517")
+    @State private var showInfoSheet = false
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -222,8 +281,6 @@ struct SWPCalculatorView: View {
                     ResultRow(label: "Ending Corpus", value: vm.swpEndingCorpus.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.swpEndingCorpus)
                     Divider().padding(.vertical, 4)
-                    Text("Ending Corpus is the remaining balance after monthly withdrawals and returns.")
-                        .font(.footnote).foregroundStyle(.secondary)
                 }
             }
         }
@@ -235,6 +292,36 @@ struct SWPCalculatorView: View {
         .onChange(of: vm.swpExpectedReturnPercent) { _ in vm.recalculateAll() }
         .navigationTitle("SWP Calculator")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInfoSheet = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .tint(accent)
+            }
+        }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("SWP Calculator Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("Systematic Withdrawal Plan simulates monthly withdrawals while the remaining corpus continues to earn returns. Ending corpus depends on withdrawal size and returns.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Choosing a sustainable withdrawal rate helps preserve capital.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
     }
 }
 
@@ -243,6 +330,7 @@ struct SWPCalculatorView: View {
 struct FDCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#BA7517")
+    @State private var showInfoSheet = false
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -262,8 +350,6 @@ struct FDCalculatorView: View {
                     ResultRow(label: "Maturity Amount", value: vm.fdMaturityAmount.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.fdMaturityAmount)
                     Divider().padding(.vertical, 4)
-                    Text("Maturity Amount = Principal compounded at the chosen frequency and rate.")
-                        .font(.footnote).foregroundStyle(.secondary)
                 }
             }
         }
@@ -275,6 +361,36 @@ struct FDCalculatorView: View {
         .onChange(of: vm.fdCompoundingPerYear) { _ in vm.recalculateAll() }
         .navigationTitle("FD Calculator")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInfoSheet = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .tint(accent)
+            }
+        }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("FD Calculator Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("Fixed Deposit maturity is computed using compound interest with your chosen compounding frequency. Bank rates and compounding may vary.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Senior citizen rates and special tenures may offer higher returns.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
     }
 }
 
@@ -283,6 +399,7 @@ struct FDCalculatorView: View {
 struct RDCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#BA7517")
+    @State private var showInfoSheet = false
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -302,8 +419,6 @@ struct RDCalculatorView: View {
                     ResultRow(label: "Maturity Amount", value: vm.rdMaturityAmount.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.rdMaturityAmount)
                     Divider().padding(.vertical, 4)
-                    Text("Maturity Amount is the compounded value of monthly deposits over the term.")
-                        .font(.footnote).foregroundStyle(.secondary)
                 }
             }
         }
@@ -315,6 +430,36 @@ struct RDCalculatorView: View {
         .onChange(of: vm.rdCompoundingPerYear) { _ in vm.recalculateAll() }
         .navigationTitle("RD Calculator")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInfoSheet = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .tint(accent)
+            }
+        }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("RD Calculator Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("Recurring Deposit maturity uses the future value of monthly deposits compounded at the expected rate. Actual bank computation may differ slightly.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Missing deposits can impact the final maturity amount.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
     }
 }
 
@@ -323,6 +468,7 @@ struct RDCalculatorView: View {
 struct LumpSumMFView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#BA7517")
+    @State private var showInfoSheet = false
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -341,8 +487,6 @@ struct LumpSumMFView: View {
                     ResultRow(label: "Future Value", value: vm.lumpSumFutureValue.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.lumpSumFutureValue)
                     Divider().padding(.vertical, 4)
-                    Text("Future Value is the compounded value of the one-time investment.")
-                        .font(.footnote).foregroundStyle(.secondary)
                 }
             }
         }
@@ -353,6 +497,36 @@ struct LumpSumMFView: View {
         .onChange(of: vm.lumpSumExpectedReturnPercent) { _ in vm.recalculateAll() }
         .navigationTitle("MF Lump Sum")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInfoSheet = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .tint(accent)
+            }
+        }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Mutual Fund Lump Sum Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("Future value is estimated using annual compounding at your expected return. Market-linked products carry risk; past performance is not indicative of future returns.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Consider diversification and suitable investment horizon.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
     }
 }
 
@@ -360,6 +534,7 @@ struct LumpSumMFView: View {
 // Accent: Teal #1D9E75
 struct TaxCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
+    @State private var showInfoSheet = false
     private let accent = Color(hex: "#1D9E75")
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
@@ -406,8 +581,6 @@ struct TaxCalculatorView: View {
                     ResultRow(label: "Tax Payable", value: vm.taxPayable.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.taxPayable)
                     Divider().padding(.vertical, 4)
-                    Text("Illustrative estimate only. Verify slabs, exemptions, and limits for your assessment year.")
-                        .font(.footnote).foregroundStyle(.secondary)
                 }
             }
         }
@@ -424,6 +597,45 @@ struct TaxCalculatorView: View {
         .onChange(of: vm.taxCessPercent) { _ in vm.recalculateAll() }
         .navigationTitle("Tax Calculator")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInfoSheet = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .tint(accent)
+            }
+        }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Tax Info & Reference")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("As per the latest update, there is no tax up to ₹12,00,000 under both regimes in this app. Slabs above 12L are illustrative. Always verify with official sources for your assessment year.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Link(destination: URL(string: "https://www.incometaxindia.gov.in/income-tax-calculator")!) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "link")
+                                Text("Open Official Income Tax Calculator")
+                                Image(systemName: "arrow.up.right.square")
+                            }
+                            .font(.body.weight(.semibold))
+                        }
+                    }
+                    .padding()
+                }
+                .navigationTitle("Tax Info")
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") { showInfoSheet = false }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -432,6 +644,7 @@ struct TaxCalculatorView: View {
 struct NPSCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#1D9E75")
+    @State private var showInfoSheet = false
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -453,8 +666,6 @@ struct NPSCalculatorView: View {
                     ResultRow(label: "Est. Annual Pension", value: vm.npsEstimatedAnnualPension.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.npsEstimatedAnnualPension)
                     Divider().padding(.vertical, 4)
-                    Text("Corpus is split into lumpsum and annuity as per the selected percentage.")
-                        .font(.footnote).foregroundStyle(.secondary)
                 }
             }
         }
@@ -467,6 +678,36 @@ struct NPSCalculatorView: View {
         .onChange(of: vm.npsAnnuityReturnPercent) { _ in vm.recalculateAll() }
         .navigationTitle("NPS Calculator")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInfoSheet = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .tint(accent)
+            }
+        }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("NPS Calculator Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("NPS corpus is estimated by compounding contributions at the expected return. At maturity, a portion is allocated to annuity and the rest can be withdrawn as lumpsum.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Equity allocation during early years may improve long-term corpus, subject to risk profile.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
     }
 }
 
@@ -475,6 +716,7 @@ struct NPSCalculatorView: View {
 struct PFCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#1D9E75")
+    @State private var showInfoSheet = false
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -494,6 +736,36 @@ struct PFCalculatorView: View {
         .onChange(of: vm.pfEmployerFixedAmount) { _ in vm.recalculateAll() }
         .navigationTitle("PF Calculator")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInfoSheet = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .tint(accent)
+            }
+        }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("PF Calculator Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("EPF contributions from employee and employer are accumulated and compounded at the declared annual rate. Actual rules (wage caps, EPS split) may apply.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Changes in basic salary or contribution rates affect the corpus.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
     }
 
     private var inputsSection: some View {
@@ -537,8 +809,6 @@ struct PFCalculatorView: View {
                 ResultRow(label: "Corpus at Maturity", value: vm.pfCorpusAtMaturity.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                     .contentTransition(.numericText()).animation(.snappy, value: vm.pfCorpusAtMaturity)
                 Divider().padding(.vertical, 4)
-                Text("Corpus at Maturity is an approximation by compounding total contributions at the expected rate.")
-                    .font(.footnote).foregroundStyle(.secondary)
             }
         }
     }
@@ -549,6 +819,7 @@ struct PFCalculatorView: View {
 struct GratuityCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color(hex: "#1D9E75")
+    @State private var showInfoSheet = false
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -566,8 +837,6 @@ struct GratuityCalculatorView: View {
                     ResultRow(label: "Gratuity Amount", value: vm.gratuityAmount.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.gratuityAmount)
                     Divider().padding(.vertical, 4)
-                    Text("Formula: (15 ÷ 26) × Last Drawn Basic × Years of Service")
-                        .font(.footnote).foregroundStyle(.secondary)
                 }
             }
         }
@@ -577,6 +846,36 @@ struct GratuityCalculatorView: View {
         .onChange(of: vm.gratuityYearsOfService) { _ in vm.recalculateAll() }
         .navigationTitle("Gratuity Calculator")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInfoSheet = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .tint(accent)
+            }
+        }
+        .sheet(isPresented: $showInfoSheet) {
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Gratuity Calculator Info")
+                            .font(.title2.bold())
+                            .foregroundStyle(accent)
+                        Text("Gratuity is computed using (15/26) × Last Drawn Basic × Years of Service (rounded down). Statutory limits and eligibility conditions apply.")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                        Text("Tip: Service of 5 or more years is generally required for eligibility (with exceptions).")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                }
+                .navigationTitle("Info")
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showInfoSheet = false } } }
+            }
+        }
     }
 }
 

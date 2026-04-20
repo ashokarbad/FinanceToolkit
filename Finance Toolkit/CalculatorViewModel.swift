@@ -286,11 +286,12 @@ final class CalculatorViewModel: ObservableObject {
 
     /// Illustrative old regime slabs (example only)
     private func calculateOldRegimeTax(for income: Double) -> Double {
+        // Updated: No tax up to ₹12,00,000 as per latest rule (illustrative)
         let slabs: [(limit: Double, rate: Double)] = [
-            (250_000, 0.0),
-            (250_000, 0.05),
-            (500_000, 0.20),
-            (Double.greatestFiniteMagnitude, 0.30)
+            (1_200_000, 0.0),                 // 0% up to 12L
+            (300_000, 0.10),                  // 10% on next 3L (illustrative)
+            (500_000, 0.20),                  // 20% on next 5L (illustrative)
+            (Double.greatestFiniteMagnitude, 0.30) // 30% beyond
         ]
         var remaining = max(income, 0)
         var tax: Double = 0
@@ -305,13 +306,13 @@ final class CalculatorViewModel: ObservableObject {
 
     /// Illustrative new regime slabs (example only)
     private func calculateNewRegimeTax(for income: Double) -> Double {
+        // Updated: No tax up to ₹12,00,000 as per latest rule (illustrative)
         let slabs: [(limit: Double, rate: Double)] = [
-            (300_000, 0.0),
-            (300_000, 0.05),
-            (300_000, 0.10),
-            (300_000, 0.15),
-            (300_000, 0.20),
-            (Double.greatestFiniteMagnitude, 0.30)
+            (1_200_000, 0.0),                 // 0% up to 12L
+            (300_000, 0.10),                  // 10% on next 3L (illustrative)
+            (300_000, 0.15),                  // 15% on next 3L (illustrative)
+            (300_000, 0.20),                  // 20% on next 3L (illustrative)
+            (Double.greatestFiniteMagnitude, 0.30) // 30% beyond
         ]
         var remaining = max(income, 0)
         var tax: Double = 0
