@@ -73,8 +73,13 @@ private struct ResultCard<Content: View>: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(accentColor.opacity(0.18))
+                .strokeBorder(accentColor.opacity(0.28), lineWidth: 1)
         )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(.white.opacity(0.25), lineWidth: 0.5)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         .listRowInsets(EdgeInsets())
         .listRowBackground(Color.clear)
     }
@@ -135,13 +140,12 @@ struct LoanCalculatorView: View {
                 HStack { Text("Principal"); Spacer(); TextField("Principal", value: $vm.principal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Annual Rate %"); Spacer(); TextField("Rate", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $vm.tenureMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
             }
             Section {
@@ -153,7 +157,6 @@ struct LoanCalculatorView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Total Paid", value: vm.loanTotalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.loanTotalPayment)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -212,13 +215,12 @@ struct SIPCalculatorView: View {
                 SectionHeader(systemImage: "calendar.badge.plus", title: "Inputs", color: accent)
                 HStack { Text("Monthly Investment"); Spacer(); TextField("Amount", value: $vm.sipMonthly, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $sipMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
                 HStack { Text("Expected Return %"); Spacer(); TextField("%", value: $vm.sipExpectedReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
             }
@@ -229,7 +231,6 @@ struct SIPCalculatorView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Future Value", value: vm.sipFutureValue.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.sipFutureValue)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -293,13 +294,12 @@ struct SWPCalculatorView: View {
                 SectionHeader(systemImage: "arrow.down.left.circle.fill", title: "Inputs", color: accent)
                 HStack { Text("Corpus"); Spacer(); TextField("Corpus", value: $vm.swpCorpus, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $swpMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
                 HStack { Text("Monthly Withdrawal"); Spacer(); TextField("Withdrawal", value: $vm.swpMonthlyWithdrawal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Expected Return %"); Spacer(); TextField("%", value: $vm.swpExpectedReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
@@ -311,7 +311,6 @@ struct SWPCalculatorView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Ending Corpus", value: vm.swpEndingCorpus.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.swpEndingCorpus)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -376,13 +375,12 @@ struct FDCalculatorView: View {
                 SectionHeader(systemImage: "building.columns.fill", title: "Inputs", color: accent)
                 HStack { Text("Principal"); Spacer(); TextField("Principal", value: $vm.fdPrincipal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $fdMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
                 HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.fdAnnualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Compounding / Year"); Spacer(); TextField("Times", value: $vm.fdCompoundingPerYear, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
@@ -394,7 +392,6 @@ struct FDCalculatorView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Maturity Amount", value: vm.fdMaturityAmount.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.fdMaturityAmount)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -459,13 +456,12 @@ struct RDCalculatorView: View {
                 SectionHeader(systemImage: "clock.fill", title: "Inputs", color: accent)
                 HStack { Text("Monthly Deposit"); Spacer(); TextField("Deposit", value: $vm.rdMonthlyDeposit, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $rdMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
                 HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.rdAnnualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Compounding / Year"); Spacer(); TextField("Times", value: $vm.rdCompoundingPerYear, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
@@ -477,7 +473,6 @@ struct RDCalculatorView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Maturity Amount", value: vm.rdMaturityAmount.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.rdMaturityAmount)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -542,13 +537,12 @@ struct LumpSumMFView: View {
                 SectionHeader(systemImage: "chart.pie.fill", title: "Inputs", color: accent)
                 HStack { Text("Lump Sum Amount"); Spacer(); TextField("Amount", value: $vm.lumpSumAmount, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $lumpSumMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
                 HStack { Text("Expected Return %"); Spacer(); TextField("%", value: $vm.lumpSumExpectedReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
             }
@@ -559,7 +553,6 @@ struct LumpSumMFView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Future Value", value: vm.lumpSumFutureValue.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.lumpSumFutureValue)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -658,7 +651,6 @@ struct TaxCalculatorView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Tax Payable", value: vm.taxPayable.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.taxPayable)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -743,7 +735,6 @@ struct NPSCalculatorView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Est. Annual Pension", value: vm.npsEstimatedAnnualPension.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.npsEstimatedAnnualPension)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -886,7 +877,6 @@ struct PFCalculatorView: View {
                 Divider().padding(.vertical, 4)
                 ResultRow(label: "Corpus at Maturity", value: vm.pfCorpusAtMaturity.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                     .contentTransition(.numericText()).animation(.snappy, value: vm.pfCorpusAtMaturity)
-                Divider().padding(.vertical, 4)
             }
         }
     }
@@ -914,7 +904,6 @@ struct GratuityCalculatorView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Gratuity Amount", value: vm.gratuityAmount.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.gratuityAmount)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -989,13 +978,12 @@ struct VehiclePersonalLoanView: View {
                 HStack { Text("Processing Fee %"); Spacer(); TextField("%", value: $processingFeePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $vm.tenureMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
             }
             Section {
@@ -1009,7 +997,6 @@ struct VehiclePersonalLoanView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Total Outflow", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: totalPayment)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -1017,7 +1004,22 @@ struct VehiclePersonalLoanView: View {
         .tint(accent)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.large)
-        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(title)
+                    .font(.headline)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInfoSheet = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .tint(accent)
+            }
+        }
         .sheet(isPresented: $showInfoSheet) {
             NavigationStack {
                 ScrollView {
@@ -1072,13 +1074,12 @@ struct EducationLoanView: View {
                 HStack { Text("Principal"); Spacer(); TextField("Amount", value: $vm.principal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $vm.tenureMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
                 HStack { Text("Moratorium"); Spacer(); TextField("Months", value: $moratoriumMonths, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad); Text("months").foregroundStyle(.secondary) }
             }
@@ -1092,7 +1093,6 @@ struct EducationLoanView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Total Paid (EMIs)", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: totalPayment)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -1154,7 +1154,6 @@ struct CreditLineOverdraftView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Monthly Interest (approx)", value: monthlyInterest.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: monthlyInterest)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -1162,7 +1161,22 @@ struct CreditLineOverdraftView: View {
         .tint(accent)
         .navigationTitle("Credit Line / Overdraft")
         .navigationBarTitleDisplayMode(.large)
-        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Credit Line / Overdraft")
+                    .font(.headline)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInfoSheet = true
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .tint(accent)
+            }
+        }
         .sheet(isPresented: $showInfoSheet) {
             NavigationStack {
                 ScrollView {
@@ -1215,13 +1229,12 @@ struct BusinessLoanView: View {
                 HStack { Text("Processing Fee %"); Spacer(); TextField("%", value: $processingFeePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $vm.tenureMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
             }
             Section {
@@ -1234,7 +1247,6 @@ struct BusinessLoanView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Total Outflow", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: totalPayment)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -1296,13 +1308,12 @@ struct GoldLoanView: View {
                 HStack { Text("LTV %"); Spacer(); TextField("%", value: $ltvPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $vm.tenureMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
             }
             Section {
@@ -1315,7 +1326,6 @@ struct GoldLoanView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Total Paid", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: totalPayment)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -1380,13 +1390,12 @@ struct LAPLoanView: View {
                 HStack { Text("Processing Fee %"); Spacer(); TextField("%", value: $processingFeePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $vm.tenureMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
             }
             Section {
@@ -1400,14 +1409,13 @@ struct LAPLoanView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Total Outflow", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: totalPayment)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
         .keyboardDoneToolbar()
         .tint(accent)
         .navigationTitle("Loan Against Property (LAP)")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
         .sheet(isPresented: $showInfoSheet) {
             NavigationStack {
@@ -1458,13 +1466,12 @@ struct AgriculturalLoanView: View {
                 HStack { Text("Principal"); Spacer(); TextField("Amount", value: $vm.principal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $vm.tenureMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
                 HStack { Text("Moratorium"); Spacer(); TextField("Months", value: $moratoriumMonths, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad); Text("months").foregroundStyle(.secondary) }
             }
@@ -1474,7 +1481,6 @@ struct AgriculturalLoanView: View {
                         .contentTransition(.numericText()).animation(.snappy, value: emi)
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Total Paid (EMIs)", value: totalPayment.formatted(.currency(code: currency)))
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
@@ -1552,13 +1558,12 @@ struct ConsumerDurableLoanView: View {
                 Toggle("No-cost EMI", isOn: $noCostEMI)
                 HStack { Text("Annual Rate %"); Spacer(); TextField("%", value: $vm.annualRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 HStack {
-                    Text("Tenure")
+                    Text("Tenure in months")
                     Spacer()
                     TextField("Months", value: $vm.tenureMonths, format: .number)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.numberPad)
-                    Text("months")
-                        .foregroundStyle(.secondary)
+                    
                 }
             }
             Section {
@@ -1574,14 +1579,13 @@ struct ConsumerDurableLoanView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Total Outflow", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: totalPayment)
-                    Divider().padding(.vertical, 4)
                 }
             }
         }
         .keyboardDoneToolbar()
         .tint(accent)
         .navigationTitle("Consumer Durable / EMI Loan")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
         .sheet(isPresented: $showInfoSheet) {
             NavigationStack {
