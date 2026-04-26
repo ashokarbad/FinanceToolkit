@@ -162,9 +162,9 @@ struct LoanCalculatorView: View {
         }
         .keyboardDoneToolbar()
         .tint(accent)
-        .onChange(of: vm.principal) { _ in vm.recalculateAll() }
-        .onChange(of: vm.annualRatePercent) { _ in vm.recalculateAll() }
-        .onChange(of: vm.tenureMonths) { _ in vm.recalculateAll() }
+        .onChange(of: vm.principal) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.tenureMonths) { _, _ in vm.recalculateAll() }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -239,11 +239,12 @@ struct SIPCalculatorView: View {
         .onAppear {
             sipMonths = max(0, vm.sipYears) * 12
         }
-        .onChange(of: sipMonths) { _ in
+        .onChange(of: sipMonths) { _, _ in
             vm.sipYears = max(0, sipMonths) / 12
+            vm.recalculateAll()
         }
-        .onChange(of: vm.sipMonthly) { _ in vm.recalculateAll() }
-        .onChange(of: vm.sipExpectedReturnPercent) { _ in vm.recalculateAll() }
+        .onChange(of: vm.sipMonthly) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.sipExpectedReturnPercent) { _, _ in vm.recalculateAll() }
         .navigationTitle("SIP Calculator")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -319,12 +320,13 @@ struct SWPCalculatorView: View {
         .onAppear {
             swpMonths = max(0, vm.swpYears) * 12
         }
-        .onChange(of: swpMonths) { _ in
+        .onChange(of: swpMonths) { _, _ in
             vm.swpYears = max(0, swpMonths) / 12
+            vm.recalculateAll()
         }
-        .onChange(of: vm.swpCorpus) { _ in vm.recalculateAll() }
-        .onChange(of: vm.swpMonthlyWithdrawal) { _ in vm.recalculateAll() }
-        .onChange(of: vm.swpExpectedReturnPercent) { _ in vm.recalculateAll() }
+        .onChange(of: vm.swpCorpus) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.swpMonthlyWithdrawal) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.swpExpectedReturnPercent) { _, _ in vm.recalculateAll() }
         .navigationTitle("SWP Calculator")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -400,12 +402,13 @@ struct FDCalculatorView: View {
         .onAppear {
             fdMonths = max(0, vm.fdYears) * 12
         }
-        .onChange(of: fdMonths) { _ in
+        .onChange(of: fdMonths) { _, _ in
             vm.fdYears = max(0, fdMonths) / 12
+            vm.recalculateAll()
         }
-        .onChange(of: vm.fdPrincipal) { _ in vm.recalculateAll() }
-        .onChange(of: vm.fdAnnualRatePercent) { _ in vm.recalculateAll() }
-        .onChange(of: vm.fdCompoundingPerYear) { _ in vm.recalculateAll() }
+        .onChange(of: vm.fdPrincipal) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.fdAnnualRatePercent) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.fdCompoundingPerYear) { _, _ in vm.recalculateAll() }
         .navigationTitle("FD Calculator")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -481,12 +484,13 @@ struct RDCalculatorView: View {
         .onAppear {
             rdMonths = max(0, vm.rdYears) * 12
         }
-        .onChange(of: rdMonths) { _ in
+        .onChange(of: rdMonths) { _, _ in
             vm.rdYears = max(0, rdMonths) / 12
+            vm.recalculateAll()
         }
-        .onChange(of: vm.rdMonthlyDeposit) { _ in vm.recalculateAll() }
-        .onChange(of: vm.rdAnnualRatePercent) { _ in vm.recalculateAll() }
-        .onChange(of: vm.rdCompoundingPerYear) { _ in vm.recalculateAll() }
+        .onChange(of: vm.rdMonthlyDeposit) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.rdAnnualRatePercent) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.rdCompoundingPerYear) { _, _ in vm.recalculateAll() }
         .navigationTitle("RD Calculator")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -561,11 +565,12 @@ struct LumpSumMFView: View {
         .onAppear {
             lumpSumMonths = max(0, vm.lumpSumYears) * 12
         }
-        .onChange(of: lumpSumMonths) { _ in
+        .onChange(of: lumpSumMonths) { _, _ in
             vm.lumpSumYears = max(0, lumpSumMonths) / 12
+            vm.recalculateAll()
         }
-        .onChange(of: vm.lumpSumAmount) { _ in vm.recalculateAll() }
-        .onChange(of: vm.lumpSumExpectedReturnPercent) { _ in vm.recalculateAll() }
+        .onChange(of: vm.lumpSumAmount) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.lumpSumExpectedReturnPercent) { _, _ in vm.recalculateAll() }
         .navigationTitle("MF Lump Sum")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -656,15 +661,15 @@ struct TaxCalculatorView: View {
         }
         .keyboardDoneToolbar()
         .tint(accent)
-        .onChange(of: vm.taxRegime) { _ in vm.recalculateAll() }
-        .onChange(of: vm.taxBasicSalary) { _ in vm.recalculateAll() }
-        .onChange(of: vm.taxOtherIncome) { _ in vm.recalculateAll() }
-        .onChange(of: vm.taxHRAExempt) { _ in vm.recalculateAll() }
-        .onChange(of: vm.taxStandardDeduction) { _ in vm.recalculateAll() }
-        .onChange(of: vm.taxDeduction80C) { _ in vm.recalculateAll() }
-        .onChange(of: vm.taxDeduction80D) { _ in vm.recalculateAll() }
-        .onChange(of: vm.taxOtherDeductions) { _ in vm.recalculateAll() }
-        .onChange(of: vm.taxCessPercent) { _ in vm.recalculateAll() }
+        .onChange(of: vm.taxRegime) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxBasicSalary) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxOtherIncome) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxHRAExempt) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxStandardDeduction) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxDeduction80C) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxDeduction80D) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxOtherDeductions) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxCessPercent) { _, _ in vm.recalculateAll() }
         .navigationTitle("Tax Calculator")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -740,11 +745,11 @@ struct NPSCalculatorView: View {
         }
         .keyboardDoneToolbar()
         .tint(accent)
-        .onChange(of: vm.npsMonthlyContribution) { _ in vm.recalculateAll() }
-        .onChange(of: vm.npsYears) { _ in vm.recalculateAll() }
-        .onChange(of: vm.npsExpectedReturnPercent) { _ in vm.recalculateAll() }
-        .onChange(of: vm.npsAnnuityPercentAtMaturity) { _ in vm.recalculateAll() }
-        .onChange(of: vm.npsAnnuityReturnPercent) { _ in vm.recalculateAll() }
+        .onChange(of: vm.npsMonthlyContribution) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.npsYears) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.npsExpectedReturnPercent) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.npsAnnuityPercentAtMaturity) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.npsAnnuityReturnPercent) { _, _ in vm.recalculateAll() }
         .navigationTitle("NPS Calculator")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -795,14 +800,14 @@ struct PFCalculatorView: View {
         }
         .keyboardDoneToolbar()
         .tint(accent)
-        .onChange(of: vm.pfBasicSalary) { _ in vm.recalculateAll() }
-        .onChange(of: vm.pfEmployeeRatePercent) { _ in vm.recalculateAll() }
-        .onChange(of: vm.pfEmployerRatePercent) { _ in vm.recalculateAll() }
-        .onChange(of: vm.pfYears) { _ in vm.recalculateAll() }
-        .onChange(of: vm.pfAnnualReturnPercent) { _ in vm.recalculateAll() }
-        .onChange(of: vm.pfContributionMode) { _ in vm.recalculateAll() }
-        .onChange(of: vm.pfEmployeeFixedAmount) { _ in vm.recalculateAll() }
-        .onChange(of: vm.pfEmployerFixedAmount) { _ in vm.recalculateAll() }
+        .onChange(of: vm.pfBasicSalary) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfEmployeeRatePercent) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfEmployerRatePercent) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfYears) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfAnnualReturnPercent) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfContributionMode) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfEmployeeFixedAmount) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfEmployerFixedAmount) { _, _ in vm.recalculateAll() }
         .navigationTitle("PF Calculator")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -909,8 +914,8 @@ struct GratuityCalculatorView: View {
         }
         .keyboardDoneToolbar()
         .tint(accent)
-        .onChange(of: vm.gratuityLastDrawnBasic) { _ in vm.recalculateAll() }
-        .onChange(of: vm.gratuityYearsOfService) { _ in vm.recalculateAll() }
+        .onChange(of: vm.gratuityLastDrawnBasic) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.gratuityYearsOfService) { _, _ in vm.recalculateAll() }
         .navigationTitle("Gratuity Calculator")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -1098,10 +1103,10 @@ struct EducationLoanView: View {
         }
         .keyboardDoneToolbar()
         .tint(accent)
-        .onChange(of: vm.principal) { _ in vm.recalculateAll() }
-        .onChange(of: vm.annualRatePercent) { _ in vm.recalculateAll() }
-        .onChange(of: vm.tenureMonths) { _ in vm.recalculateAll() }
-        .onChange(of: moratoriumMonths) { _ in vm.recalculateAll() }
+        .onChange(of: vm.principal) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.tenureMonths) { _, _ in vm.recalculateAll() }
+        .onChange(of: moratoriumMonths) { _, _ in vm.recalculateAll() }
         .navigationTitle("Education Loan")
         .navigationBarTitleDisplayMode(.large)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
@@ -1486,10 +1491,10 @@ struct AgriculturalLoanView: View {
         }
         .keyboardDoneToolbar()
         .tint(accent)
-        .onChange(of: vm.principal) { _ in vm.recalculateAll() }
-        .onChange(of: vm.annualRatePercent) { _ in vm.recalculateAll() }
-        .onChange(of: vm.tenureMonths) { _ in vm.recalculateAll() }
-        .onChange(of: moratoriumMonths) { _ in vm.recalculateAll() }
+        .onChange(of: vm.principal) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.tenureMonths) { _, _ in vm.recalculateAll() }
+        .onChange(of: moratoriumMonths) { _, _ in vm.recalculateAll() }
         .navigationTitle("Agricultural Loan")
         .navigationBarTitleDisplayMode(.large)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }

@@ -11,7 +11,7 @@ import SwiftUI
 struct FinanceToolkit: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            FinCalcRootView()
         }
     }
 }
