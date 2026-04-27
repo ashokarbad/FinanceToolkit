@@ -1,0 +1,261 @@
+// MoreCalculators.swift
+// Finance Toolkit — Tax, NPS, PF, Gratuity calculators
+
+import SwiftUI
+
+// MARK: - Tax Calculator
+struct TaxCalculatorView: View {
+    @EnvironmentObject var vm: CalculatorViewModel
+    private let accent = Color.teal
+    @State private var showInfoSheet = false
+    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+
+    private func makeSnapshot() -> SavedCalculation {
+        SavedCalculation(calculatorTitle: "Tax Calculator", icon: "percent", date: Date(),
+            note: "\(vm.taxRegime == 0 ? "Old" : "New") Regime · Gross ₹\(Int(vm.taxGrossIncome).formatted())",
+            results: [
+                .init(label: "Gross Income",       value: vm.taxGrossIncome.formatted(.currency(code: currency)),              isHighlight: false),
+                .init(label: "Total Deductions",   value: vm.taxTotalDeductions.formatted(.currency(code: currency)),          isHighlight: false),
+                .init(label: "Taxable Income",     value: vm.taxTaxableIncomeComputed.formatted(.currency(code: currency)),    isHighlight: false),
+                .init(label: "Tax Payable",        value: vm.taxPayable.formatted(.currency(code: currency)),                  isHighlight: true),
+            ])
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                SectionHeader(systemImage: "percent", title: "Income Details", color: accent)
+                Picker("Tax Regime", selection: $vm.taxRegime) {
+                    Text("Old Regime").tag(0)
+                    Text("New Regime").tag(1)
+                }
+                .pickerStyle(.segmented)
+                HStack { Text("Basic Salary");           Spacer(); TextField("Amount", value: $vm.taxBasicSalary, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Other Income");           Spacer(); TextField("Amount", value: $vm.taxOtherIncome, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Standard Deduction");     Spacer(); TextField("Amount", value: $vm.taxStandardDeduction, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                if vm.taxRegime == 0 {
+                    HStack { Text("HRA Exemption");      Spacer(); TextField("Amount", value: $vm.taxHRAExempt, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                    HStack { Text("Section 80C");        Spacer(); TextField("Amount", value: $vm.taxDeduction80C, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                    HStack { Text("Section 80D");        Spacer(); TextField("Amount", value: $vm.taxDeduction80D, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                    HStack { Text("Other Deductions");   Spacer(); TextField("Amount", value: $vm.taxOtherDeductions, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                }
+                HStack { Text("Cess %");                 Spacer(); TextField("%", value: $vm.taxCessPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+            }
+            Section {
+                ResultCard(systemImage: "percent", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
+                    ResultRow(label: "Gross Income",       value: vm.taxGrossIncome.formatted(.currency(code: currency)))
+                    ResultRow(label: "Total Deductions",   value: vm.taxTotalDeductions.formatted(.currency(code: currency)))
+                    ResultRow(label: "Taxable Income",     value: vm.taxTaxableIncomeComputed.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Tax (before cess)",  value: vm.taxBeforeCess.formatted(.currency(code: currency)))
+                    ResultRow(label: "Cess (\(Int(vm.taxCessPercent))%)", value: vm.taxCessAmount.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Tax Payable",        value: vm.taxPayable.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: vm.taxPayable)
+                }
+            }
+        }
+        .keyboardDoneToolbar().tint(accent)
+        .onChange(of: vm.taxRegime)              { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxBasicSalary)         { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxOtherIncome)         { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxStandardDeduction)   { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxHRAExempt)           { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxDeduction80C)        { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxDeduction80D)        { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxOtherDeductions)     { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.taxCessPercent)         { _, _ in vm.recalculateAll() }
+        .navigationTitle("Tax Calculator")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .sheet(isPresented: $showInfoSheet) {
+            InfoSheet(title: "Tax Calculator Info",
+                      body1: "Compares Old vs New regime. Old regime allows HRA, 80C, 80D and other deductions. New regime offers lower slab rates but fewer deductions.",
+                      body2: "Tip: Use Old regime if your total deductions exceed ₹3.75L. Otherwise the New regime's lower slabs may save more tax.",
+                      accent: accent)
+        }
+    }
+}
+
+// MARK: - NPS Calculator
+struct NPSCalculatorView: View {
+    @EnvironmentObject var vm: CalculatorViewModel
+    private let accent = Color.teal
+    @State private var showInfoSheet = false
+    @State private var npsMonths: Int = 240
+    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+
+    private func makeSnapshot() -> SavedCalculation {
+        SavedCalculation(calculatorTitle: "NPS Calculator", icon: "shield.fill", date: Date(),
+            note: "₹\(Int(vm.npsMonthlyContribution).formatted())/mo · \(npsMonths) months",
+            results: [
+                .init(label: "Corpus at Maturity",     value: vm.npsCorpusAtMaturity.formatted(.currency(code: currency)),       isHighlight: true),
+                .init(label: "Annuity Purchase",       value: vm.npsAnnuityPurchase.formatted(.currency(code: currency)),        isHighlight: false),
+                .init(label: "Lumpsum Withdrawal",     value: vm.npsLumpsumWithdrawal.formatted(.currency(code: currency)),      isHighlight: false),
+                .init(label: "Est. Annual Pension",    value: vm.npsEstimatedAnnualPension.formatted(.currency(code: currency)), isHighlight: true),
+            ])
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                SectionHeader(systemImage: "shield.fill", title: "NPS Inputs", color: accent)
+                HStack { Text("Monthly Contribution");  Spacer(); TextField("Amount", value: $vm.npsMonthlyContribution, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Tenure (months)");       Spacer(); TextField("Months", value: $npsMonths, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
+                HStack { Text("Expected Return %");     Spacer(); TextField("%", value: $vm.npsExpectedReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Annuity % at Maturity"); Spacer(); TextField("%", value: $vm.npsAnnuityPercentAtMaturity, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Annuity Return %");      Spacer(); TextField("%", value: $vm.npsAnnuityReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+            }
+            Section {
+                ResultCard(systemImage: "shield.fill", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
+                    ResultRow(label: "Corpus at Maturity",  value: vm.npsCorpusAtMaturity.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: vm.npsCorpusAtMaturity)
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Annuity Purchase",    value: vm.npsAnnuityPurchase.formatted(.currency(code: currency)))
+                    ResultRow(label: "Lumpsum Withdrawal",  value: vm.npsLumpsumWithdrawal.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Est. Annual Pension", value: vm.npsEstimatedAnnualPension.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                }
+            }
+        }
+        .keyboardDoneToolbar().tint(accent)
+        .onAppear { npsMonths = vm.npsYears * 12 }
+        .onChange(of: npsMonths) { _, _ in vm.npsYears = max(1, npsMonths / 12); vm.recalculateAll() }
+        .onChange(of: vm.npsMonthlyContribution)     { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.npsExpectedReturnPercent)    { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.npsAnnuityPercentAtMaturity) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.npsAnnuityReturnPercent)     { _, _ in vm.recalculateAll() }
+        .navigationTitle("NPS Calculator")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .sheet(isPresented: $showInfoSheet) {
+            InfoSheet(title: "NPS Calculator Info",
+                      body1: "NPS (National Pension System) builds a retirement corpus through monthly contributions. At maturity, a minimum 40% must be used to buy an annuity; the rest can be withdrawn as lumpsum (tax-free up to 60%).",
+                      body2: "Tip: NPS offers additional ₹50,000 tax deduction under Section 80CCD(1B) over and above ₹1.5L under 80C.",
+                      accent: accent)
+        }
+    }
+}
+
+// MARK: - PF Calculator
+struct PFCalculatorView: View {
+    @EnvironmentObject var vm: CalculatorViewModel
+    private let accent = Color.teal
+    @State private var showInfoSheet = false
+    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+
+    private func makeSnapshot() -> SavedCalculation {
+        SavedCalculation(calculatorTitle: "PF Calculator", icon: "banknote.fill", date: Date(),
+            note: "Basic ₹\(Int(vm.pfBasicSalary).formatted()) · \(vm.pfYears) years",
+            results: [
+                .init(label: "Employee Contribution", value: vm.pfEmployeeContribution.formatted(.currency(code: currency)), isHighlight: false),
+                .init(label: "Employer Contribution", value: vm.pfEmployerContribution.formatted(.currency(code: currency)), isHighlight: false),
+                .init(label: "Total Contribution",    value: vm.pfTotalContribution.formatted(.currency(code: currency)),    isHighlight: false),
+                .init(label: "Corpus at Maturity",    value: vm.pfCorpusAtMaturity.formatted(.currency(code: currency)),     isHighlight: true),
+            ])
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                SectionHeader(systemImage: "banknote.fill", title: "PF Inputs", color: accent)
+                Picker("Contribution Mode", selection: $vm.pfContributionMode) {
+                    Text("% of Basic").tag(0)
+                    Text("Fixed Amount").tag(1)
+                }
+                .pickerStyle(.segmented)
+                HStack { Text("Basic Salary");   Spacer(); TextField("Amount", value: $vm.pfBasicSalary, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                if vm.pfContributionMode == 0 {
+                    HStack { Text("Employee Rate %"); Spacer(); TextField("%", value: $vm.pfEmployeeRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                    HStack { Text("Employer Rate %"); Spacer(); TextField("%", value: $vm.pfEmployerRatePercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                } else {
+                    HStack { Text("Employee Fixed/mo"); Spacer(); TextField("Amount", value: $vm.pfEmployeeFixedAmount, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                    HStack { Text("Employer Fixed/mo"); Spacer(); TextField("Amount", value: $vm.pfEmployerFixedAmount, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                }
+                HStack { Text("Service Years");      Spacer(); TextField("Years", value: $vm.pfYears, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
+                HStack { Text("Annual Return %");    Spacer(); TextField("%", value: $vm.pfAnnualReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+            }
+            Section {
+                ResultCard(systemImage: "banknote.fill", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
+                    ResultRow(label: "Employee Contribution", value: vm.pfEmployeeContribution.formatted(.currency(code: currency)))
+                    ResultRow(label: "Employer Contribution", value: vm.pfEmployerContribution.formatted(.currency(code: currency)))
+                    ResultRow(label: "Total Contribution",    value: vm.pfTotalContribution.formatted(.currency(code: currency)))
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Corpus at Maturity",    value: vm.pfCorpusAtMaturity.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: vm.pfCorpusAtMaturity)
+                }
+            }
+        }
+        .keyboardDoneToolbar().tint(accent)
+        .onChange(of: vm.pfContributionMode)      { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfBasicSalary)           { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfEmployeeRatePercent)   { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfEmployerRatePercent)   { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfEmployeeFixedAmount)   { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfEmployerFixedAmount)   { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfYears)                 { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.pfAnnualReturnPercent)   { _, _ in vm.recalculateAll() }
+        .navigationTitle("PF Calculator")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .sheet(isPresented: $showInfoSheet) {
+            InfoSheet(title: "PF Calculator Info",
+                      body1: "EPF (Employees' Provident Fund) accumulates through equal employee and employer contributions. The current EPF interest rate is ~8.1% p.a., declared annually by EPFO.",
+                      body2: "Tip: Voluntary PF (VPF) lets you contribute more than 12% from your side, earning the same rate. Withdrawals after 5 years of continuous service are tax-free.",
+                      accent: accent)
+        }
+    }
+}
+
+// MARK: - Gratuity Calculator
+struct GratuityCalculatorView: View {
+    @EnvironmentObject var vm: CalculatorViewModel
+    private let accent = Color.teal
+    @State private var showInfoSheet = false
+    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+
+    private func makeSnapshot() -> SavedCalculation {
+        SavedCalculation(calculatorTitle: "Gratuity Calculator", icon: "gift.fill", date: Date(),
+            note: "Basic ₹\(Int(vm.gratuityLastDrawnBasic).formatted()) · \(String(format: "%.1f", vm.gratuityYearsOfService)) years",
+            results: [
+                .init(label: "Last Drawn Basic + DA", value: vm.gratuityLastDrawnBasic.formatted(.currency(code: currency)), isHighlight: false),
+                .init(label: "Years of Service",      value: String(format: "%.1f", vm.gratuityYearsOfService),               isHighlight: false),
+                .init(label: "Gratuity Amount",       value: vm.gratuityAmount.formatted(.currency(code: currency)),          isHighlight: true),
+            ])
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                SectionHeader(systemImage: "gift.fill", title: "Gratuity Inputs", color: accent)
+                HStack { Text("Last Drawn Basic + DA"); Spacer(); TextField("Amount", value: $vm.gratuityLastDrawnBasic, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Years of Service");      Spacer(); TextField("Years", value: $vm.gratuityYearsOfService, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+            }
+            Section {
+                Text("Gratuity = (15 / 26) × Last Drawn Basic × Completed Years of Service")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
+            Section {
+                ResultCard(systemImage: "gift.fill", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
+                    ResultRow(label: "Last Drawn Basic + DA", value: vm.gratuityLastDrawnBasic.formatted(.currency(code: currency)))
+                    ResultRow(label: "Completed Years",       value: "\(Int(floor(vm.gratuityYearsOfService)))")
+                    Divider().padding(.vertical, 4)
+                    ResultRow(label: "Gratuity Amount",       value: vm.gratuityAmount.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        .contentTransition(.numericText()).animation(.snappy, value: vm.gratuityAmount)
+                }
+            }
+        }
+        .keyboardDoneToolbar().tint(accent)
+        .onChange(of: vm.gratuityLastDrawnBasic)  { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.gratuityYearsOfService)  { _, _ in vm.recalculateAll() }
+        .navigationTitle("Gratuity Calculator")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
+        .sheet(isPresented: $showInfoSheet) {
+            InfoSheet(title: "Gratuity Calculator Info",
+                      body1: "Under the Payment of Gratuity Act, gratuity is payable to employees who have completed 5+ years of continuous service. Formula: (15/26) × last drawn salary × completed years.",
+                      body2: "Tip: Gratuity up to ₹20L is tax-exempt under Section 10(10). Months > 6 in the last year are rounded up to the next full year.",
+                      accent: accent)
+        }
+    }
+}
