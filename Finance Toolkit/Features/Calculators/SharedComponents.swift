@@ -194,13 +194,4 @@ struct InfoSheet: View {
     }
 }
 
-// MARK: - Landscape-aware form wrapper
-/// Wraps Form in a GeometryReader so calculators respond to orientation change naturally.
-struct LandscapeAwareForm<Content: View>: View {
-    @ViewBuilder var content: () -> Content
-    var body: some View {
-        GeometryReader { _ in
-            Form { content() }
-        }
-    }
-}
+

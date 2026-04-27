@@ -129,43 +129,46 @@ struct SidebarDrawer: View {
                     .frame(width: 0.5)
             }
 
-            VStack(alignment: .leading, spacing: 0) {
-                BrandHeaderView()
-                    .padding(.horizontal, 16)
-                    .padding(.top, 58)
-                    .padding(.bottom, 26)
+            VStack(spacing: 0) {
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        BrandHeaderView()
+                            .padding(.horizontal, 16)
+                            .padding(.top, 16)
+                            .padding(.bottom, 26)
 
-                SidebarSectionLabel("Main")
-                ForEach(mainItems) { item in
-                    SidebarRow(item: item, isSelected: selected == item) {
-                        select(item)
+                        SidebarSectionLabel("Main")
+                        ForEach(mainItems) { item in
+                            SidebarRow(item: item, isSelected: selected == item) {
+                                select(item)
+                            }
+                        }
+
+                        sectionDivider
+
+                        SidebarSectionLabel("Account")
+                        ForEach(accountItems) { item in
+                            SidebarRow(item: item, isSelected: selected == item) {
+                                select(item)
+                            }
+                        }
+
+                        sectionDivider
+
+                        SidebarSectionLabel("Info")
+                        ForEach(infoItems) { item in
+                            SidebarRow(item: item, isSelected: selected == item) {
+                                select(item)
+                            }
+                        }
                     }
                 }
-
-                sectionDivider
-
-                SidebarSectionLabel("Account")
-                ForEach(accountItems) { item in
-                    SidebarRow(item: item, isSelected: selected == item) {
-                        select(item)
-                    }
-                }
-
-                sectionDivider
-
-                SidebarSectionLabel("Info")
-                ForEach(infoItems) { item in
-                    SidebarRow(item: item, isSelected: selected == item) {
-                        select(item)
-                    }
-                }
-
-                Spacer()
 
                 DarkModeToggleRow(darkMode: $darkMode)
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 16)
             }
+            .safeAreaPadding(.top, 8)
         }
         .clipShape(RoundedCornerShape(radius: 22, corners: [.topRight, .bottomRight]))
     }
