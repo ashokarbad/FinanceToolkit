@@ -70,10 +70,11 @@ struct ResultCard<Content: View>: View {
         }
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.ultraThinMaterial))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(accentColor.opacity(0.28), lineWidth: 1))
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.25), lineWidth: 0.5))
         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-        .listRowInsets(EdgeInsets())
+        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
         .listRowBackground(Color.clear)
     }
 }

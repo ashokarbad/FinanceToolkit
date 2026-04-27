@@ -91,14 +91,18 @@ struct FinCalcAppShell: View {
     private var detailView: some View {
         switch selected {
         case .calculators: MainCalculatorView()
-        case .dashboard:   DashboardView()
+        case .dashboard:   DashboardView(navigateTo: navigate)
         case .saved:       SavedView()
         case .tips:        TipsFAQView()
-        case .profile:     ProfileView()
+        case .profile:     ProfileView(navigateTo: navigate)
         case .settings:    SettingsView(darkMode: $darkMode)
         case .feedback:    FeedbackView()
         case .about:       AboutView()
         }
+    }
+
+    private func navigate(_ destination: SidebarDestination) {
+        selected = destination
     }
 }
 

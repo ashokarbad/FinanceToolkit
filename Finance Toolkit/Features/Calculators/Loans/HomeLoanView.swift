@@ -103,9 +103,9 @@ struct HomeLoanView: View {
                 }
             }
 
-            // What-if EMI section
+            // Custom Amortization section
             Section {
-                SectionHeader(systemImage: "slider.horizontal.3", title: "What-If EMI", color: accent)
+                SectionHeader(systemImage: "slider.horizontal.3", title: "Custom Amortization", color: accent)
                 Toggle("Use Custom EMI", isOn: $customEMIEnabled)
                 if customEMIEnabled {
                     HStack {
@@ -184,8 +184,8 @@ struct HomeLoanView: View {
         .sheet(isPresented: $showInfoSheet) {
             InfoSheet(
                 title: "Home Loan Calculator",
-                body1: "EMI is calculated using standard amortisation. Total Paid = Principal + Total Interest. The amortisation schedule shows month-by-month breakdown of principal, interest and outstanding balance.",
-                body2: "Tip: Making prepayments reduces the outstanding principal and can significantly cut total interest. Shorter tenure = lower total interest but higher EMI.",
+                body1: "EMI = P × r × (1+r)^n / [(1+r)^n − 1], where P = principal, r = monthly rate, n = months. The amortisation schedule shows month-by-month breakdown of principal, interest and outstanding balance.",
+                body2: "Use Custom Amortization to enter a higher EMI and see how many months and how much interest you save. Prepaying even small extra amounts towards principal can cut total interest dramatically.",
                 accent: accent
             )
         }

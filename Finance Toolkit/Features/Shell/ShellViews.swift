@@ -7,6 +7,7 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject private var vm: CalculatorViewModel
     @ObservedObject private var store = SavedStore.shared
+    var navigateTo: ((SidebarDestination) -> Void)?
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -17,7 +18,33 @@ struct DashboardView: View {
                     DashboardCard(title: "Last EMI", value: vm.emi.formatted(.currency(code: currency)), icon: "house.fill", color: .navy)
                     DashboardCard(title: "Last SIP FV", value: vm.sipFutureValue.formatted(.currency(code: currency)), icon: "chart.line.uptrend.xyaxis", color: .gold)
                     DashboardCard(title: "Tax Payable", value: vm.taxPayable.formatted(.currency(code: currency)), icon: "percent", color: .teal)
-                    DashboardCard(title: "Saved Items", value: "\(store.calculations.count)", icon: "star.fill", color: .gold)
+                    Button { navigateTo?(.saved) } label: {
+                        DashboardCard(title: "Saved Items", value: "\(store.calculations.count)", icon: "bookmark.fill", color: .gold)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                // Quick navigation
+                HStack(spacing: 12) {
+                    Button { navigateTo?(.saved) } label: {
+                        Label("View Saved", systemImage: "bookmark.fill")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Color.navy)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.navy.opacity(0.08)))
+                    }
+                    .buttonStyle(.plain)
+
+                    Button { navigateTo?(.calculators) } label: {
+                        Label("Favourites", systemImage: "star.fill")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Color.gold)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.gold.opacity(0.08)))
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 if !store.calculations.isEmpty {
@@ -196,10 +223,9 @@ struct TipsFAQView: View {
 struct ProfileView: View {
     @AppStorage("profileName") private var name = ""
     @AppStorage("profileAge") private var age = ""
-    @AppStorage("profilePAN") private var pan = ""
-    @AppStorage("profileMonthlyIncome") private var monthlyIncome = ""
     @AppStorage("profileCity") private var city = ""
     @ObservedObject private var store = SavedStore.shared
+    var navigateTo: ((SidebarDestination) -> Void)?
 
     var body: some View {
         Form {
@@ -231,25 +257,38 @@ struct ProfileView: View {
                 HStack { Text("City"); Spacer(); TextField("City", text: $city).multilineTextAlignment(.trailing) }
             }
 
-            Section("Financial Info") {
-                HStack { Text("PAN (optional)"); Spacer(); TextField("ABCDE1234F", text: $pan).multilineTextAlignment(.trailing).textInputAutocapitalization(.characters) }
-                HStack { Text("Monthly Income"); Spacer(); TextField("Amount", text: $monthlyIncome).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-            }
-
             Section("Activity") {
-                HStack {
-                    Label("Saved Calculations", systemImage: "bookmark.fill")
-                    Spacer()
-                    Text("\(store.calculations.count)")
-                        .foregroundStyle(.secondary)
+                Button {
+                    navigateTo?(.saved)
+                } label: {
+                    HStack {
+                        Label("Saved Calculations", systemImage: "bookmark.fill")
+                            .foregroundStyle(.primary)
+                        Spacer()
+                        Text("\(store.calculations.count)")
+                            .foregroundStyle(.secondary)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
                 }
-                HStack {
-                    Label("Favourites", systemImage: "star.fill")
-                        .foregroundStyle(.primary)
-                    Spacer()
-                    Text("\(store.savedIDs.count)")
-                        .foregroundStyle(.secondary)
+                .buttonStyle(.plain)
+
+                Button {
+                    navigateTo?(.calculators)
+                } label: {
+                    HStack {
+                        Label("Favourites", systemImage: "star.fill")
+                            .foregroundStyle(.primary)
+                        Spacer()
+                        Text("\(store.savedIDs.count)")
+                            .foregroundStyle(.secondary)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
                 }
+                .buttonStyle(.plain)
             }
         }
         .keyboardDoneToolbar()
@@ -292,7 +331,9 @@ struct FeedbackView: View {
     @State private var message = ""
     @State private var email = ""
     @State private var submitted = false
+    @State private var showMailError = false
     private let types = ["Bug Report", "Feature Request", "General Query", "Other"]
+    private let supportEmail = "ashokarbad@gmail.com"
 
     var body: some View {
         if submitted {
@@ -302,7 +343,7 @@ struct FeedbackView: View {
                     .foregroundStyle(.teal)
                 Text("Thank you!")
                     .font(.title2.bold())
-                Text("Your feedback has been recorded.\nWe will get back to you if needed.")
+                Text("Your feedback has been sent.\nWe will get back to you if needed.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -322,7 +363,14 @@ struct FeedbackView: View {
                         ForEach(0..<types.count, id: \.self) { Text(types[$0]).tag($0) }
                     }
                     HStack { Text("Subject"); Spacer(); TextField("Brief subject", text: $subject).multilineTextAlignment(.trailing) }
-                    HStack { Text("Email (optional)"); Spacer(); TextField("you@example.com", text: $email).multilineTextAlignment(.trailing).keyboardType(.emailAddress).textInputAutocapitalization(.never) }
+                    HStack {
+                        Text("Email (optional)")
+                        Spacer()
+                        TextField("", text: $email, prompt: Text("you@example.com").foregroundStyle(.quaternary))
+                            .multilineTextAlignment(.trailing)
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+                    }
                 }
 
                 Section("Your Message") {
@@ -341,9 +389,7 @@ struct FeedbackView: View {
 
                 Section {
                     Button {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                            submitted = true
-                        }
+                        sendFeedbackEmail()
                     } label: {
                         HStack {
                             Spacer()
@@ -358,6 +404,40 @@ struct FeedbackView: View {
                 }
             }
             .keyboardDoneToolbar()
+            .alert("Unable to Send Email", isPresented: $showMailError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Could not open the mail app. Please send your feedback manually to \(supportEmail).")
+            }
+        }
+    }
+
+    private func sendFeedbackEmail() {
+        let typeLabel = types[feedbackType]
+        let subjectLine = "[Finance Toolkit] \(typeLabel): \(subject)"
+        let body = """
+        Type: \(typeLabel)
+        From: \(email.isEmpty ? "Not provided" : email)
+
+        \(message)
+        """
+
+        let subjectEncoded = subjectLine.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let bodyEncoded = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let mailtoString = "mailto:\(supportEmail)?subject=\(subjectEncoded)&body=\(bodyEncoded)"
+
+        if let url = URL(string: mailtoString), UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url) { success in
+                if success {
+                    DispatchQueue.main.async {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            submitted = true
+                        }
+                    }
+                }
+            }
+        } else {
+            showMailError = true
         }
     }
 
