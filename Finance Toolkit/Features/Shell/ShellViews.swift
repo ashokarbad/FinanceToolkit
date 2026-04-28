@@ -6,7 +6,6 @@ import StoreKit
 
 // MARK: - Dashboard
 struct DashboardView: View {
-    @EnvironmentObject private var vm: CalculatorViewModel
     @ObservedObject private var store = SavedStore.shared
     @ObservedObject private var expenseStore = ExpenseStore.shared
     @ObservedObject private var outflowStore = OutflowStore.shared
@@ -23,46 +22,21 @@ struct DashboardView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // Quick summary cards
+            VStack(spacing: 16) {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
-                    DashboardCard(title: "Last EMI", value: vm.emi.formatted(.currency(code: currency)), icon: "house.fill", color: .navy)
-                    DashboardCard(title: "Last SIP FV", value: vm.sipFutureValue.formatted(.currency(code: currency)), icon: "chart.line.uptrend.xyaxis", color: .gold)
-                    DashboardCard(title: "Tax Payable", value: vm.taxPayable.formatted(.currency(code: currency)), icon: "percent", color: .teal)
                     Button { navigateTo?(.saved) } label: {
-                        DashboardCard(title: "Saved Items", value: "\(store.calculations.count)", icon: "bookmark.fill", color: .gold)
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                // Quick navigation
-                HStack(spacing: 12) {
-                    Button { navigateTo?(.saved) } label: {
-                        Label("View Saved", systemImage: "bookmark.fill")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(Color.navy)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.navy.opacity(0.08)))
+                        DashboardCard(title: "Saved Items", value: "\(store.calculations.count)", icon: "bookmark.fill", color: .navy)
                     }
                     .buttonStyle(.plain)
 
                     Button { navigateTo?(.calculators) } label: {
-                        Label("Favourites", systemImage: "star.fill")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(Color.gold)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.gold.opacity(0.08)))
+                        DashboardCard(title: "Favourites", value: "Calculators", icon: "star.fill", color: .gold)
                     }
                     .buttonStyle(.plain)
-                }
 
-                // Expenses & Outflow summary
-                HStack(spacing: 12) {
                     Button { navigateTo?(.expenses) } label: {
                         DashboardCard(
-                            title: "This Month Expenses",
+                            title: "Monthly Expenses",
                             value: currentMonthExpenseTotal.formatted(.currency(code: currency)),
                             icon: "chart.pie.fill",
                             color: Color(hex: "#E87D2B")
@@ -75,51 +49,10 @@ struct DashboardView: View {
                             title: "Monthly Outflow",
                             value: outflowStore.items.reduce(0) { $0 + $1.amount }.formatted(.currency(code: currency)),
                             icon: "arrow.up.forward.circle.fill",
-                            color: .navy
+                            color: .teal
                         )
                     }
                     .buttonStyle(.plain)
-                }
-
-                if !store.calculations.isEmpty {
-                    Text("Recent Saves")
-                        .font(.headline)
-                        .padding(.top, 8)
-                    ForEach(store.calculations.prefix(5)) { calc in
-                        HStack(spacing: 12) {
-                            Image(systemName: calc.icon)
-                                .font(.system(size: 14))
-                                .foregroundStyle(.secondary)
-                                .frame(width: 28, height: 28)
-                                .background(RoundedRectangle(cornerRadius: 7).fill(Color.primary.opacity(0.06)))
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(calc.calculatorTitle)
-                                    .font(.subheadline.weight(.medium))
-                                Text(calc.note)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Text(calc.date, style: .date)
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
-                        }
-                        .padding(.vertical, 4)
-                    }
-                }
-
-                if store.calculations.isEmpty {
-                    VStack(spacing: 12) {
-                        Image(systemName: "chart.bar.doc.horizontal")
-                            .font(.system(size: 40, weight: .light))
-                            .foregroundStyle(.tertiary)
-                        Text("Your dashboard will populate as you use calculators and save results.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 40)
                 }
             }
             .padding()
@@ -162,7 +95,6 @@ struct SavedView: View {
     @State private var sharePDFURL: URL?
     @State private var shareAllPDFURL: URL?
     @State private var shareCSVURL: URL?
-    @State private var noteEditCalcID: UUID?
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     var body: some View {
@@ -234,15 +166,7 @@ struct SavedView: View {
                 ShareSheet(items: [url])
             }
         }
-        .sheet(isPresented: Binding(
-            get: { noteEditCalcID != nil },
-            set: { if !$0 { noteEditCalcID = nil } }
-        )) {
-            if let id = noteEditCalcID,
-               let calc = store.calculations.first(where: { $0.id == id }) {
-                NoteEditorSheet(store: store, calculationID: id, existingNote: calc.userNote ?? StyledNote())
-            }
-        }
+
     }
 
     @ViewBuilder
@@ -297,18 +221,12 @@ struct SavedView: View {
             }
             .tint(.navy)
         }
-        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+        .swipeActions(edge: .trailing) {
             Button(role: .destructive) {
                 store.delete(id: calc.id)
             } label: {
                 Label("Delete", systemImage: "trash")
             }
-            Button {
-                noteEditCalcID = calc.id
-            } label: {
-                Label("Note", systemImage: "note.text")
-            }
-            .tint(Color.gold)
         }
     }
 
@@ -334,23 +252,23 @@ struct SavedView: View {
         ]
         let headAttr: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 14, weight: .semibold),
-            .foregroundColor: UIColor.label
+            .foregroundColor: UIColor.black
         ]
         let bodyAttr: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 11, weight: .regular),
-            .foregroundColor: UIColor.label
+            .foregroundColor: UIColor.darkGray
         ]
         let valAttr: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 11, weight: .semibold),
-            .foregroundColor: UIColor.label
+            .foregroundColor: UIColor.black
         ]
         let subAttr: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 10, weight: .regular),
-            .foregroundColor: UIColor.secondaryLabel
+            .foregroundColor: UIColor.gray
         ]
         let footerAttr: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 9, weight: .regular),
-            .foregroundColor: UIColor.tertiaryLabel
+            .foregroundColor: UIColor.lightGray
         ]
 
         // Title
@@ -421,7 +339,7 @@ struct SavedView: View {
             }
 
             y += 8
-            ctx.setStrokeColor(UIColor.separator.cgColor)
+            ctx.setStrokeColor(UIColor.lightGray.cgColor)
             ctx.setLineWidth(0.5)
             ctx.move(to: CGPoint(x: margin, y: y))
             ctx.addLine(to: CGPoint(x: pageW - margin, y: y))
@@ -748,11 +666,16 @@ struct QuickNoteEditorSheet: View {
 
                 Section("Content") {
                     TextEditor(text: $styledNote.text)
-                        .frame(minHeight: 120)
+                        .font(.system(size: CGFloat(styledNote.fontSize),
+                                      weight: styledNote.isBold ? .bold : .regular))
+                        .italic(styledNote.isItalic)
+                        .foregroundStyle(Color(hex: styledNote.colorHex))
+                        .frame(minHeight: 150)
                         .overlay(alignment: .topLeading) {
                             if styledNote.text.isEmpty {
                                 Text("Write your note here...")
                                     .foregroundStyle(.tertiary)
+                                    .font(.system(size: CGFloat(styledNote.fontSize)))
                                     .padding(.top, 8)
                                     .padding(.leading, 4)
                                     .allowsHitTesting(false)
@@ -808,16 +731,6 @@ struct QuickNoteEditorSheet: View {
                             }
                             .buttonStyle(.plain)
                         }
-                    }
-                }
-
-                if !styledNote.text.isEmpty {
-                    Section("Preview") {
-                        Text(styledNote.text)
-                            .font(.system(size: CGFloat(styledNote.fontSize),
-                                          weight: styledNote.isBold ? .bold : .regular))
-                            .italic(styledNote.isItalic)
-                            .foregroundStyle(Color(hex: styledNote.colorHex))
                     }
                 }
 
@@ -1166,9 +1079,21 @@ struct FeedbackView: View {
 struct AboutView: View {
     @Environment(\.requestReview) private var requestReview
 
+    private let features: [(icon: String, title: String, desc: String)] = [
+        ("house.fill", "Loan Calculators", "Home loan, vehicle loan, personal loan & education loan with full amortization schedules"),
+        ("chart.line.uptrend.xyaxis", "Investment Tools", "SIP, lump sum, mutual fund, FD, RD & PPF calculators with growth projections"),
+        ("indianrupeesign.circle", "Tax Planning", "Income tax calculator supporting old & new regime with HRA, 80C & 80D deductions"),
+        ("person.badge.clock", "Retirement", "NPS, PF, gratuity & retirement corpus calculators to plan your financial future"),
+        ("chart.pie.fill", "Expense Tracker", "Track monthly expenses with category-wise breakdown, charts & PDF/CSV export"),
+        ("arrow.up.arrow.down", "Monthly Outflow", "Manage recurring & one-time outflows with salary tracking and month-wise views"),
+        ("note.text", "Smart Notes", "Create styled notes with custom font sizes, colors, bold & italic formatting"),
+        ("star.fill", "Save & Compare", "Bookmark any calculation result and export all saved data as PDF or Excel"),
+    ]
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: 24) {
+                // App Icon & Title
                 ZStack {
                     RoundedRectangle(cornerRadius: 20)
                         .fill(LinearGradient(colors: [.navy, .teal], startPoint: .topLeading, endPoint: .bottomTrailing))
@@ -1179,18 +1104,75 @@ struct AboutView: View {
                 }
                 .padding(.top, 30)
 
-                Text("Finance Toolkit")
-                    .font(.title.bold())
-                Text("Loans · Investments · Tax · Retirement")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                VStack(spacing: 6) {
+                    Text("Finance Toolkit")
+                        .font(.title.bold())
+                    Text("Version 1.0")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                    Text("Your Complete Indian Financial Companion")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
 
-                Text("A comprehensive Indian financial calculator suite covering home loans, vehicle loans, SIPs, mutual funds, FDs, RDs, tax planning, NPS, PF, and gratuity.")
+                // Description
+                Text("Finance Toolkit is an all-in-one financial calculator suite designed for Indian users. Whether you're planning a home purchase, comparing investment options, filing taxes, or tracking monthly expenses — this app has you covered with accurate, easy-to-use tools.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, 28)
 
+                // Features Grid
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Features")
+                        .font(.headline)
+                        .foregroundStyle(Color.navy)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 4)
+
+                    ForEach(features, id: \.title) { feature in
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: feature.icon)
+                                .font(.system(size: 14))
+                                .foregroundStyle(Color.teal)
+                                .frame(width: 30, height: 30)
+                                .background(RoundedRectangle(cornerRadius: 8).fill(Color.teal.opacity(0.1)))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(feature.title)
+                                    .font(.subheadline.weight(.semibold))
+                                Text(feature.desc)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 6)
+                    }
+                }
+                .padding(.vertical, 12)
+                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.ultraThinMaterial))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.navy.opacity(0.1), lineWidth: 0.5))
+                .padding(.horizontal, 16)
+
+                // Highlights
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Highlights")
+                        .font(.headline)
+                        .foregroundStyle(Color.navy)
+
+                    aboutHighlightRow(icon: "globe", text: "Supports 10 currencies — INR, USD, EUR, GBP & more")
+                    aboutHighlightRow(icon: "moon.fill", text: "Dark mode support with adaptive UI")
+                    aboutHighlightRow(icon: "doc.richtext", text: "Export reports as PDF or Excel (CSV)")
+                    aboutHighlightRow(icon: "lock.shield.fill", text: "100% offline — your data stays on your device")
+                    aboutHighlightRow(icon: "ipad.and.iphone", text: "Optimized for iPhone & iPad with landscape support")
+                }
+                .padding(16)
+                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.ultraThinMaterial))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.teal.opacity(0.15), lineWidth: 0.5))
+                .padding(.horizontal, 16)
+
+                // Rate Button
                 Button {
                     requestReview()
                 } label: {
@@ -1202,10 +1184,32 @@ struct AboutView: View {
                         .background(Capsule().fill(LinearGradient(colors: [.navy, .teal], startPoint: .leading, endPoint: .trailing)))
                 }
                 .buttonStyle(.plain)
-                .padding(.top, 8)
+                .padding(.top, 4)
 
-                Spacer()
+                // Footer
+                VStack(spacing: 4) {
+                    Text("Made with care in India")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("© 2025 Finance Toolkit. All rights reserved.")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.top, 8)
+                .padding(.bottom, 30)
             }
+        }
+    }
+
+    private func aboutHighlightRow(icon: String, text: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 12))
+                .foregroundStyle(Color.teal)
+                .frame(width: 22)
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 }
