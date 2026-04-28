@@ -24,11 +24,11 @@ struct HomeLoanView: View {
     }
 
     /// Custom amortization schedule based on the active EMI
-    private var customAmortization: [CalculatorViewModel.AmortizationRow] {
+    private var customAmortization: [AmortizationRow] {
         let r = vm.annualRatePercent / 12.0 / 100.0
         let emiVal = activeEMI
         var balance = vm.principal
-        var rows: [CalculatorViewModel.AmortizationRow] = []
+        var rows: [AmortizationRow] = []
         var month = 1
         let maxMonths = 600 // safety cap at 50 years
         while balance > 0 && month <= maxMonths {
@@ -40,6 +40,11 @@ struct HomeLoanView: View {
             month += 1
         }
         return rows
+    }
+
+    /// Standard amortization from VM converted to shared type
+    private var standardAmortization: [AmortizationRow] {
+        vm.amortizationSchedule.map { AmortizationRow(id: $0.id, month: $0.month, emi: $0.emi, principal: $0.principal, interest: $0.interest, balance: $0.balance) }
     }
 
     private var customTotalPaid: Double { activeEMI * Double(customAmortization.count) }
@@ -159,7 +164,7 @@ struct HomeLoanView: View {
 
                 if showAmortization {
                     AmortizationScheduleView(
-                        rows: customEMIEnabled ? customAmortization : vm.amortizationSchedule,
+                        rows: customEMIEnabled ? customAmortization : standardAmortization,
                         accent: accent,
                         currency: currency
                     )
@@ -192,70 +197,4 @@ struct HomeLoanView: View {
     }
 }
 
-// MARK: - Amortization schedule view
-struct AmortizationScheduleView: View {
-    let rows: [CalculatorViewModel.AmortizationRow]
-    let accent: Color
-    let currency: String
 
-    @State private var showAll = false
-    private let previewCount = 12
-
-    var displayedRows: [CalculatorViewModel.AmortizationRow] {
-        showAll ? rows : Array(rows.prefix(previewCount))
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header
-            HStack {
-                Text("Month").font(.caption.weight(.bold)).frame(width: 44, alignment: .leading)
-                Text("EMI").font(.caption.weight(.bold)).frame(maxWidth: .infinity, alignment: .trailing)
-                Text("Principal").font(.caption.weight(.bold)).frame(maxWidth: .infinity, alignment: .trailing)
-                Text("Interest").font(.caption.weight(.bold)).frame(maxWidth: .infinity, alignment: .trailing)
-                Text("Balance").font(.caption.weight(.bold)).frame(maxWidth: .infinity, alignment: .trailing)
-            }
-            .foregroundStyle(accent)
-            .padding(.vertical, 6)
-            .padding(.horizontal, 4)
-
-            Divider()
-
-            ForEach(displayedRows) { row in
-                HStack {
-                    Text("\(row.month)").font(.caption).frame(width: 44, alignment: .leading)
-                    Text(shortCurrency(row.emi)).font(.caption).frame(maxWidth: .infinity, alignment: .trailing)
-                    Text(shortCurrency(row.principal)).font(.caption).frame(maxWidth: .infinity, alignment: .trailing)
-                    Text(shortCurrency(row.interest)).font(.caption).frame(maxWidth: .infinity, alignment: .trailing)
-                    Text(shortCurrency(row.balance)).font(.caption.bold()).frame(maxWidth: .infinity, alignment: .trailing).foregroundStyle(accent)
-                }
-                .padding(.vertical, 4)
-                .padding(.horizontal, 4)
-                .background(row.month % 2 == 0 ? Color.primary.opacity(0.03) : Color.clear)
-            }
-
-            if rows.count > previewCount {
-                Button {
-                    withAnimation { showAll.toggle() }
-                } label: {
-                    Text(showAll ? "Show less" : "Show all \(rows.count) months")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(accent)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(.vertical, 4)
-    }
-
-    private func shortCurrency(_ value: Double) -> String {
-        if value >= 1_00_000 {
-            return String(format: "₹%.1fL", value / 1_00_000)
-        } else if value >= 1_000 {
-            return String(format: "₹%.0fK", value / 1_000)
-        }
-        return String(format: "₹%.0f", value)
-    }
-}

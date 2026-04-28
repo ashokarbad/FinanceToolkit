@@ -19,6 +19,8 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
     case calculators = "Calculators"
     case dashboard   = "Dashboard"
     case saved       = "Saved"
+    case expenses    = "Expenses"
+    case outflow     = "Monthly Outflow"
     case tips        = "Tips & FAQ"
     case profile     = "Profile"
     case settings    = "Settings"
@@ -32,6 +34,8 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
         case .calculators: return "square.grid.2x2.fill"
         case .dashboard:   return "chart.bar.fill"
         case .saved:       return "bookmark.fill"
+        case .expenses:    return "chart.pie.fill"
+        case .outflow:     return "arrow.up.forward.circle.fill"
         case .tips:        return "lightbulb.fill"
         case .profile:     return "person.crop.circle.fill"
         case .settings:    return "gearshape.fill"
@@ -45,6 +49,8 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
         case .calculators: return .navy
         case .dashboard:   return .teal
         case .saved:       return .gold
+        case .expenses:    return Color(hex: "#E87D2B")
+        case .outflow:     return .navy
         case .tips:        return Color(hex: "#E87D2B")
         case .profile, .settings, .feedback, .about: return Color(hex: "#888888")
         }

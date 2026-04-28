@@ -93,6 +93,8 @@ struct FinCalcAppShell: View {
         case .calculators: MainCalculatorView()
         case .dashboard:   DashboardView(navigateTo: navigate)
         case .saved:       SavedView()
+        case .expenses:    ExpensesTrackerView()
+        case .outflow:     MonthlyOutflowView()
         case .tips:        TipsFAQView()
         case .profile:     ProfileView(navigateTo: navigate)
         case .settings:    SettingsView(darkMode: $darkMode)
@@ -112,7 +114,7 @@ struct SidebarDrawer: View {
     @Binding var darkMode: Bool
     @Binding var sidebarOpen: Bool
 
-    private let mainItems:    [SidebarDestination] = [.calculators, .dashboard, .saved, .tips]
+    private let mainItems:    [SidebarDestination] = [.calculators, .dashboard, .saved, .expenses, .outflow, .tips]
     private let accountItems: [SidebarDestination] = [.profile, .settings, .feedback]
     private let infoItems:    [SidebarDestination] = [.about]
 

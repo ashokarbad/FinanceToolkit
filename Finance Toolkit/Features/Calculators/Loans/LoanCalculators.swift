@@ -9,6 +9,7 @@ struct VehiclePersonalLoanView: View {
     let title: String
     private let accent = Color.navy
     @State private var showInfoSheet = false
+    @State private var showAmortization = false
     @State private var downPayment: Double = 0
     @State private var processingFeePercent: Double = 0
     @State private var insuranceAmount: Double = 0
@@ -65,6 +66,9 @@ struct VehiclePersonalLoanView: View {
                         .contentTransition(.numericText()).animation(.snappy, value: totalOutflow)
                 }
             }
+            AmortizationToggleSection(
+                rows: buildGenericAmortization(principal: netLoanAmount, annualRatePercent: vm.annualRatePercent, months: vm.tenureMonths, emi: emi),
+                accent: accent, currency: currency, showAmortization: $showAmortization)
         }
         .keyboardDoneToolbar().tint(accent)
         .onChange(of: vm.principal)         { _, _ in vm.recalculateAll() }
@@ -86,6 +90,7 @@ struct EducationLoanView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color.navy
     @State private var showInfoSheet = false
+    @State private var showAmortization = false
     @State private var moratoriumMonths: Int = 0
     @State private var repaymentMonths: Int = 60
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
@@ -136,6 +141,9 @@ struct EducationLoanView: View {
                     ResultRow(label: "Total Paid",        value: totalEMIPaid.formatted(.currency(code: currency)),  isHighlight: true, accentColor: accent)
                 }
             }
+            AmortizationToggleSection(
+                rows: buildGenericAmortization(principal: principalAfterMoratorium, annualRatePercent: vm.annualRatePercent, months: repaymentMonths, emi: emi),
+                accent: accent, currency: currency, showAmortization: $showAmortization)
         }
         .keyboardDoneToolbar().tint(accent)
         .onChange(of: vm.principal)         { _, _ in vm.recalculateAll() }
@@ -157,6 +165,7 @@ struct BusinessLoanView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color.navy
     @State private var showInfoSheet = false
+    @State private var showAmortization = false
     @State private var processingFeePercent: Double = 1.0
     @State private var collateralValue: Double = 0
     @State private var loanPurpose: String = "Working Capital"
@@ -206,6 +215,9 @@ struct BusinessLoanView: View {
                     ResultRow(label: "Total Outflow",   value: totalPaid.formatted(.currency(code: currency)),      isHighlight: true, accentColor: accent)
                 }
             }
+            AmortizationToggleSection(
+                rows: buildGenericAmortization(principal: vm.principal, annualRatePercent: vm.annualRatePercent, months: vm.tenureMonths, emi: emi),
+                accent: accent, currency: currency, showAmortization: $showAmortization)
         }
         .keyboardDoneToolbar().tint(accent)
         .onChange(of: vm.principal) { _, _ in vm.recalculateAll() }
@@ -227,6 +239,7 @@ struct GoldLoanView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color.navy
     @State private var showInfoSheet = false
+    @State private var showAmortization = false
     @State private var goldValue: Double = 5_00_000
     @State private var ltvPercent: Double = 75
     @State private var loanType: Int = 0  // 0 = EMI, 1 = Bullet (interest-only)
@@ -279,6 +292,11 @@ struct GoldLoanView: View {
                         .contentTransition(.numericText()).animation(.snappy, value: totalPaid)
                 }
             }
+            if loanType == 0 {
+                AmortizationToggleSection(
+                    rows: buildGenericAmortization(principal: principalFromLTV, annualRatePercent: vm.annualRatePercent, months: vm.tenureMonths, emi: emiAmount),
+                    accent: accent, currency: currency, showAmortization: $showAmortization)
+            }
         }
         .keyboardDoneToolbar().tint(accent)
         .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll() }
@@ -299,6 +317,7 @@ struct LAPLoanView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color.navy
     @State private var showInfoSheet = false
+    @State private var showAmortization = false
     @State private var propertyValue: Double = 50_00_000
     @State private var ltvPercent: Double = 70
     @State private var processingFeePercent: Double = 0.5
@@ -344,6 +363,9 @@ struct LAPLoanView: View {
                     ResultRow(label: "Total Outflow",            value: totalOutflow.formatted(.currency(code: currency)),   isHighlight: true, accentColor: accent)
                 }
             }
+            AmortizationToggleSection(
+                rows: buildGenericAmortization(principal: principalFromLTV, annualRatePercent: vm.annualRatePercent, months: vm.tenureMonths, emi: emi),
+                accent: accent, currency: currency, showAmortization: $showAmortization)
         }
         .keyboardDoneToolbar().tint(accent)
         .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll() }
@@ -364,6 +386,7 @@ struct AgriculturalLoanView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color.navy
     @State private var showInfoSheet = false
+    @State private var showAmortization = false
     @State private var moratoriumMonths: Int = 0
     @State private var cropCycle: String = "Kharif (June-Nov)"
     private let cropCycles = ["Kharif (June-Nov)", "Rabi (Nov-Apr)", "Zaid (Apr-June)", "Annual"]
@@ -405,6 +428,9 @@ struct AgriculturalLoanView: View {
                     ResultRow(label: "Total Paid (EMIs)", value: totalPaid.formatted(.currency(code: currency)))
                 }
             }
+            AmortizationToggleSection(
+                rows: buildGenericAmortization(principal: principalGrown, annualRatePercent: vm.annualRatePercent, months: repayMonths, emi: emi),
+                accent: accent, currency: currency, showAmortization: $showAmortization)
         }
         .keyboardDoneToolbar().tint(accent)
         .onChange(of: vm.principal) { _, _ in vm.recalculateAll() }
@@ -471,6 +497,7 @@ struct ConsumerDurableLoanView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color.navy
     @State private var showInfoSheet = false
+    @State private var showAmortization = false
     @State private var price: Double = 50_000
     @State private var downPayment: Double = 0
     @State private var processingFeePercent: Double = 0
@@ -524,6 +551,11 @@ struct ConsumerDurableLoanView: View {
                     Divider().padding(.vertical, 4)
                     ResultRow(label: "Total Outflow",    value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                 }
+            }
+            if !noCostEMI {
+                AmortizationToggleSection(
+                    rows: buildGenericAmortization(principal: netLoanAmount, annualRatePercent: vm.annualRatePercent, months: vm.tenureMonths, emi: emi),
+                    accent: accent, currency: currency, showAmortization: $showAmortization)
             }
         }
         .keyboardDoneToolbar().tint(accent)

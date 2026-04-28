@@ -147,6 +147,129 @@ extension View {
     func keyboardDoneToolbar() -> some View { modifier(KeyboardDoneToolbar()) }
 }
 
+// MARK: - Amortization schedule view (shared)
+struct AmortizationRow: Identifiable {
+    let id: Int
+    let month: Int
+    let emi: Double
+    let principal: Double
+    let interest: Double
+    let balance: Double
+}
+
+/// Builds a generic amortization schedule for any reducing-balance loan.
+func buildGenericAmortization(principal: Double, annualRatePercent: Double, months: Int, emi: Double) -> [AmortizationRow] {
+    let r = annualRatePercent / 12.0 / 100.0
+    var balance = principal
+    var rows: [AmortizationRow] = []
+    for month in 1...max(months, 1) {
+        let interest = balance * r
+        let prin = min(emi - interest, balance)
+        balance = max(balance - prin, 0)
+        rows.append(AmortizationRow(id: month, month: month, emi: emi, principal: prin, interest: interest, balance: balance))
+        if balance <= 0 { break }
+    }
+    return rows
+}
+
+struct AmortizationScheduleView: View {
+    let rows: [AmortizationRow]
+    let accent: Color
+    let currency: String
+
+    @State private var showAll = false
+    private let previewCount = 12
+
+    var displayedRows: [AmortizationRow] {
+        showAll ? rows : Array(rows.prefix(previewCount))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("Month").font(.caption.weight(.bold)).frame(width: 44, alignment: .leading)
+                Text("EMI").font(.caption.weight(.bold)).frame(maxWidth: .infinity, alignment: .trailing)
+                Text("Principal").font(.caption.weight(.bold)).frame(maxWidth: .infinity, alignment: .trailing)
+                Text("Interest").font(.caption.weight(.bold)).frame(maxWidth: .infinity, alignment: .trailing)
+                Text("Balance").font(.caption.weight(.bold)).frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .foregroundStyle(accent)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 4)
+
+            Divider()
+
+            ForEach(displayedRows) { row in
+                HStack {
+                    Text("\(row.month)").font(.caption).frame(width: 44, alignment: .leading)
+                    Text(shortCurrency(row.emi)).font(.caption).frame(maxWidth: .infinity, alignment: .trailing)
+                    Text(shortCurrency(row.principal)).font(.caption).frame(maxWidth: .infinity, alignment: .trailing)
+                    Text(shortCurrency(row.interest)).font(.caption).frame(maxWidth: .infinity, alignment: .trailing)
+                    Text(shortCurrency(row.balance)).font(.caption.bold()).frame(maxWidth: .infinity, alignment: .trailing).foregroundStyle(accent)
+                }
+                .padding(.vertical, 4)
+                .padding(.horizontal, 4)
+                .background(row.month % 2 == 0 ? Color.primary.opacity(0.03) : Color.clear)
+            }
+
+            if rows.count > previewCount {
+                Button {
+                    withAnimation { showAll.toggle() }
+                } label: {
+                    Text(showAll ? "Show less" : "Show all \(rows.count) months")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(accent)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func shortCurrency(_ value: Double) -> String {
+        if value >= 1_00_000 {
+            return String(format: "₹%.1fL", value / 1_00_000)
+        } else if value >= 1_000 {
+            return String(format: "₹%.0fK", value / 1_000)
+        }
+        return String(format: "₹%.0f", value)
+    }
+}
+
+/// Reusable amortization toggle section for any loan calculator.
+struct AmortizationToggleSection: View {
+    let rows: [AmortizationRow]
+    let accent: Color
+    let currency: String
+    @Binding var showAmortization: Bool
+
+    var body: some View {
+        Section {
+            Button {
+                withAnimation { showAmortization.toggle() }
+            } label: {
+                HStack {
+                    Image(systemName: "list.number")
+                        .foregroundStyle(accent)
+                    Text("View Amortization Schedule")
+                        .foregroundStyle(accent)
+                    Spacer()
+                    Image(systemName: showAmortization ? "chevron.up" : "chevron.down")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+            }
+            .buttonStyle(.plain)
+
+            if showAmortization {
+                AmortizationScheduleView(rows: rows, accent: accent, currency: currency)
+            }
+        }
+    }
+}
+
 // MARK: - Info sheet builder
 struct InfoSheet: View {
     let title: String

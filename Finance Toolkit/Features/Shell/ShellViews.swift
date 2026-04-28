@@ -2,6 +2,7 @@
 // Finance Toolkit — sidebar destination views (Dashboard, Saved, Tips, Profile, Settings, About)
 
 import SwiftUI
+import StoreKit
 
 // MARK: - Dashboard
 struct DashboardView: View {
@@ -125,6 +126,8 @@ struct DashboardCard: View {
 // MARK: - Saved
 struct SavedView: View {
     @ObservedObject private var store = SavedStore.shared
+    @State private var shareItem: SavedCalculation?
+    @State private var shareAllSheet = false
     private var currency: String { Locale.current.currency?.identifier ?? "INR" }
 
     var body: some View {
@@ -175,12 +178,61 @@ struct SavedView: View {
                             }
                         }
                         .padding(.vertical, 4)
+                        .swipeActions(edge: .leading) {
+                            Button {
+                                shareItem = calc
+                            } label: {
+                                Label("Share", systemImage: "square.and.arrow.up")
+                            }
+                            .tint(.navy)
+                        }
                     }
                     .onDelete { offsets in store.delete(at: offsets) }
                 }
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            shareAllSheet = true
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 14))
+                        }
+                    }
+                }
             }
         }
+        .sheet(item: $shareItem) { calc in
+            let text = formatCalculationForShare(calc)
+            ShareSheet(items: [text])
+        }
+        .sheet(isPresented: $shareAllSheet) {
+            let text = store.calculations.map { formatCalculationForShare($0) }.joined(separator: "\n\n" + String(repeating: "─", count: 40) + "\n\n")
+            ShareSheet(items: [text])
+        }
     }
+
+    private func formatCalculationForShare(_ calc: SavedCalculation) -> String {
+        var lines: [String] = []
+        lines.append("📊 \(calc.calculatorTitle)")
+        lines.append("Date: \(calc.date.formatted(date: .abbreviated, time: .omitted))")
+        if !calc.note.isEmpty { lines.append("Note: \(calc.note)") }
+        lines.append("")
+        for entry in calc.results {
+            lines.append("\(entry.label): \(entry.value)")
+        }
+        lines.append("")
+        lines.append("— Shared from Finance Toolkit")
+        return lines.joined(separator: "\n")
+    }
+}
+
+// MARK: - Share sheet wrapper
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - Tips & FAQ
@@ -306,11 +358,27 @@ struct ProfileView: View {
 // MARK: - Settings
 struct SettingsView: View {
     @Binding var darkMode: Bool
+    @Environment(\.requestReview) private var requestReview
 
     var body: some View {
         Form {
             Section("Appearance") {
                 Toggle("Dark Mode", isOn: $darkMode)
+            }
+            Section("Support") {
+                Button {
+                    requestReview()
+                } label: {
+                    HStack {
+                        Label("Rate this App", systemImage: "star.fill")
+                            .foregroundStyle(.primary)
+                        Spacer()
+                        Image(systemName: "arrow.up.right.square")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .buttonStyle(.plain)
             }
             Section("Data") {
                 HStack {
@@ -452,6 +520,8 @@ struct FeedbackView: View {
 
 // MARK: - About
 struct AboutView: View {
+    @Environment(\.requestReview) private var requestReview
+
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -476,6 +546,19 @@ struct AboutView: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
+
+                Button {
+                    requestReview()
+                } label: {
+                    Label("Rate this App", systemImage: "star.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(Capsule().fill(LinearGradient(colors: [.navy, .teal], startPoint: .leading, endPoint: .trailing)))
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 8)
 
                 Spacer()
             }
