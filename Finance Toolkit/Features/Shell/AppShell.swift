@@ -22,7 +22,7 @@ struct FinCalcAppShell: View {
     @AppStorage("darkMode") private var darkMode = false
     @EnvironmentObject private var vm: CalculatorViewModel
     @State private var sidebarOpen = false
-    @State private var selected: SidebarDestination = .calculators
+    @State private var selected: SidebarDestination = .dashboard
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -95,6 +95,7 @@ struct FinCalcAppShell: View {
         case .saved:       SavedView()
         case .expenses:    ExpensesTrackerView()
         case .outflow:     MonthlyOutflowView()
+        case .notes:       NotesListView()
         case .tips:        TipsFAQView()
         case .profile:     ProfileView(navigateTo: navigate)
         case .settings:    SettingsView(darkMode: $darkMode)
@@ -114,7 +115,7 @@ struct SidebarDrawer: View {
     @Binding var darkMode: Bool
     @Binding var sidebarOpen: Bool
 
-    private let mainItems:    [SidebarDestination] = [.calculators, .dashboard, .saved, .expenses, .outflow, .tips]
+    private let mainItems:    [SidebarDestination] = [.dashboard, .expenses, .outflow, .saved, .calculators, .notes, .tips]
     private let accountItems: [SidebarDestination] = [.profile, .settings, .feedback]
     private let infoItems:    [SidebarDestination] = [.about]
 
@@ -171,6 +172,7 @@ struct SidebarDrawer: View {
                     .padding(.bottom, 16)
             }
             .safeAreaPadding(.top, 8)
+            .safeAreaPadding(.bottom, 8)
         }
         .clipShape(RoundedCornerShape(radius: 22, corners: [.topRight, .bottomRight]))
     }

@@ -8,7 +8,7 @@ struct TaxCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color.teal
     @State private var showInfoSheet = false
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private func makeSnapshot() -> SavedCalculation {
         SavedCalculation(calculatorTitle: "Tax Calculator", icon: "percent", date: Date(),
@@ -83,7 +83,7 @@ struct NPSCalculatorView: View {
     private let accent = Color.teal
     @State private var showInfoSheet = false
     @State private var npsMonths: Int = 240
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private func makeSnapshot() -> SavedCalculation {
         SavedCalculation(calculatorTitle: "NPS Calculator", icon: "shield.fill", date: Date(),
@@ -142,7 +142,7 @@ struct PFCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color.teal
     @State private var showInfoSheet = false
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private func makeSnapshot() -> SavedCalculation {
         SavedCalculation(calculatorTitle: "PF Calculator", icon: "banknote.fill", date: Date(),
@@ -212,7 +212,7 @@ struct GratuityCalculatorView: View {
     @EnvironmentObject var vm: CalculatorViewModel
     private let accent = Color.teal
     @State private var showInfoSheet = false
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private func makeSnapshot() -> SavedCalculation {
         SavedCalculation(calculatorTitle: "Gratuity Calculator", icon: "gift.fill", date: Date(),

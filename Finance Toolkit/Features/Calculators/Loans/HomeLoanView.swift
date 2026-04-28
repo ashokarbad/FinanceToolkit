@@ -10,7 +10,7 @@ struct HomeLoanView: View {
     @State private var showAmortization = false
     @State private var customEMIEnabled = false
     @State private var customEMI: Double = 0
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     /// The minimum EMI is the interest-only payment for month 1 (otherwise balance never reduces)
     private var minimumEMI: Double {

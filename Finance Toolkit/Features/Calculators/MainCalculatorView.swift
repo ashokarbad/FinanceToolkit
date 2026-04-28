@@ -8,6 +8,7 @@ struct MainCalculatorView: View {
     @EnvironmentObject private var vm: CalculatorViewModel
     @ObservedObject private var store = SavedStore.shared
     @State private var searchText = ""
+    @AppStorage("calcViewMode") private var isGridMode = false
 
     // MARK: Calculator sections
     private var loanItems: [CalcItem] {[
@@ -62,22 +63,21 @@ struct MainCalculatorView: View {
 
     var body: some View {
         ScrollView {
-            // Landscape: items get more horizontal space automatically
             LazyVStack(alignment: .leading, spacing: 0) {
                 if hasNoResults {
                     NoResultsView(query: searchText).padding(.top, 80)
                 } else {
                     if !favouriteItems.isEmpty {
-                        CalcSectionView(title: "Favourites", icon: "star.fill", color: .gold, items: favouriteItems)
+                        calcSection(title: "Favourites", icon: "star.fill", color: .gold, items: favouriteItems)
                     }
                     if !filteredLoans.isEmpty {
-                        CalcSectionView(title: "Loans", icon: "banknote", color: .navy, items: filteredLoans)
+                        calcSection(title: "Loans", icon: "banknote", color: .navy, items: filteredLoans)
                     }
                     if !filteredInvestments.isEmpty {
-                        CalcSectionView(title: "Investments", icon: "chart.line.uptrend.xyaxis", color: .gold, items: filteredInvestments)
+                        calcSection(title: "Investments", icon: "chart.line.uptrend.xyaxis", color: .gold, items: filteredInvestments)
                     }
                     if !filteredMore.isEmpty {
-                        CalcSectionView(title: "More Calculators", icon: "ellipsis.circle", color: .teal, items: filteredMore)
+                        calcSection(title: "More Calculators", icon: "ellipsis.circle", color: .teal, items: filteredMore)
                     }
                 }
             }
@@ -85,6 +85,27 @@ struct MainCalculatorView: View {
             .padding(.bottom, 40)
         }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search calculators…")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.25)) { isGridMode.toggle() }
+                } label: {
+                    Image(systemName: isGridMode ? "list.bullet" : "square.grid.2x2")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(Color.navy)
+                }
+            }
+        }
+    }
+
+    // MARK: - Section builder (switches between list and grid)
+    @ViewBuilder
+    private func calcSection(title: String, icon: String, color: Color, items: [CalcItem]) -> some View {
+        if isGridMode {
+            CalcGridSectionView(title: title, icon: icon, color: color, items: items)
+        } else {
+            CalcSectionView(title: title, icon: icon, color: color, items: items)
+        }
     }
 }
 
@@ -201,6 +222,90 @@ struct NoResultsView: View {
                 .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Grid section view
+struct CalcGridSectionView: View {
+    let title: String
+    let icon:  String
+    let color: Color
+    let items: [CalcItem]
+
+    private let columns = [GridItem(.flexible()), GridItem(.flexible())]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label {
+                Text(title.uppercased())
+                    .font(.system(size: 11, weight: .semibold))
+                    .tracking(0.7)
+            } icon: {
+                Image(systemName: icon)
+                    .font(.system(size: 11, weight: .medium))
+            }
+            .foregroundStyle(color)
+            .padding(.horizontal, 4)
+            .padding(.top, 22)
+
+            LazyVGrid(columns: columns, spacing: 12) {
+                ForEach(items) { item in
+                    NavigationLink(destination: item.destination) {
+                        CalcGridCell(item: item)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Grid cell
+struct CalcGridCell: View {
+    let item: CalcItem
+    @ObservedObject private var store = SavedStore.shared
+
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack {
+                Spacer()
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        store.toggle(item.title)
+                    }
+                } label: {
+                    Image(systemName: store.isSaved(item.title) ? "star.fill" : "star")
+                        .font(.system(size: 12))
+                        .foregroundStyle(store.isSaved(item.title) ? Color.gold : Color.secondary.opacity(0.3))
+                }
+                .buttonStyle(.plain)
+            }
+
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(item.color.opacity(0.12))
+                    .frame(width: 44, height: 44)
+                Image(systemName: item.icon)
+                    .font(.system(size: 20, weight: .medium))
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(item.color)
+            }
+
+            Text(item.title)
+                .font(.system(size: 12, weight: .semibold))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(item.subtitle)
+                .font(.system(size: 10))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.primary.opacity(0.08), lineWidth: 0.5))
     }
 }
 

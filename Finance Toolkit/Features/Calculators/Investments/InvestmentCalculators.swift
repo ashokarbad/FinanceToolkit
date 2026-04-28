@@ -9,7 +9,7 @@ struct SIPCalculatorView: View {
     private let accent = Color.gold
     @State private var showInfoSheet = false
     @State private var sipMonths: Int = 120
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private func makeSnapshot() -> SavedCalculation {
         SavedCalculation(calculatorTitle: "SIP Calculator", icon: "calendar.badge.plus", date: Date(),
@@ -62,7 +62,7 @@ struct SWPCalculatorView: View {
     private let accent = Color.gold
     @State private var showInfoSheet = false
     @State private var swpMonths: Int = 60
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private func makeSnapshot() -> SavedCalculation {
         SavedCalculation(calculatorTitle: "SWP Calculator", icon: "arrow.down.left.circle.fill", date: Date(),
@@ -127,7 +127,7 @@ struct FDCalculatorView: View {
     private let accent = Color.gold
     @State private var showInfoSheet = false
     @State private var fdMonths: Int = 36
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private func makeSnapshot() -> SavedCalculation {
         SavedCalculation(calculatorTitle: "FD Calculator", icon: "building.columns.fill", date: Date(),
@@ -182,7 +182,7 @@ struct RDCalculatorView: View {
     private let accent = Color.gold
     @State private var showInfoSheet = false
     @State private var rdMonths: Int = 36
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private func makeSnapshot() -> SavedCalculation {
         SavedCalculation(calculatorTitle: "RD Calculator", icon: "calendar.circle.fill", date: Date(),
@@ -237,7 +237,7 @@ struct LumpSumMFView: View {
     private let accent = Color.gold
     @State private var showInfoSheet = false
     @State private var lumpSumMonths: Int = 120
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private func makeSnapshot() -> SavedCalculation {
         SavedCalculation(calculatorTitle: "MF Lump Sum", icon: "chart.pie.fill", date: Date(),

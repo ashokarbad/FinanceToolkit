@@ -1,7 +1,31 @@
 // BrandColors.swift
-// Finance Toolkit — design-token layer
+// Finance Toolkit — design-token layer & shared helpers
 
 import SwiftUI
+
+// MARK: - Currency Settings
+struct CurrencySettings {
+    static let supportedCurrencies: [(code: String, name: String, symbol: String)] = [
+        ("INR", "Indian Rupee", "₹"),
+        ("USD", "US Dollar", "$"),
+        ("EUR", "Euro", "€"),
+        ("GBP", "British Pound", "£"),
+        ("AED", "UAE Dirham", "د.إ"),
+        ("SAR", "Saudi Riyal", "﷼"),
+        ("CAD", "Canadian Dollar", "C$"),
+        ("AUD", "Australian Dollar", "A$"),
+        ("SGD", "Singapore Dollar", "S$"),
+        ("JPY", "Japanese Yen", "¥"),
+    ]
+
+    static var selectedCode: String {
+        UserDefaults.standard.string(forKey: "selectedCurrency") ?? (Locale.current.currency?.identifier ?? "INR")
+    }
+
+    static func symbol(for code: String) -> String {
+        supportedCurrencies.first(where: { $0.code == code })?.symbol ?? "₹"
+    }
+}
 
 // MARK: - Hex initialiser
 extension Color {

@@ -14,7 +14,7 @@ struct VehiclePersonalLoanView: View {
     @State private var processingFeePercent: Double = 0
     @State private var insuranceAmount: Double = 0
     @State private var rtoCharges: Double = 0
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var isVehicle: Bool { title.lowercased().contains("vehicle") || title.lowercased().contains("car") }
     private var netLoanAmount: Double { max(vm.principal - downPayment, 0) }
@@ -93,7 +93,7 @@ struct EducationLoanView: View {
     @State private var showAmortization = false
     @State private var moratoriumMonths: Int = 0
     @State private var repaymentMonths: Int = 60
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var principalAfterMoratorium: Double { vm.principal * pow(1 + vm.annualRatePercent / 12.0 / 100.0, Double(moratoriumMonths)) }
     private var emi: Double {
@@ -170,7 +170,7 @@ struct BusinessLoanView: View {
     @State private var collateralValue: Double = 0
     @State private var loanPurpose: String = "Working Capital"
     private let purposes = ["Working Capital", "Equipment Purchase", "Business Expansion", "Inventory", "Other"]
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var processingFee: Double { vm.principal * (processingFeePercent / 100.0) }
     private var emi: Double { vm.calculateEMI(principal: vm.principal, annualRatePercent: vm.annualRatePercent, months: vm.tenureMonths) }
@@ -243,7 +243,7 @@ struct GoldLoanView: View {
     @State private var goldValue: Double = 5_00_000
     @State private var ltvPercent: Double = 75
     @State private var loanType: Int = 0  // 0 = EMI, 1 = Bullet (interest-only)
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var principalFromLTV: Double { goldValue * (ltvPercent / 100.0) }
     private var monthlyInterestOnly: Double { principalFromLTV * (vm.annualRatePercent / 100.0) / 12.0 }
@@ -323,7 +323,7 @@ struct LAPLoanView: View {
     @State private var processingFeePercent: Double = 0.5
     @State private var propertyType: String = "Residential"
     private let propertyTypes = ["Residential", "Commercial", "Industrial", "Land"]
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var principalFromLTV: Double { propertyValue * (ltvPercent / 100.0) }
     private var processingFee: Double { principalFromLTV * (processingFeePercent / 100.0) }
@@ -390,7 +390,7 @@ struct AgriculturalLoanView: View {
     @State private var moratoriumMonths: Int = 0
     @State private var cropCycle: String = "Kharif (June-Nov)"
     private let cropCycles = ["Kharif (June-Nov)", "Rabi (Nov-Apr)", "Zaid (Apr-June)", "Annual"]
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var principalGrown: Double { vm.principal * pow(1 + vm.annualRatePercent / 12.0 / 100.0, Double(moratoriumMonths)) }
     private var repayMonths: Int { max(vm.tenureMonths - moratoriumMonths, 1) }
@@ -455,7 +455,7 @@ struct CreditLineOverdraftView: View {
     @State private var creditLimit: Double = 5_00_000
     @State private var utilizationPercent: Double = 40
     @State private var averageMonths: Int = 6
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var utilizedAmount: Double { creditLimit * (utilizationPercent / 100.0) }
     private var monthlyInterest: Double { utilizedAmount * (vm.annualRatePercent / 100.0) / 12.0 }
@@ -502,7 +502,7 @@ struct ConsumerDurableLoanView: View {
     @State private var downPayment: Double = 0
     @State private var processingFeePercent: Double = 0
     @State private var noCostEMI: Bool = false
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var netLoanAmount: Double { max(price - downPayment, 0) }
     private var processingFeeAmount: Double { netLoanAmount * (processingFeePercent / 100.0) }

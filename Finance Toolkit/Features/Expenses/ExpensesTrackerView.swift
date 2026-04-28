@@ -96,13 +96,203 @@ final class ExpenseStore: ObservableObject {
     }
 }
 
+// MARK: - SwiftUI view → UIImage helper
+@MainActor
+private func renderSwiftUIView<V: View>(_ view: V, size: CGSize) -> UIImage {
+    let controller = UIHostingController(rootView: view.frame(width: size.width, height: size.height))
+    controller.view.bounds = CGRect(origin: .zero, size: size)
+    controller.view.backgroundColor = .white
+    controller.overrideUserInterfaceStyle = .light
+    controller.view.layoutIfNeeded()
+    let renderer = UIGraphicsImageRenderer(size: size)
+    return renderer.image { _ in
+        controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+    }
+}
+
+// MARK: - Expense PDF Generator
+@MainActor
+private func generateExpensesPDF(
+    monthLabel: String,
+    grandTotal: Double,
+    categoryTotals: [(category: String, total: Double, color: Color)],
+    entries: [ExpenseEntry],
+    currency: String,
+    chartView: some View
+) -> URL? {
+    let pageW: CGFloat = 595  // A4
+    let pageH: CGFloat = 842
+    let margin: CGFloat = 50
+    let topMarginNewPage: CGFloat = 60
+    let contentW = pageW - margin * 2
+
+    let pdfURL = FileManager.default.temporaryDirectory
+        .appendingPathComponent("Expenses_\(monthLabel.replacingOccurrences(of: " ", with: "_")).pdf")
+
+    UIGraphicsBeginPDFContextToFile(pdfURL.path, CGRect(x: 0, y: 0, width: pageW, height: pageH), nil)
+    UIGraphicsBeginPDFPage()
+
+    guard let ctx = UIGraphicsGetCurrentContext() else { return nil }
+    var y: CGFloat = topMarginNewPage
+
+    // --- Title ---
+    let titleAttr: [NSAttributedString.Key: Any] = [
+        .font: UIFont.systemFont(ofSize: 22, weight: .bold),
+        .foregroundColor: UIColor(Color.navy)
+    ]
+    let title = NSAttributedString(string: "Monthly Expenses Report", attributes: titleAttr)
+    title.draw(at: CGPoint(x: margin, y: y))
+    y += 30
+
+    // --- Subtitle: month + total ---
+    let subAttr: [NSAttributedString.Key: Any] = [
+        .font: UIFont.systemFont(ofSize: 14, weight: .regular),
+        .foregroundColor: UIColor.secondaryLabel
+    ]
+    let sub = NSAttributedString(string: monthLabel, attributes: subAttr)
+    sub.draw(at: CGPoint(x: margin, y: y))
+
+    let totalAttr: [NSAttributedString.Key: Any] = [
+        .font: UIFont.systemFont(ofSize: 14, weight: .bold),
+        .foregroundColor: UIColor(Color.navy)
+    ]
+    let totalStr = NSAttributedString(string: "Total: \(grandTotal.formatted(.currency(code: currency)))", attributes: totalAttr)
+    let totalSize = totalStr.size()
+    totalStr.draw(at: CGPoint(x: pageW - margin - totalSize.width, y: y))
+    y += 28
+
+    // --- Separator ---
+    ctx.setStrokeColor(UIColor.separator.cgColor)
+    ctx.setLineWidth(0.5)
+    ctx.move(to: CGPoint(x: margin, y: y))
+    ctx.addLine(to: CGPoint(x: pageW - margin, y: y))
+    ctx.strokePath()
+    y += 16
+
+    // --- Chart image ---
+    let chartW: CGFloat = 280
+    let chartH: CGFloat = 280
+    let chartImage = renderSwiftUIView(chartView, size: CGSize(width: chartW, height: chartH))
+    let chartRect = CGRect(x: margin + (contentW - chartW) / 2, y: y, width: chartW, height: chartH)
+    chartImage.draw(in: chartRect)
+    y += chartH + 16
+
+    // --- Category breakdown table ---
+    let headerAttr: [NSAttributedString.Key: Any] = [
+        .font: UIFont.systemFont(ofSize: 11, weight: .bold),
+        .foregroundColor: UIColor(Color.navy)
+    ]
+    let cellAttr: [NSAttributedString.Key: Any] = [
+        .font: UIFont.systemFont(ofSize: 11, weight: .regular),
+        .foregroundColor: UIColor.label
+    ]
+    let cellBoldAttr: [NSAttributedString.Key: Any] = [
+        .font: UIFont.systemFont(ofSize: 11, weight: .semibold),
+        .foregroundColor: UIColor.label
+    ]
+    let pctAttr: [NSAttributedString.Key: Any] = [
+        .font: UIFont.systemFont(ofSize: 10, weight: .regular),
+        .foregroundColor: UIColor.secondaryLabel
+    ]
+
+    // Table header
+    let col1X = margin
+    let col2X = margin + contentW * 0.55
+    let col3X = margin + contentW * 0.80
+
+    NSAttributedString(string: "Category", attributes: headerAttr).draw(at: CGPoint(x: col1X, y: y))
+    NSAttributedString(string: "Amount", attributes: headerAttr).draw(at: CGPoint(x: col2X, y: y))
+    NSAttributedString(string: "%", attributes: headerAttr).draw(at: CGPoint(x: col3X, y: y))
+    y += 18
+
+    ctx.setStrokeColor(UIColor.separator.cgColor)
+    ctx.move(to: CGPoint(x: margin, y: y))
+    ctx.addLine(to: CGPoint(x: pageW - margin, y: y))
+    ctx.strokePath()
+    y += 6
+
+    for item in categoryTotals {
+        if y > pageH - 80 {
+            UIGraphicsBeginPDFPage()
+            y = topMarginNewPage
+        }
+        let pct = grandTotal > 0 ? item.total / grandTotal * 100 : 0
+
+        // Color dot
+        ctx.setFillColor(UIColor(item.color).cgColor)
+        ctx.fillEllipse(in: CGRect(x: col1X, y: y + 3, width: 8, height: 8))
+
+        NSAttributedString(string: item.category, attributes: cellAttr)
+            .draw(at: CGPoint(x: col1X + 14, y: y))
+        NSAttributedString(string: item.total.formatted(.currency(code: currency)), attributes: cellBoldAttr)
+            .draw(at: CGPoint(x: col2X, y: y))
+        NSAttributedString(string: String(format: "%.1f%%", pct), attributes: pctAttr)
+            .draw(at: CGPoint(x: col3X, y: y))
+        y += 20
+    }
+
+    y += 12
+    ctx.setStrokeColor(UIColor.separator.cgColor)
+    ctx.move(to: CGPoint(x: margin, y: y))
+    ctx.addLine(to: CGPoint(x: pageW - margin, y: y))
+    ctx.strokePath()
+    y += 16
+
+    // --- Recent entries ---
+    if !entries.isEmpty {
+        NSAttributedString(string: "Recent Entries", attributes: [
+            .font: UIFont.systemFont(ofSize: 13, weight: .bold),
+            .foregroundColor: UIColor(Color.navy)
+        ]).draw(at: CGPoint(x: margin, y: y))
+        y += 22
+
+        let dateCol = margin
+        let catCol = margin + 80
+        let amtCol = margin + contentW * 0.75
+
+        NSAttributedString(string: "Date", attributes: headerAttr).draw(at: CGPoint(x: dateCol, y: y))
+        NSAttributedString(string: "Category", attributes: headerAttr).draw(at: CGPoint(x: catCol, y: y))
+        NSAttributedString(string: "Amount", attributes: headerAttr).draw(at: CGPoint(x: amtCol, y: y))
+        y += 16
+
+        for entry in entries.prefix(20) {
+            if y > pageH - 60 {
+                UIGraphicsBeginPDFPage()
+                y = topMarginNewPage
+            }
+            NSAttributedString(string: entry.date.formatted(date: .abbreviated, time: .omitted), attributes: pctAttr)
+                .draw(at: CGPoint(x: dateCol, y: y))
+            NSAttributedString(string: entry.category, attributes: cellAttr)
+                .draw(at: CGPoint(x: catCol, y: y))
+            NSAttributedString(string: entry.amount.formatted(.currency(code: currency)), attributes: cellBoldAttr)
+                .draw(at: CGPoint(x: amtCol, y: y))
+            y += 18
+        }
+    }
+
+    // --- Footer ---
+    let footerAttr: [NSAttributedString.Key: Any] = [
+        .font: UIFont.systemFont(ofSize: 9, weight: .regular),
+        .foregroundColor: UIColor.tertiaryLabel
+    ]
+    let footer = NSAttributedString(string: "Generated by Finance Toolkit", attributes: footerAttr)
+    footer.draw(at: CGPoint(x: margin, y: pageH - 30))
+
+    UIGraphicsEndPDFContext()
+    return pdfURL
+}
+
 // MARK: - Expenses Tracker View
 struct ExpensesTrackerView: View {
     @ObservedObject private var store = ExpenseStore.shared
     @State private var showAddSheet = false
+    @State private var sharePDFURL: URL?
+    @State private var shareCSVURL: URL?
     @State private var selectedMonth = Date()
+    @State private var deleteEntryID: UUID?
+    @State private var showDeleteAlert = false
 
-    private var currency: String { Locale.current.currency?.identifier ?? "INR" }
+    @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var currentMonthExpenses: [ExpenseEntry] {
         let cal = Calendar.current
@@ -152,16 +342,98 @@ struct ExpensesTrackerView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button { showAddSheet = true } label: {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 18))
-                        .foregroundStyle(Color.navy)
+                HStack(spacing: 14) {
+                    if !currentMonthExpenses.isEmpty {
+                        Menu {
+                            Button { shareExpensesPDF() } label: {
+                                Label("Export as PDF", systemImage: "doc.richtext")
+                            }
+                            Button { shareExpensesCSV() } label: {
+                                Label("Export as Excel (CSV)", systemImage: "tablecells")
+                            }
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 14))
+                                .foregroundStyle(Color.navy)
+                        }
+                    }
+                    Button { showAddSheet = true } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(Color.navy)
+                    }
                 }
             }
         }
         .sheet(isPresented: $showAddSheet) {
-            AddExpenseSheet(store: store)
+            AddExpenseSheet(store: store, initialDate: selectedMonth)
         }
+        .sheet(isPresented: Binding(
+            get: { sharePDFURL != nil },
+            set: { if !$0 { sharePDFURL = nil } }
+        )) {
+            if let url = sharePDFURL {
+                ShareSheet(items: [url])
+            }
+        }
+        .sheet(isPresented: Binding(
+            get: { shareCSVURL != nil },
+            set: { if !$0 { shareCSVURL = nil } }
+        )) {
+            if let url = shareCSVURL {
+                ShareSheet(items: [url])
+            }
+        }
+        .alert("Delete Expense", isPresented: $showDeleteAlert) {
+            Button("Delete", role: .destructive) {
+                if let id = deleteEntryID {
+                    withAnimation { store.delete(id: id) }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to remove this expense entry?")
+        }
+    }
+
+    // MARK: - Share as PDF
+    private func shareExpensesPDF() {
+        let chartView = ExpenseShareChart(
+            categoryTotals: categoryTotals,
+            grandTotal: grandTotal,
+            monthLabel: selectedMonth.formatted(.dateTime.month(.wide).year()),
+            currency: currency
+        )
+        sharePDFURL = generateExpensesPDF(
+            monthLabel: selectedMonth.formatted(.dateTime.month(.wide).year()),
+            grandTotal: grandTotal,
+            categoryTotals: categoryTotals,
+            entries: currentMonthExpenses,
+            currency: currency,
+            chartView: chartView
+        )
+    }
+
+    // MARK: - Share as CSV
+    private func shareExpensesCSV() {
+        let month = selectedMonth.formatted(.dateTime.month(.wide).year())
+        var csv = "Date,Category,Amount (\(currency))\n"
+        for entry in currentMonthExpenses {
+            let dateStr = entry.date.formatted(date: .abbreviated, time: .omitted)
+            let escaped = entry.category.replacingOccurrences(of: ",", with: " ")
+            csv += "\(dateStr),\(escaped),\(String(format: "%.2f", entry.amount))\n"
+        }
+        csv += "\nTotal,,\(String(format: "%.2f", grandTotal))\n"
+        csv += "\nCategory Breakdown\nCategory,Amount,Percentage\n"
+        for item in categoryTotals {
+            let pct = grandTotal > 0 ? item.total / grandTotal * 100 : 0
+            csv += "\(item.category),\(String(format: "%.2f", item.total)),\(String(format: "%.1f%%", pct))\n"
+        }
+
+        let fileName = "Expenses_\(month.replacingOccurrences(of: " ", with: "_")).csv"
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+        try? csv.write(to: url, atomically: true, encoding: .utf8)
+        shareCSVURL = url
     }
 
     // MARK: - Month Picker
@@ -325,6 +597,16 @@ struct ExpensesTrackerView: View {
                         Spacer()
                         Text(entry.amount.formatted(.currency(code: currency)))
                             .font(.subheadline.weight(.semibold))
+
+                        Button {
+                            deleteEntryID = entry.id
+                            showDeleteAlert = true
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding(.vertical, 2)
                 }
@@ -336,14 +618,54 @@ struct ExpensesTrackerView: View {
     }
 }
 
+// MARK: - Chart-only view for PDF rendering
+struct ExpenseShareChart: View {
+    let categoryTotals: [(category: String, total: Double, color: Color)]
+    let grandTotal: Double
+    let monthLabel: String
+    let currency: String
+
+    var body: some View {
+        Chart(categoryTotals, id: \.category) { item in
+            SectorMark(
+                angle: .value("Amount", item.total),
+                innerRadius: .ratio(0.55),
+                angularInset: 1.5
+            )
+            .foregroundStyle(item.color)
+            .cornerRadius(4)
+        }
+        .chartLegend(.hidden)
+        .padding(32)
+        .background(Color.white)
+    }
+}
+
 // MARK: - Add Expense Sheet
 struct AddExpenseSheet: View {
     @ObservedObject var store: ExpenseStore
+    var initialDate: Date = Date()
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedCategory: ExpenseCategory = .groceries
     @State private var amount = ""
     @State private var date = Date()
+
+    init(store: ExpenseStore, initialDate: Date = Date()) {
+        self.store = store
+        self.initialDate = initialDate
+        // Set default date to a day in the selected month
+        let cal = Calendar.current
+        let components = cal.dateComponents([.year, .month], from: initialDate)
+        let now = Date()
+        let nowComponents = cal.dateComponents([.year, .month], from: now)
+        // If selected month is current month, use today; otherwise use 1st of that month
+        if components.year == nowComponents.year && components.month == nowComponents.month {
+            _date = State(initialValue: now)
+        } else {
+            _date = State(initialValue: cal.date(from: components) ?? initialDate)
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -363,7 +685,7 @@ struct AddExpenseSheet: View {
 
                 Section("Details") {
                     HStack {
-                        Text("Amount (₹)")
+                        Text("Amount (\(CurrencySettings.symbol(for: CurrencySettings.selectedCode)))")
                         Spacer()
                         TextField("0", text: $amount)
                             .multilineTextAlignment(.trailing)

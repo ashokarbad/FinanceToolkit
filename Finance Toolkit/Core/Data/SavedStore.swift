@@ -14,11 +14,32 @@ struct SavedCalculation: Identifiable, Codable, Equatable {
     var note: String
     /// Key-value pairs of result labels → formatted strings
     var results: [ResultEntry]
+    /// User-added custom note with formatting
+    var userNote: StyledNote?
 
     struct ResultEntry: Codable, Equatable {
         var label: String
         var value: String
         var isHighlight: Bool
+    }
+}
+
+// MARK: - Styled note model
+struct StyledNote: Codable, Equatable {
+    var text: String = ""
+    var fontSize: Int = 14 // 12, 14, 16, 18, 20
+    var isBold: Bool = false
+    var isItalic: Bool = false
+    var colorHex: String = "#185FA5" // navy default
+
+    var uiFont: UIFont {
+        let size = CGFloat(fontSize)
+        var font = UIFont.systemFont(ofSize: size, weight: isBold ? .bold : .regular)
+        if isItalic {
+            let descriptor = font.fontDescriptor.withSymbolicTraits(.traitItalic) ?? font.fontDescriptor
+            font = UIFont(descriptor: descriptor, size: size)
+        }
+        return font
     }
 }
 
@@ -69,9 +90,67 @@ final class SavedStore: ObservableObject {
         persist()
     }
 
+    func updateNote(id: UUID, note: StyledNote) {
+        if let idx = calculations.firstIndex(where: { $0.id == id }) {
+            calculations[idx].userNote = note
+            persist()
+        }
+    }
+
     private func persist() {
         if let data = try? JSONEncoder().encode(calculations) {
             UserDefaults.standard.set(data, forKey: calcsKey)
         }
     }
 }
+// MARK: - Quick Note model
+struct QuickNote: Identifiable, Codable, Equatable {
+    var id: UUID = UUID()
+    var title: String = ""
+    var style: StyledNote = StyledNote()
+    var date: Date = Date()
+}
+
+// MARK: - Notes Store
+final class NoteStore: ObservableObject {
+    static let shared = NoteStore()
+
+    @Published private(set) var notes: [QuickNote] = []
+    private let storeKey = "quickNotes"
+
+    private init() {
+        if let data = UserDefaults.standard.data(forKey: storeKey),
+           let decoded = try? JSONDecoder().decode([QuickNote].self, from: data) {
+            notes = decoded
+        }
+    }
+
+    func add(_ note: QuickNote) {
+        notes.insert(note, at: 0)
+        persist()
+    }
+
+    func update(_ note: QuickNote) {
+        if let idx = notes.firstIndex(where: { $0.id == note.id }) {
+            notes[idx] = note
+            persist()
+        }
+    }
+
+    func delete(id: UUID) {
+        notes.removeAll { $0.id == id }
+        persist()
+    }
+
+    func delete(at offsets: IndexSet) {
+        notes.remove(atOffsets: offsets)
+        persist()
+    }
+
+    private func persist() {
+        if let data = try? JSONEncoder().encode(notes) {
+            UserDefaults.standard.set(data, forKey: storeKey)
+        }
+    }
+}
+
