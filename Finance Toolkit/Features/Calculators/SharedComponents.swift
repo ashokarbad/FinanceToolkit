@@ -241,6 +241,8 @@ struct AmortizationScheduleView: View {
 /// Reusable amortization toggle section for any loan calculator.
 struct AmortizationToggleSection: View {
     let rows: [AmortizationRow]
+    var customRows: [AmortizationRow]? = nil
+    var customEMIEnabled: Bool = false
     let accent: Color
     let currency: String
     @Binding var showAmortization: Bool
@@ -264,7 +266,99 @@ struct AmortizationToggleSection: View {
             .buttonStyle(.plain)
 
             if showAmortization {
-                AmortizationScheduleView(rows: rows, accent: accent, currency: currency)
+                AmortizationScheduleView(
+                    rows: (customEMIEnabled && customRows != nil) ? customRows! : rows,
+                    accent: accent,
+                    currency: currency
+                )
+            }
+        }
+    }
+}
+
+// MARK: - Custom Amortization Section (what-if EMI analysis)
+
+/// Builds a custom amortization schedule given a principal, annual rate, and a custom EMI amount.
+func buildCustomAmortization(principal: Double, annualRatePercent: Double, customEMI: Double) -> [AmortizationRow] {
+    let r = annualRatePercent / 12.0 / 100.0
+    var balance = principal
+    var rows: [AmortizationRow] = []
+    var month = 1
+    let maxMonths = 600 // safety cap at 50 years
+    while balance > 0 && month <= maxMonths {
+        let interest = balance * r
+        let prin = min(customEMI - interest, balance)
+        balance = max(balance - prin, 0)
+        rows.append(.init(id: month, month: month, emi: customEMI, principal: prin, interest: interest, balance: balance))
+        if balance <= 0 { break }
+        month += 1
+    }
+    return rows
+}
+
+/// Reusable custom amortization section with what-if EMI analysis.
+struct CustomAmortizationSection: View {
+    let principal: Double
+    let annualRatePercent: Double
+    let standardEMI: Double
+    let standardTenureMonths: Int
+    let standardTotalInterest: Double
+    let accent: Color
+    let currency: String
+    @Binding var customEMIEnabled: Bool
+    @Binding var customEMI: Double
+
+    private var minimumEMI: Double {
+        let r = annualRatePercent / 12.0 / 100.0
+        return principal * r + 1
+    }
+
+    private var activeEMI: Double {
+        max(customEMI, minimumEMI)
+    }
+
+    private var customSchedule: [AmortizationRow] {
+        buildCustomAmortization(principal: principal, annualRatePercent: annualRatePercent, customEMI: activeEMI)
+    }
+
+    private var customTotalPaid: Double { activeEMI * Double(customSchedule.count) }
+    private var customTotalInterest: Double { max(customTotalPaid - principal, 0) }
+    private var tenureSaved: Int { max(standardTenureMonths - customSchedule.count, 0) }
+    private var interestSaved: Double { max(standardTotalInterest - customTotalInterest, 0) }
+
+    var body: some View {
+        Section {
+            SectionHeader(systemImage: "slider.horizontal.3", title: "Custom Amortization", color: accent)
+            Toggle("Use Custom EMI", isOn: $customEMIEnabled)
+            if customEMIEnabled {
+                HStack {
+                    Text("Your EMI")
+                    Spacer()
+                    TextField("EMI", value: $customEMI, format: .number)
+                        .multilineTextAlignment(.trailing).keyboardType(.decimalPad)
+                }
+                if customEMI > 0 && customEMI >= minimumEMI {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ResultRow(label: "Custom EMI", value: activeEMI.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        ResultRow(label: "New Tenure", value: "\(customSchedule.count) months")
+                        ResultRow(label: "New Total Interest", value: customTotalInterest.formatted(.currency(code: currency)))
+                        ResultRow(label: "New Total Paid", value: customTotalPaid.formatted(.currency(code: currency)))
+                        if tenureSaved > 0 || interestSaved > 0 {
+                            Divider().padding(.vertical, 2)
+                            HStack {
+                                Image(systemName: "arrow.down.circle.fill")
+                                    .foregroundStyle(.teal)
+                                Text("You save \(tenureSaved) months & \(interestSaved.formatted(.currency(code: currency))) interest")
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(.teal)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                } else if customEMI > 0 {
+                    Text("EMI must be at least \(minimumEMI.formatted(.currency(code: currency))) to cover monthly interest.")
+                        .font(.caption).foregroundStyle(.red)
+                }
             }
         }
     }

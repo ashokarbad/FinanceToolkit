@@ -52,10 +52,13 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
         case .dashboard:   return .teal
         case .saved:       return .gold
         case .expenses:    return Color(hex: "#E87D2B")
-        case .outflow:     return .navy
+        case .outflow:     return Color(hex: "#1D9E75")
         case .notes:       return Color(hex: "#8B5CF6")
-        case .tips:        return Color(hex: "#E87D2B")
-        case .profile, .settings, .feedback, .about: return Color(hex: "#888888")
+        case .tips:        return Color(hex: "#F59E0B")
+        case .profile:     return Color(hex: "#3B82F6")
+        case .settings:    return Color(hex: "#6366F1")
+        case .feedback:    return Color(hex: "#EC4899")
+        case .about:       return Color(hex: "#14B8A6")
         }
     }
 }

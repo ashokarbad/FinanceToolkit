@@ -9,8 +9,10 @@ struct DashboardView: View {
     @ObservedObject private var store = SavedStore.shared
     @ObservedObject private var expenseStore = ExpenseStore.shared
     @ObservedObject private var outflowStore = OutflowStore.shared
+    @ObservedObject private var noteStore = NoteStore.shared
     var navigateTo: ((SidebarDestination) -> Void)?
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
+    @AppStorage("profileName") private var profileName = ""
 
     private var currentMonthExpenseTotal: Double {
         let cal = Calendar.current
@@ -20,39 +22,160 @@ struct DashboardView: View {
         }.reduce(0) { $0 + $1.amount }
     }
 
+    private var currentMonthOutflowTotal: Double {
+        let cal = Calendar.current
+        let now = Date()
+        return outflowStore.items.filter {
+            $0.isFixed || cal.isDate($0.date, equalTo: now, toGranularity: .month)
+        }.reduce(0) { $0 + $1.amount }
+    }
+
+    private var currentMonthExpenseCount: Int {
+        let cal = Calendar.current
+        let now = Date()
+        return expenseStore.expenses.filter {
+            cal.isDate($0.date, equalTo: now, toGranularity: .month)
+        }.count
+    }
+
+    private var currentMonthOutflowCount: Int {
+        let cal = Calendar.current
+        let now = Date()
+        return outflowStore.items.filter {
+            $0.isFixed || cal.isDate($0.date, equalTo: now, toGranularity: .month)
+        }.count
+    }
+
+    private var greeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12: return "Good Morning"
+        case 12..<17: return "Good Afternoon"
+        case 17..<21: return "Good Evening"
+        default: return "Good Night"
+        }
+    }
+
+    private var greetingIcon: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12: return "sun.max.fill"
+        case 12..<17: return "sun.min.fill"
+        case 17..<21: return "sunset.fill"
+        default: return "moon.stars.fill"
+        }
+    }
+
+    private var monthLabel: String {
+        Date().formatted(.dateTime.month(.wide).year())
+    }
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
+            VStack(spacing: 20) {
+
+                // Greeting header
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: greetingIcon)
+                                .font(.system(size: 14))
+                                .foregroundStyle(Color.gold)
+                            Text(greeting)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        Text(profileName.isEmpty ? "Welcome back!" : profileName)
+                            .font(.title3.bold())
+                            .foregroundStyle(.primary)
+                    }
+                    Spacer()
+                    Text(monthLabel)
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Capsule().fill(Color.navy))
+                }
+                .padding(.horizontal, 4)
+
+                // Expenses hero card (full width)
+                Button { navigateTo?(.expenses) } label: {
+                    DashboardHeroCard(
+                        title: "Monthly Expenses",
+                        value: currentMonthExpenseTotal.formatted(.currency(code: currency)),
+                        subtitle: "\(currentMonthExpenseCount) transactions this month",
+                        icon: "chart.pie.fill",
+                        gradient: [Color(hex: "#E87D2B"), Color(hex: "#F5A623")]
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Outflow hero card (full width)
+                Button { navigateTo?(.outflow) } label: {
+                    DashboardHeroCard(
+                        title: "Monthly Outflow",
+                        value: currentMonthOutflowTotal.formatted(.currency(code: currency)),
+                        subtitle: "\(currentMonthOutflowCount) items this month",
+                        icon: "arrow.up.forward.circle.fill",
+                        gradient: [Color(hex: "#1D9E75"), Color(hex: "#34D399")]
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Bottom row: Saved, Favourites, Notes
+                HStack(spacing: 12) {
                     Button { navigateTo?(.saved) } label: {
-                        DashboardCard(title: "Saved Items", value: "\(store.calculations.count)", icon: "bookmark.fill", color: .navy)
+                        DashboardCompactCard(
+                            title: "Saved",
+                            value: "\(store.calculations.count)",
+                            icon: "bookmark.fill",
+                            color: .navy
+                        )
                     }
                     .buttonStyle(.plain)
 
                     Button { navigateTo?(.calculators) } label: {
-                        DashboardCard(title: "Favourites", value: "Calculators", icon: "star.fill", color: .gold)
-                    }
-                    .buttonStyle(.plain)
-
-                    Button { navigateTo?(.expenses) } label: {
-                        DashboardCard(
-                            title: "Monthly Expenses",
-                            value: currentMonthExpenseTotal.formatted(.currency(code: currency)),
-                            icon: "chart.pie.fill",
-                            color: Color(hex: "#E87D2B")
+                        DashboardCompactCard(
+                            title: "Favourites",
+                            value: "\(store.savedIDs.count)",
+                            icon: "star.fill",
+                            color: .gold
                         )
                     }
                     .buttonStyle(.plain)
 
-                    Button { navigateTo?(.outflow) } label: {
-                        DashboardCard(
-                            title: "Monthly Outflow",
-                            value: outflowStore.items.reduce(0) { $0 + $1.amount }.formatted(.currency(code: currency)),
-                            icon: "arrow.up.forward.circle.fill",
-                            color: .teal
+                    Button { navigateTo?(.notes) } label: {
+                        DashboardCompactCard(
+                            title: "Notes",
+                            value: "\(noteStore.notes.count)",
+                            icon: "note.text",
+                            color: Color(hex: "#8B5CF6")
                         )
                     }
                     .buttonStyle(.plain)
+                }
+
+                // Quick actions
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Quick Actions")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                        .tracking(0.5)
+                        .padding(.leading, 4)
+
+                    HStack(spacing: 12) {
+                        DashboardActionButton(icon: "plus.circle.fill", label: "Add Expense", color: Color(hex: "#E87D2B")) {
+                            navigateTo?(.expenses)
+                        }
+                        DashboardActionButton(icon: "arrow.up.circle.fill", label: "Add Outflow", color: .teal) {
+                            navigateTo?(.outflow)
+                        }
+                        DashboardActionButton(icon: "square.grid.2x2.fill", label: "Calculators", color: .navy) {
+                            navigateTo?(.calculators)
+                        }
+                    }
                 }
             }
             .padding()
@@ -60,32 +183,130 @@ struct DashboardView: View {
     }
 }
 
-struct DashboardCard: View {
+// MARK: - Dashboard Hero Card (full-width, gradient)
+struct DashboardHeroCard: View {
+    let title: String
+    let value: String
+    let subtitle: String
+    let icon: String
+    let gradient: [Color]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                ZStack {
+                    Circle()
+                        .fill(.white.opacity(0.2))
+                        .frame(width: 36, height: 36)
+                    Image(systemName: icon)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.white.opacity(0.8))
+                Text(value)
+                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .contentTransition(.numericText())
+                Text(subtitle)
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(LinearGradient(colors: gradient, startPoint: .topLeading, endPoint: .bottomTrailing))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(
+                    LinearGradient(colors: [.white.opacity(0.15), .clear], startPoint: .top, endPoint: .center)
+                )
+        )
+        .shadow(color: gradient.first!.opacity(0.3), radius: 8, y: 4)
+    }
+}
+
+// MARK: - Dashboard Compact Card (small, for bottom row)
+struct DashboardCompactCard: View {
     let title: String
     let value: String
     let icon: String
     let color: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
+        VStack(spacing: 8) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(color.opacity(0.12))
+                    .frame(width: 36, height: 36)
                 Image(systemName: icon)
-                    .font(.system(size: 13))
+                    .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(color)
-                Spacer()
             }
             Text(value)
-                .font(.system(size: 15, weight: .bold))
+                .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundStyle(.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .contentTransition(.numericText())
             Text(title)
-                .font(.caption)
+                .font(.caption2.weight(.medium))
                 .foregroundStyle(.secondary)
         }
-        .padding(14)
-        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.ultraThinMaterial))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(color.opacity(0.2), lineWidth: 0.5))
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(.ultraThinMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(color.opacity(0.15), lineWidth: 0.5)
+        )
+    }
+}
+
+// MARK: - Dashboard Action Button
+struct DashboardActionButton: View {
+    let icon: String
+    let label: String
+    let color: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(color)
+                Text(label)
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(color.opacity(0.06))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(color.opacity(0.12), lineWidth: 0.5)
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -95,15 +316,37 @@ struct SavedView: View {
     @State private var sharePDFURL: URL?
     @State private var shareAllPDFURL: URL?
     @State private var shareCSVURL: URL?
+    @State private var editingNoteCalc: SavedCalculation?
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
+
+    private var totalSaved: Int { store.calculations.count }
+
+    private var calculatorBreakdown: [(name: String, icon: String, count: Int)] {
+        var dict: [String: (icon: String, count: Int)] = [:]
+        for calc in store.calculations {
+            let existing = dict[calc.calculatorTitle]
+            dict[calc.calculatorTitle] = (calc.icon, (existing?.count ?? 0) + 1)
+        }
+        return dict.map { (name: $0.key, icon: $0.value.icon, count: $0.value.count) }
+            .sorted { $0.count > $1.count }
+    }
 
     var body: some View {
         Group {
             if store.calculations.isEmpty {
-                VStack(spacing: 14) {
-                    Image(systemName: "star")
-                        .font(.system(size: 44, weight: .light))
-                        .foregroundStyle(.tertiary)
+                // Empty state
+                VStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.navy.opacity(0.08))
+                            .frame(width: 90, height: 90)
+                        Circle()
+                            .fill(Color.navy.opacity(0.05))
+                            .frame(width: 70, height: 70)
+                        Image(systemName: "bookmark")
+                            .font(.system(size: 30, weight: .light))
+                            .foregroundStyle(Color.navy.opacity(0.4))
+                    }
                     Text("No saved calculations")
                         .font(.headline)
                         .foregroundStyle(.secondary)
@@ -115,11 +358,75 @@ struct SavedView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                List {
-                    ForEach(store.calculations) { calc in
-                        savedCalcRow(calc)
+                ScrollView {
+                    VStack(spacing: 16) {
+
+                        // Summary header card
+                        VStack(spacing: 14) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Total Saved")
+                                        .font(.caption.weight(.medium))
+                                        .foregroundStyle(.white.opacity(0.8))
+                                    Text("\(totalSaved)")
+                                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                                        .foregroundStyle(.white)
+                                        .contentTransition(.numericText())
+                                    Text(totalSaved == 1 ? "calculation" : "calculations")
+                                        .font(.caption2)
+                                        .foregroundStyle(.white.opacity(0.6))
+                                }
+                                Spacer()
+                                ZStack {
+                                    Circle()
+                                        .fill(.white.opacity(0.15))
+                                        .frame(width: 50, height: 50)
+                                    Image(systemName: "bookmark.fill")
+                                        .font(.system(size: 22))
+                                        .foregroundStyle(.white)
+                                }
+                            }
+
+                            // Mini breakdown chips
+                            if !calculatorBreakdown.isEmpty {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 8) {
+                                        ForEach(calculatorBreakdown.prefix(5), id: \.name) { item in
+                                            HStack(spacing: 4) {
+                                                Image(systemName: item.icon)
+                                                    .font(.system(size: 9))
+                                                Text("\(item.count)")
+                                                    .font(.caption2.weight(.bold))
+                                                Text(item.name)
+                                                    .font(.caption2)
+                                                    .lineLimit(1)
+                                            }
+                                            .foregroundStyle(.white)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 4)
+                                            .background(Capsule().fill(.white.opacity(0.15)))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        .padding(18)
+                        .background(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .fill(LinearGradient(colors: [Color.navy, Color.navyDark], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .fill(LinearGradient(colors: [.white.opacity(0.12), .clear], startPoint: .top, endPoint: .center))
+                        )
+                        .shadow(color: Color.navy.opacity(0.25), radius: 8, y: 4)
+
+                        // Saved calculation cards
+                        ForEach(store.calculations) { calc in
+                            savedCalcCard(calc)
+                        }
                     }
-                    .onDelete { offsets in store.delete(at: offsets) }
+                    .padding()
                 }
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -166,40 +473,71 @@ struct SavedView: View {
                 ShareSheet(items: [url])
             }
         }
-
+        .sheet(isPresented: Binding(
+            get: { editingNoteCalc != nil },
+            set: { if !$0 { editingNoteCalc = nil } }
+        )) {
+            if let calc = editingNoteCalc {
+                NoteEditorSheet(store: store, calculationID: calc.id, existingNote: calc.userNote ?? StyledNote())
+            }
+        }
     }
 
     @ViewBuilder
-    private func savedCalcRow(_ calc: SavedCalculation) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+    private func savedCalcCard(_ calc: SavedCalculation) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+
+            // Card header
             HStack(spacing: 10) {
-                Image(systemName: calc.icon)
-                    .foregroundStyle(.secondary)
-                Text(calc.calculatorTitle)
-                    .font(.subheadline.weight(.semibold))
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color.navy.opacity(0.1))
+                        .frame(width: 36, height: 36)
+                    Image(systemName: calc.icon)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(Color.navy)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(calc.calculatorTitle)
+                        .font(.subheadline.weight(.semibold))
+                    if !calc.note.isEmpty {
+                        Text(calc.note)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
                 Spacer()
-                Text(calc.date, style: .date)
+                Text(calc.date.formatted(date: .abbreviated, time: .omitted))
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
-            if !calc.note.isEmpty {
-                Text(calc.note)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            ForEach(calc.results, id: \.label) { entry in
-                HStack {
-                    Text(entry.label)
-                        .font(entry.isHighlight ? .caption.weight(.semibold) : .caption)
-                    Spacer()
-                    Text(entry.value)
-                        .font(entry.isHighlight ? .caption.bold() : .caption)
-                        .foregroundStyle(entry.isHighlight ? .primary : .secondary)
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 10)
+
+            Divider().padding(.horizontal, 16)
+
+            // Results
+            VStack(spacing: 6) {
+                ForEach(calc.results, id: \.label) { entry in
+                    HStack {
+                        Text(entry.label)
+                            .font(entry.isHighlight ? .caption.weight(.semibold) : .caption)
+                            .foregroundStyle(entry.isHighlight ? .primary : .secondary)
+                        Spacer()
+                        Text(entry.value)
+                            .font(entry.isHighlight ? .subheadline.bold() : .caption)
+                            .foregroundStyle(entry.isHighlight ? Color.navy : .secondary)
+                    }
                 }
             }
-            // User note
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+
+            // User note (if exists)
             if let userNote = calc.userNote, !userNote.text.isEmpty {
-                Divider()
+                Divider().padding(.horizontal, 16)
                 HStack(alignment: .top, spacing: 6) {
                     Image(systemName: "note.text")
                         .font(.caption2)
@@ -209,25 +547,81 @@ struct SavedView: View {
                                       weight: userNote.isBold ? .bold : .regular))
                         .italic(userNote.isItalic)
                         .foregroundStyle(Color(hex: userNote.colorHex))
+                        .lineLimit(3)
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+            }
+
+            Divider().padding(.horizontal, 16)
+
+            // Action buttons row
+            HStack(spacing: 0) {
+                Button {
+                    sharePDFURL = generateSavedPDF(calculations: [calc])
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 11))
+                        Text("Share")
+                            .font(.caption2.weight(.medium))
+                    }
+                    .foregroundStyle(Color.navy)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(Color.primary.opacity(0.08))
+                    .frame(width: 0.5, height: 20)
+
+                Button {
+                    editingNoteCalc = calc
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "note.text.badge.plus")
+                            .font(.system(size: 11))
+                        Text("Note")
+                            .font(.caption2.weight(.medium))
+                    }
+                    .foregroundStyle(Color(hex: "#8B5CF6"))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(Color.primary.opacity(0.08))
+                    .frame(width: 0.5, height: 20)
+
+                Button {
+                    withAnimation(.spring(response: 0.3)) {
+                        store.delete(id: calc.id)
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 11))
+                        Text("Delete")
+                            .font(.caption2.weight(.medium))
+                    }
+                    .foregroundStyle(.red.opacity(0.8))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
             }
         }
-        .padding(.vertical, 4)
-        .swipeActions(edge: .leading) {
-            Button {
-                sharePDFURL = generateSavedPDF(calculations: [calc])
-            } label: {
-                Label("Share", systemImage: "square.and.arrow.up")
-            }
-            .tint(.navy)
-        }
-        .swipeActions(edge: .trailing) {
-            Button(role: .destructive) {
-                store.delete(id: calc.id)
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-        }
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(.ultraThinMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+        )
+        .shadow(color: Color.black.opacity(0.04), radius: 4, y: 2)
     }
 
     private func generateSavedPDF(calculations: [SavedCalculation]) -> URL? {
@@ -505,6 +899,13 @@ struct NoteEditorSheet: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        store.updateNote(id: calculationID, note: existingNote)
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
+                }
             }
         }
     }
@@ -756,6 +1157,11 @@ struct QuickNoteEditorSheet: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { saveNote() }
+                        .fontWeight(.semibold)
+                        .disabled(styledNote.text.isEmpty)
+                }
             }
         }
     }
@@ -777,35 +1183,70 @@ struct QuickNoteEditorSheet: View {
 
 // MARK: - Tips & FAQ
 struct TipsFAQView: View {
-    private let tips: [(icon: String, title: String, detail: String)] = [
-        ("lightbulb.fill", "Start SIPs early", "Even small monthly investments grow significantly over 15–20 years thanks to compounding."),
-        ("percent", "Compare tax regimes", "Use the Tax Calculator to check which regime — Old or New — saves you more tax."),
-        ("house.fill", "Prepay your home loan", "Extra payments towards the principal reduce total interest dramatically."),
-        ("shield.fill", "Max out NPS for tax benefits", "NPS gives an extra ₹50K deduction under 80CCD(1B) beyond ₹1.5L under 80C."),
-        ("banknote.fill", "Track your PF balance", "EPF earns ~8.1% p.a. tax-free — one of the best guaranteed-return instruments."),
-        ("gift.fill", "Know your gratuity entitlement", "After 5 years of service, gratuity up to ₹20L is tax-exempt."),
-        ("chart.line.uptrend.xyaxis", "SWP for retirement income", "Use SWP from a mutual fund corpus to create a monthly pension-like income."),
-        ("creditcard.fill", "Avoid high-interest debt", "Credit card/overdraft interest (24–42% p.a.) compounds fast — pay off quickly."),
+    private let sections: [(heading: String, color: String, tips: [(icon: String, title: String, detail: String)])] = [
+        ("App Features", "#8B5CF6", [
+            ("bookmark.fill", "Save & compare results", "Save any calculation result for future reference. Access all saved items from the Dashboard or Saved section."),
+            ("square.and.arrow.up.fill", "Export as PDF or CSV", "Share or export individual calculations or all saved items as a formatted PDF or CSV file from the Saved section."),
+            ("star.fill", "Favourite calculators", "Star your most-used calculators for quick access. Favourites appear at the top of the Calculators screen."),
+            ("note.text", "Use Notes for quick reminders", "Create styled notes with custom font sizes, colors, bold and italic formatting. Perfect for financial planning reminders."),
+            ("list.number", "View amortization schedules", "Every loan calculator includes a month-by-month amortization schedule showing EMI, principal, interest, and outstanding balance."),
+            ("moon.fill", "Dark mode support", "Toggle dark mode from the sidebar for comfortable viewing in any lighting condition."),
+        ]),
+        ("Expenses & Outflow", "#E87D2B", [
+            ("chart.pie.fill", "Track monthly expenses", "Log every expense by category to understand your spending patterns. View the pie chart breakdown and export monthly reports as PDF."),
+            ("arrow.up.forward.circle.fill", "Monitor monthly outflow", "Track EMIs, subscriptions, and bills in Monthly Outflow. Mark recurring items as fixed so they appear in every month automatically."),
+            ("chart.bar.fill", "Yearly graphical overview", "Tap the chart icon in Expenses or Outflow to see a full-year bar chart overview — identify high-spend months and track your trends."),
+            ("dollarsign.circle.fill", "Multi-currency support", "Switch currencies in Settings — supports INR, USD, EUR, GBP, AED, SAR, CAD, AUD, SGD, JPY, and RD$. All calculators and trackers update automatically."),
+        ]),
+        ("Loan Tips", "#185FA5", [
+            ("house.fill", "Prepay your home loan", "Even a small extra payment towards the principal each month reduces total interest dramatically. Use Custom Amortization to see exactly how much you save."),
+            ("slider.horizontal.3", "Try Custom Amortization", "Available on all loan calculators — enter a higher EMI to instantly see how many months and how much interest you save compared to the standard schedule."),
+            ("car.fill", "Maximise your down payment", "A larger down payment on vehicle or consumer durable loans reduces EMI and total interest. The Vehicle Loan calculator shows the net loan after down payment."),
+            ("book.fill", "Pay interest during moratorium", "For education and agricultural loans, paying interest during the moratorium period prevents the outstanding balance from growing, resulting in lower future EMIs."),
+            ("sparkles", "Understand gold loan LTV", "RBI caps gold loan LTV at 75%. Compare EMI repayment vs bullet (interest-only) mode in the Gold Loan calculator to pick the best option."),
+            ("building.2.fill", "LAP for lower rates", "Loan Against Property offers lower interest rates than personal loans since it's secured. Use the LAP calculator to compare outflow at different LTV percentages."),
+            ("creditcard.fill", "Avoid high-interest debt", "Credit card and overdraft interest (24–42% p.a.) compounds fast. Use the Credit Line calculator to see the true cost, and pay off quickly."),
+            ("cart.fill", "No-cost EMI isn't free", "Consumer durable no-cost EMI may have hidden processing fees. Compare total outflow of standard EMI vs no-cost EMI using the calculator."),
+        ]),
+        ("Investment Tips", "#BA7517", [
+            ("calendar.badge.plus", "Start SIPs early", "Even small monthly investments grow significantly over 15–20 years thanks to compounding. The SIP calculator shows the power of time on your returns."),
+            ("chart.pie.fill", "Lump sum vs SIP", "Use the Mutual Fund Lump Sum calculator for one-time investments and compare with SIP returns. Lump sum works better in bullish markets, SIP averages out volatility."),
+            ("arrow.down.left.circle.fill", "SWP for retirement income", "Use SWP from a mutual fund corpus to create a monthly pension-like income stream without selling your entire investment at once."),
+            ("building.columns.fill", "FD for safety", "Fixed deposits offer guaranteed returns with zero market risk. Use the FD calculator to compare maturity amounts across different tenures and rates."),
+            ("calendar.circle.fill", "RD builds discipline", "Recurring Deposits enforce a monthly savings habit with guaranteed returns. Great for short-term goals — use the RD calculator to plan ahead."),
+        ]),
+        ("Tax & Benefits", "#1D9E75", [
+            ("percent", "Compare tax regimes", "Use the Tax Calculator to check which regime — Old or New — saves you more tax based on your salary, HRA, and deductions under 80C, 80D, etc."),
+            ("shield.fill", "Max out NPS for tax benefits", "NPS gives an extra ₹50K deduction under 80CCD(1B) beyond ₹1.5L under 80C. The NPS calculator shows your corpus and annuity at retirement."),
+            ("banknote.fill", "Track your PF balance", "EPF earns ~8.1% p.a. tax-free — one of the best guaranteed-return instruments. Use the PF calculator with both employee and employer contributions."),
+            ("gift.fill", "Know your gratuity entitlement", "After 5 years of service, gratuity up to ₹20L is tax-exempt. The Gratuity calculator shows your exact entitlement based on last drawn basic salary."),
+        ]),
     ]
 
     var body: some View {
         List {
-            ForEach(tips, id: \.title) { tip in
-                HStack(alignment: .top, spacing: 14) {
-                    Image(systemName: tip.icon)
-                        .font(.system(size: 15))
-                        .foregroundStyle(Color(hex: "#E87D2B"))
-                        .frame(width: 30, height: 30)
-                        .background(RoundedRectangle(cornerRadius: 8).fill(Color(hex: "#E87D2B").opacity(0.12)))
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(tip.title)
-                            .font(.subheadline.weight(.semibold))
-                        Text(tip.detail)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+            ForEach(sections, id: \.heading) { section in
+                Section {
+                    ForEach(section.tips, id: \.title) { tip in
+                        HStack(alignment: .top, spacing: 14) {
+                            Image(systemName: tip.icon)
+                                .font(.system(size: 15))
+                                .foregroundStyle(Color(hex: section.color))
+                                .frame(width: 30, height: 30)
+                                .background(RoundedRectangle(cornerRadius: 8).fill(Color(hex: section.color).opacity(0.12)))
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(tip.title)
+                                    .font(.subheadline.weight(.semibold))
+                                Text(tip.detail)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(.vertical, 4)
                     }
+                } header: {
+                    Text(section.heading)
                 }
-                .padding(.vertical, 4)
             }
         }
     }
@@ -1080,29 +1521,27 @@ struct AboutView: View {
     @Environment(\.requestReview) private var requestReview
 
     private let features: [(icon: String, title: String, desc: String)] = [
-        ("house.fill", "Loan Calculators", "Home loan, vehicle loan, personal loan & education loan with full amortization schedules"),
-        ("chart.line.uptrend.xyaxis", "Investment Tools", "SIP, lump sum, mutual fund, FD, RD & PPF calculators with growth projections"),
-        ("indianrupeesign.circle", "Tax Planning", "Income tax calculator supporting old & new regime with HRA, 80C & 80D deductions"),
-        ("person.badge.clock", "Retirement", "NPS, PF, gratuity & retirement corpus calculators to plan your financial future"),
-        ("chart.pie.fill", "Expense Tracker", "Track monthly expenses with category-wise breakdown, charts & PDF/CSV export"),
-        ("arrow.up.arrow.down", "Monthly Outflow", "Manage recurring & one-time outflows with salary tracking and month-wise views"),
+        ("house.fill", "10+ Loan Calculators", "Home, vehicle, personal, education, business, gold, LAP, agricultural, consumer durable & credit line — each with custom amortization and what-if EMI analysis"),
+        ("chart.line.uptrend.xyaxis", "Investment Tools", "SIP, lump sum mutual fund, SWP, FD & RD calculators with detailed growth projections"),
+        ("percent", "Tax & Benefits", "Income tax (old vs new regime), NPS, PF & gratuity calculators for Indian tax planning"),
+        ("chart.pie.fill", "Expense Tracker", "Track monthly expenses by category with pie chart breakdown, yearly graphical overview & PDF/CSV export"),
+        ("arrow.up.forward.circle.fill", "Monthly Outflow", "Manage recurring & one-time outflows with salary tracking, fixed items & month-wise views"),
+        ("slider.horizontal.3", "Custom Amortization", "Enter a higher EMI on any loan to instantly see months saved, interest saved & the revised schedule"),
         ("note.text", "Smart Notes", "Create styled notes with custom font sizes, colors, bold & italic formatting"),
-        ("star.fill", "Save & Compare", "Bookmark any calculation result and export all saved data as PDF or Excel"),
+        ("star.fill", "Save & Export", "Bookmark any calculation, favourite calculators, and export all saved data as PDF or CSV"),
     ]
 
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 // App Icon & Title
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(LinearGradient(colors: [.navy, .teal], startPoint: .topLeading, endPoint: .bottomTrailing))
-                        .frame(width: 80, height: 80)
-                    Image(systemName: "indianrupeesign.circle.fill")
-                        .font(.system(size: 36, weight: .medium))
-                        .foregroundStyle(.white)
-                }
-                .padding(.top, 30)
+                Image("AppLogo")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 80, height: 80)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .shadow(color: .navy.opacity(0.3), radius: 8, y: 4)
+                    .padding(.top, 30)
 
                 VStack(spacing: 6) {
                     Text("Finance Toolkit")
@@ -1110,13 +1549,13 @@ struct AboutView: View {
                     Text("Version 1.0")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
-                    Text("Your Complete Indian Financial Companion")
+                    Text("Your Complete Financial Companion")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
 
                 // Description
-                Text("Finance Toolkit is an all-in-one financial calculator suite designed for Indian users. Whether you're planning a home purchase, comparing investment options, filing taxes, or tracking monthly expenses — this app has you covered with accurate, easy-to-use tools.")
+                Text("Finance Toolkit is an all-in-one financial calculator suite built for users worldwide. Whether you're planning a home purchase, comparing investment options, tracking monthly expenses, or analysing loan repayments - this app has you covered with accurate, easy-to-use tools that work in 11 currencies across the globe.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -1161,15 +1600,32 @@ struct AboutView: View {
                         .font(.headline)
                         .foregroundStyle(Color.navy)
 
-                    aboutHighlightRow(icon: "globe", text: "Supports 10 currencies — INR, USD, EUR, GBP & more")
+                    aboutHighlightRow(icon: "globe", text: "Works worldwide — supports 11 currencies including INR, USD, EUR, GBP, AED, SAR, CAD, AUD, SGD, JPY & RD$")
+                    aboutHighlightRow(icon: "function", text: "Universal financial math — EMI, SIP, FD, RD, SWP & amortization calculations work for any currency or country")
+                    aboutHighlightRow(icon: "chart.bar.fill", text: "Yearly graphical overviews for expenses and outflow with month-wise bar charts")
                     aboutHighlightRow(icon: "moon.fill", text: "Dark mode support with adaptive UI")
-                    aboutHighlightRow(icon: "doc.richtext", text: "Export reports as PDF or Excel (CSV)")
-                    aboutHighlightRow(icon: "lock.shield.fill", text: "100% offline — your data stays on your device")
+                    aboutHighlightRow(icon: "doc.richtext", text: "Export reports as PDF or CSV — share with advisors or keep for records")
+                    aboutHighlightRow(icon: "lock.shield.fill", text: "100% offline — your data stays on your device, no sign-up required")
                     aboutHighlightRow(icon: "ipad.and.iphone", text: "Optimized for iPhone & iPad with landscape support")
                 }
                 .padding(16)
                 .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.ultraThinMaterial))
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.teal.opacity(0.15), lineWidth: 0.5))
+                .padding(.horizontal, 16)
+
+                // Global note
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Global & Indian Features")
+                        .font(.headline)
+                        .foregroundStyle(Color.navy)
+
+                    Text("Loan calculators, investment tools (SIP, FD, RD, SWP), expense tracking, outflow management, notes, and custom amortization work universally in any currency.\n\nTax Calculator (Old vs New Regime), NPS, PF, and Gratuity calculators are tailored for Indian tax laws and labour regulations.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(16)
+                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.ultraThinMaterial))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.gold.opacity(0.15), lineWidth: 0.5))
                 .padding(.horizontal, 16)
 
                 // Rate Button
@@ -1188,7 +1644,7 @@ struct AboutView: View {
 
                 // Footer
                 VStack(spacing: 4) {
-                    Text("Made with care in India")
+                    Text("Made with care for users everywhere")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Text("© 2025 Finance Toolkit. All rights reserved.")

@@ -16,6 +16,7 @@ struct CurrencySettings {
         ("AUD", "Australian Dollar", "A$"),
         ("SGD", "Singapore Dollar", "S$"),
         ("JPY", "Japanese Yen", "¥"),
+        ("DOP", "Dominican Peso", "RD$"),
     ]
 
     static var selectedCode: String {

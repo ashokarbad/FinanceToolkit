@@ -195,17 +195,11 @@ struct SidebarDrawer: View {
 struct BrandHeaderView: View {
     var body: some View {
         HStack(spacing: 11) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(LinearGradient(
-                        colors: [.navy, .teal],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing))
-                    .frame(width: 40, height: 40)
-                Image(systemName: "indianrupeesign.circle.fill")
-                    .font(.system(size: 19, weight: .medium))
-                    .foregroundStyle(.white)
-            }
+            Image("AppLogo")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 40, height: 40)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 Text("Finance Toolkit")
                     .font(.system(size: 15, weight: .semibold))
@@ -242,15 +236,15 @@ struct SidebarRow: View {
         Button(action: action) {
             HStack(spacing: 10) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 9)
+                    RoundedRectangle(cornerRadius: 9, style: .continuous)
                         .fill(isSelected
-                              ? item.accentColor.opacity(0.18)
-                              : Color.primary.opacity(0.05))
+                              ? item.accentColor.opacity(0.15)
+                              : Color(.systemGray6).opacity(0.8))
                         .frame(width: 33, height: 33)
                     Image(systemName: item.icon)
-                        .font(.system(size: 13.5, weight: .medium))
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(isSelected ? item.accentColor : .secondary)
+                        .font(.system(size: 14))
+                        .symbolRenderingMode(.multicolor)
+                        .foregroundStyle(isSelected ? item.accentColor : item.accentColor.opacity(0.7))
                 }
                 Text(item.rawValue)
                     .font(.system(size: 14, weight: isSelected ? .semibold : .regular))

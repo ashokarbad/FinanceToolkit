@@ -14,6 +14,8 @@ struct VehiclePersonalLoanView: View {
     @State private var processingFeePercent: Double = 0
     @State private var insuranceAmount: Double = 0
     @State private var rtoCharges: Double = 0
+    @State private var customEMIEnabled = false
+    @State private var customEMI: Double = 0
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var isVehicle: Bool { title.lowercased().contains("vehicle") || title.lowercased().contains("car") }
@@ -66,21 +68,34 @@ struct VehiclePersonalLoanView: View {
                         .contentTransition(.numericText()).animation(.snappy, value: totalOutflow)
                 }
             }
+            CustomAmortizationSection(
+                principal: netLoanAmount,
+                annualRatePercent: vm.annualRatePercent,
+                standardEMI: emi,
+                standardTenureMonths: vm.tenureMonths,
+                standardTotalInterest: totalInterest,
+                accent: accent, currency: currency,
+                customEMIEnabled: $customEMIEnabled,
+                customEMI: $customEMI
+            )
             AmortizationToggleSection(
                 rows: buildGenericAmortization(principal: netLoanAmount, annualRatePercent: vm.annualRatePercent, months: vm.tenureMonths, emi: emi),
+                customRows: customEMIEnabled ? buildCustomAmortization(principal: netLoanAmount, annualRatePercent: vm.annualRatePercent, customEMI: max(customEMI, netLoanAmount * (vm.annualRatePercent / 12.0 / 100.0) + 1)) : nil,
+                customEMIEnabled: customEMIEnabled,
                 accent: accent, currency: currency, showAmortization: $showAmortization)
         }
         .keyboardDoneToolbar().tint(accent)
-        .onChange(of: vm.principal)         { _, _ in vm.recalculateAll() }
-        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll() }
-        .onChange(of: vm.tenureMonths)      { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.principal)         { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onChange(of: vm.tenureMonths)      { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onAppear { customEMI = emi }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.large)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
         .sheet(isPresented: $showInfoSheet) {
             InfoSheet(title: "\(title) Info",
                       body1: "EMI is computed on the net loan amount (On-road − Down Payment). Processing fee, insurance and RTO charges add to total outflow but do not affect EMI.",
-                      body2: "Tip: A larger down payment reduces EMI and total interest paid over the tenure.", accent: accent)
+                      body2: "Tip: A larger down payment reduces EMI and total interest paid over the tenure. Use Custom Amortization to enter a higher EMI and see how many months and how much interest you save.", accent: accent)
         }
     }
 }
@@ -93,6 +108,8 @@ struct EducationLoanView: View {
     @State private var showAmortization = false
     @State private var moratoriumMonths: Int = 0
     @State private var repaymentMonths: Int = 60
+    @State private var customEMIEnabled = false
+    @State private var customEMI: Double = 0
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var principalAfterMoratorium: Double { vm.principal * pow(1 + vm.annualRatePercent / 12.0 / 100.0, Double(moratoriumMonths)) }
@@ -141,20 +158,33 @@ struct EducationLoanView: View {
                     ResultRow(label: "Total Paid",        value: totalEMIPaid.formatted(.currency(code: currency)),  isHighlight: true, accentColor: accent)
                 }
             }
+            CustomAmortizationSection(
+                principal: principalAfterMoratorium,
+                annualRatePercent: vm.annualRatePercent,
+                standardEMI: emi,
+                standardTenureMonths: repaymentMonths,
+                standardTotalInterest: totalInterest,
+                accent: accent, currency: currency,
+                customEMIEnabled: $customEMIEnabled,
+                customEMI: $customEMI
+            )
             AmortizationToggleSection(
                 rows: buildGenericAmortization(principal: principalAfterMoratorium, annualRatePercent: vm.annualRatePercent, months: repaymentMonths, emi: emi),
+                customRows: customEMIEnabled ? buildCustomAmortization(principal: principalAfterMoratorium, annualRatePercent: vm.annualRatePercent, customEMI: max(customEMI, principalAfterMoratorium * (vm.annualRatePercent / 12.0 / 100.0) + 1)) : nil,
+                customEMIEnabled: customEMIEnabled,
                 accent: accent, currency: currency, showAmortization: $showAmortization)
         }
         .keyboardDoneToolbar().tint(accent)
-        .onChange(of: vm.principal)         { _, _ in vm.recalculateAll() }
-        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.principal)         { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onAppear { customEMI = emi }
         .navigationTitle("Education Loan")
         .navigationBarTitleDisplayMode(.large)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
         .sheet(isPresented: $showInfoSheet) {
             InfoSheet(title: "Education Loan Info",
                       body1: "During moratorium (usually study + 6 months), interest compounds and EMIs have not yet started. Once moratorium ends, EMI is computed on the grown outstanding amount.",
-                      body2: "Tip: Paying interest during the moratorium period keeps the outstanding balance from growing and results in lower future EMIs.",
+                      body2: "Tip: Paying interest during the moratorium period keeps the outstanding balance from growing and results in lower future EMIs. Use Custom Amortization to see how a higher EMI saves months and interest.",
                       accent: accent)
         }
     }
@@ -170,6 +200,8 @@ struct BusinessLoanView: View {
     @State private var collateralValue: Double = 0
     @State private var loanPurpose: String = "Working Capital"
     private let purposes = ["Working Capital", "Equipment Purchase", "Business Expansion", "Inventory", "Other"]
+    @State private var customEMIEnabled = false
+    @State private var customEMI: Double = 0
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var processingFee: Double { vm.principal * (processingFeePercent / 100.0) }
@@ -215,21 +247,34 @@ struct BusinessLoanView: View {
                     ResultRow(label: "Total Outflow",   value: totalPaid.formatted(.currency(code: currency)),      isHighlight: true, accentColor: accent)
                 }
             }
+            CustomAmortizationSection(
+                principal: vm.principal,
+                annualRatePercent: vm.annualRatePercent,
+                standardEMI: emi,
+                standardTenureMonths: vm.tenureMonths,
+                standardTotalInterest: totalInterest,
+                accent: accent, currency: currency,
+                customEMIEnabled: $customEMIEnabled,
+                customEMI: $customEMI
+            )
             AmortizationToggleSection(
                 rows: buildGenericAmortization(principal: vm.principal, annualRatePercent: vm.annualRatePercent, months: vm.tenureMonths, emi: emi),
+                customRows: customEMIEnabled ? buildCustomAmortization(principal: vm.principal, annualRatePercent: vm.annualRatePercent, customEMI: max(customEMI, vm.principal * (vm.annualRatePercent / 12.0 / 100.0) + 1)) : nil,
+                customEMIEnabled: customEMIEnabled,
                 accent: accent, currency: currency, showAmortization: $showAmortization)
         }
         .keyboardDoneToolbar().tint(accent)
-        .onChange(of: vm.principal) { _, _ in vm.recalculateAll() }
-        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll() }
-        .onChange(of: vm.tenureMonths) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.principal) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onChange(of: vm.tenureMonths) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onAppear { customEMI = emi }
         .navigationTitle("Business Loan")
         .navigationBarTitleDisplayMode(.large)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
         .sheet(isPresented: $showInfoSheet) {
             InfoSheet(title: "Business Loan Info",
                       body1: "Business loans may be secured (with collateral) or unsecured. Rates vary by lender, loan purpose and creditworthiness. The processing fee is typically 0.5–2% of loan amount.",
-                      body2: "Tip: MSME loans under ₹1Cr may qualify for priority-sector rates. Always compare effective interest rates (EIR) across lenders.", accent: accent)
+                      body2: "Tip: MSME loans under ₹1Cr may qualify for priority-sector rates. Use Custom Amortization to enter a higher EMI and see how many months and how much interest you save.", accent: accent)
         }
     }
 }
@@ -243,6 +288,8 @@ struct GoldLoanView: View {
     @State private var goldValue: Double = 5_00_000
     @State private var ltvPercent: Double = 75
     @State private var loanType: Int = 0  // 0 = EMI, 1 = Bullet (interest-only)
+    @State private var customEMIEnabled = false
+    @State private var customEMI: Double = 0
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var principalFromLTV: Double { goldValue * (ltvPercent / 100.0) }
@@ -293,21 +340,34 @@ struct GoldLoanView: View {
                 }
             }
             if loanType == 0 {
+                CustomAmortizationSection(
+                    principal: principalFromLTV,
+                    annualRatePercent: vm.annualRatePercent,
+                    standardEMI: emiAmount,
+                    standardTenureMonths: vm.tenureMonths,
+                    standardTotalInterest: totalInterest,
+                    accent: accent, currency: currency,
+                    customEMIEnabled: $customEMIEnabled,
+                    customEMI: $customEMI
+                )
                 AmortizationToggleSection(
                     rows: buildGenericAmortization(principal: principalFromLTV, annualRatePercent: vm.annualRatePercent, months: vm.tenureMonths, emi: emiAmount),
+                    customRows: customEMIEnabled ? buildCustomAmortization(principal: principalFromLTV, annualRatePercent: vm.annualRatePercent, customEMI: max(customEMI, principalFromLTV * (vm.annualRatePercent / 12.0 / 100.0) + 1)) : nil,
+                    customEMIEnabled: customEMIEnabled,
                     accent: accent, currency: currency, showAmortization: $showAmortization)
             }
         }
         .keyboardDoneToolbar().tint(accent)
-        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll() }
-        .onChange(of: vm.tenureMonths) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emiAmount } }
+        .onChange(of: vm.tenureMonths) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emiAmount } }
+        .onAppear { customEMI = emiAmount }
         .navigationTitle("Gold Loan")
         .navigationBarTitleDisplayMode(.large)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
         .sheet(isPresented: $showInfoSheet) {
             InfoSheet(title: "Gold Loan Info",
                       body1: "RBI caps LTV at 75% for gold loans. EMI type spreads both principal and interest monthly. Bullet type requires only monthly interest with full principal at end.",
-                      body2: "Tip: Gold loans typically have lower rates than personal loans but the gold is held as collateral and may be auctioned on default.", accent: accent)
+                      body2: "Tip: Gold loans typically have lower rates than personal loans. Use Custom Amortization (EMI mode) to enter a higher EMI and see how many months and how much interest you save.", accent: accent)
         }
     }
 }
@@ -323,6 +383,8 @@ struct LAPLoanView: View {
     @State private var processingFeePercent: Double = 0.5
     @State private var propertyType: String = "Residential"
     private let propertyTypes = ["Residential", "Commercial", "Industrial", "Land"]
+    @State private var customEMIEnabled = false
+    @State private var customEMI: Double = 0
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var principalFromLTV: Double { propertyValue * (ltvPercent / 100.0) }
@@ -363,20 +425,33 @@ struct LAPLoanView: View {
                     ResultRow(label: "Total Outflow",            value: totalOutflow.formatted(.currency(code: currency)),   isHighlight: true, accentColor: accent)
                 }
             }
+            CustomAmortizationSection(
+                principal: principalFromLTV,
+                annualRatePercent: vm.annualRatePercent,
+                standardEMI: emi,
+                standardTenureMonths: vm.tenureMonths,
+                standardTotalInterest: totalInterest,
+                accent: accent, currency: currency,
+                customEMIEnabled: $customEMIEnabled,
+                customEMI: $customEMI
+            )
             AmortizationToggleSection(
                 rows: buildGenericAmortization(principal: principalFromLTV, annualRatePercent: vm.annualRatePercent, months: vm.tenureMonths, emi: emi),
+                customRows: customEMIEnabled ? buildCustomAmortization(principal: principalFromLTV, annualRatePercent: vm.annualRatePercent, customEMI: max(customEMI, principalFromLTV * (vm.annualRatePercent / 12.0 / 100.0) + 1)) : nil,
+                customEMIEnabled: customEMIEnabled,
                 accent: accent, currency: currency, showAmortization: $showAmortization)
         }
         .keyboardDoneToolbar().tint(accent)
-        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll() }
-        .onChange(of: vm.tenureMonths) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onChange(of: vm.tenureMonths) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onAppear { customEMI = emi }
         .navigationTitle("Loan Against Property")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
         .sheet(isPresented: $showInfoSheet) {
             InfoSheet(title: "LAP Info",
                       body1: "LTV (Loan-to-Value) determines what % of property value you can borrow. Residential: up to 75%, Commercial: up to 65%, Land: up to 50% typically.",
-                      body2: "Tip: A lower LTV request may get a better interest rate. Ensure property title is clear to avoid delays.", accent: accent)
+                      body2: "Tip: A lower LTV request may get a better interest rate. Use Custom Amortization to enter a higher EMI and see how many months and how much interest you save.", accent: accent)
         }
     }
 }
@@ -390,6 +465,8 @@ struct AgriculturalLoanView: View {
     @State private var moratoriumMonths: Int = 0
     @State private var cropCycle: String = "Kharif (June-Nov)"
     private let cropCycles = ["Kharif (June-Nov)", "Rabi (Nov-Apr)", "Zaid (Apr-June)", "Annual"]
+    @State private var customEMIEnabled = false
+    @State private var customEMI: Double = 0
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var principalGrown: Double { vm.principal * pow(1 + vm.annualRatePercent / 12.0 / 100.0, Double(moratoriumMonths)) }
@@ -428,21 +505,34 @@ struct AgriculturalLoanView: View {
                     ResultRow(label: "Total Paid (EMIs)", value: totalPaid.formatted(.currency(code: currency)))
                 }
             }
+            CustomAmortizationSection(
+                principal: principalGrown,
+                annualRatePercent: vm.annualRatePercent,
+                standardEMI: emi,
+                standardTenureMonths: repayMonths,
+                standardTotalInterest: max(totalPaid - vm.principal, 0),
+                accent: accent, currency: currency,
+                customEMIEnabled: $customEMIEnabled,
+                customEMI: $customEMI
+            )
             AmortizationToggleSection(
                 rows: buildGenericAmortization(principal: principalGrown, annualRatePercent: vm.annualRatePercent, months: repayMonths, emi: emi),
+                customRows: customEMIEnabled ? buildCustomAmortization(principal: principalGrown, annualRatePercent: vm.annualRatePercent, customEMI: max(customEMI, principalGrown * (vm.annualRatePercent / 12.0 / 100.0) + 1)) : nil,
+                customEMIEnabled: customEMIEnabled,
                 accent: accent, currency: currency, showAmortization: $showAmortization)
         }
         .keyboardDoneToolbar().tint(accent)
-        .onChange(of: vm.principal) { _, _ in vm.recalculateAll() }
-        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll() }
-        .onChange(of: vm.tenureMonths) { _, _ in vm.recalculateAll() }
+        .onChange(of: vm.principal) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onChange(of: vm.tenureMonths) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = emi } }
+        .onAppear { customEMI = emi }
         .navigationTitle("Agricultural Loan")
         .navigationBarTitleDisplayMode(.large)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
         .sheet(isPresented: $showInfoSheet) {
             InfoSheet(title: "Agricultural Loan Info",
                       body1: "Kisan Credit Card (KCC) loans under ₹3L attract subsidised interest rates (often ~7% p.a.). NABARD and cooperative banks offer crop-specific financing.",
-                      body2: "Tip: Under PM-KISAN and PMFBY, insurance subsidies are available. Aligning repayment with harvest season prevents cash-flow stress.", accent: accent)
+                      body2: "Tip: Under PM-KISAN and PMFBY, insurance subsidies are available. Use Custom Amortization to enter a higher EMI and see how many months and how much interest you save.", accent: accent)
         }
     }
 }
@@ -502,6 +592,8 @@ struct ConsumerDurableLoanView: View {
     @State private var downPayment: Double = 0
     @State private var processingFeePercent: Double = 0
     @State private var noCostEMI: Bool = false
+    @State private var customEMIEnabled = false
+    @State private var customEMI: Double = 0
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private var netLoanAmount: Double { max(price - downPayment, 0) }
@@ -553,19 +645,34 @@ struct ConsumerDurableLoanView: View {
                 }
             }
             if !noCostEMI {
+                CustomAmortizationSection(
+                    principal: netLoanAmount,
+                    annualRatePercent: vm.annualRatePercent,
+                    standardEMI: emi,
+                    standardTenureMonths: vm.tenureMonths,
+                    standardTotalInterest: impliedInterest,
+                    accent: accent, currency: currency,
+                    customEMIEnabled: $customEMIEnabled,
+                    customEMI: $customEMI
+                )
                 AmortizationToggleSection(
                     rows: buildGenericAmortization(principal: netLoanAmount, annualRatePercent: vm.annualRatePercent, months: vm.tenureMonths, emi: emi),
+                    customRows: customEMIEnabled ? buildCustomAmortization(principal: netLoanAmount, annualRatePercent: vm.annualRatePercent, customEMI: max(customEMI, netLoanAmount * (vm.annualRatePercent / 12.0 / 100.0) + 1)) : nil,
+                    customEMIEnabled: customEMIEnabled,
                     accent: accent, currency: currency, showAmortization: $showAmortization)
             }
         }
         .keyboardDoneToolbar().tint(accent)
+        .onAppear { customEMI = emi }
+        .onChange(of: vm.annualRatePercent) { _, _ in if !customEMIEnabled { customEMI = emi } }
+        .onChange(of: vm.tenureMonths) { _, _ in if !customEMIEnabled { customEMI = emi } }
         .navigationTitle("Consumer Durable / EMI")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
         .sheet(isPresented: $showInfoSheet) {
             InfoSheet(title: "Consumer Durable EMI Info",
                       body1: "No-cost EMI simply spreads the product price with zero interest. However, the discount (if any) is foregone and processing fees still apply, making the effective rate non-zero.",
-                      body2: "Tip: Compare standard EMI vs no-cost EMI total outflow including processing fee to pick the better option.", accent: accent)
+                      body2: "Tip: Compare standard EMI vs no-cost EMI total outflow. Use Custom Amortization to enter a higher EMI and see how many months and how much interest you save.", accent: accent)
         }
     }
 }
