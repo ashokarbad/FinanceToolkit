@@ -26,7 +26,7 @@ struct DashboardView: View {
         let cal = Calendar.current
         let now = Date()
         return outflowStore.items.filter {
-            $0.isFixed || cal.isDate($0.date, equalTo: now, toGranularity: .month)
+            cal.isDate($0.date, equalTo: now, toGranularity: .month)
         }.reduce(0) { $0 + $1.amount }
     }
 
@@ -42,7 +42,7 @@ struct DashboardView: View {
         let cal = Calendar.current
         let now = Date()
         return outflowStore.items.filter {
-            $0.isFixed || cal.isDate($0.date, equalTo: now, toGranularity: .month)
+            cal.isDate($0.date, equalTo: now, toGranularity: .month)
         }.count
     }
 
@@ -372,9 +372,6 @@ struct SavedView: View {
                                         .font(.system(size: 34, weight: .bold, design: .rounded))
                                         .foregroundStyle(.white)
                                         .contentTransition(.numericText())
-                                    Text(totalSaved == 1 ? "calculation" : "calculations")
-                                        .font(.caption2)
-                                        .foregroundStyle(.white.opacity(0.6))
                                 }
                                 Spacer()
                                 ZStack {
@@ -751,10 +748,17 @@ struct SavedView: View {
 
     private func generateSavedCSV(calculations: [SavedCalculation]) -> URL? {
         var csv = "Calculator,Date,Note"
-        // Find max result columns
+        // Find max result columns and collect proper column headers
         let maxResults = calculations.map(\.results.count).max() ?? 0
+        // Use labels from the calculation with the most results as column headers
+        let headerCalc = calculations.max(by: { $0.results.count < $1.results.count })
         for i in 0..<maxResults {
-            csv += ",Label \(i+1),Value \(i+1)"
+            if let headerCalc, i < headerCalc.results.count {
+                let label = headerCalc.results[i].label.replacingOccurrences(of: ",", with: " ")
+                csv += ",\(label)"
+            } else {
+                csv += ",Result \(i+1)"
+            }
         }
         csv += ",User Note\n"
 
@@ -763,13 +767,12 @@ struct SavedView: View {
             let escapedNote = calc.note.replacingOccurrences(of: ",", with: " ")
             csv += "\(calc.calculatorTitle),\(dateStr),\(escapedNote)"
             for entry in calc.results {
-                let escapedLabel = entry.label.replacingOccurrences(of: ",", with: " ")
                 let escapedValue = entry.value.replacingOccurrences(of: ",", with: " ")
-                csv += ",\(escapedLabel),\(escapedValue)"
+                csv += ",\(escapedValue)"
             }
             // Pad if fewer results
             for _ in calc.results.count..<maxResults {
-                csv += ",,"
+                csv += ","
             }
             let userNoteText = calc.userNote?.text.replacingOccurrences(of: ",", with: " ").replacingOccurrences(of: "\n", with: " ") ?? ""
             csv += ",\(userNoteText)\n"
@@ -1185,18 +1188,23 @@ struct QuickNoteEditorSheet: View {
 struct TipsFAQView: View {
     private let sections: [(heading: String, color: String, tips: [(icon: String, title: String, detail: String)])] = [
         ("App Features", "#8B5CF6", [
+            ("person.badge.plus", "Personalised onboarding", "On first launch, a welcome screen lets you set your name, age, and preferred currency — so everything is ready from the start."),
+            ("eye.slash.fill", "Privacy screen", "When you leave the app or switch to another, your financial data is automatically hidden behind a privacy screen. No extra setup needed."),
             ("bookmark.fill", "Save & compare results", "Save any calculation result for future reference. Access all saved items from the Dashboard or Saved section."),
             ("square.and.arrow.up.fill", "Export as PDF or CSV", "Share or export individual calculations or all saved items as a formatted PDF or CSV file from the Saved section."),
             ("star.fill", "Favourite calculators", "Star your most-used calculators for quick access. Favourites appear at the top of the Calculators screen."),
             ("note.text", "Use Notes for quick reminders", "Create styled notes with custom font sizes, colors, bold and italic formatting. Perfect for financial planning reminders."),
             ("list.number", "View amortization schedules", "Every loan calculator includes a month-by-month amortization schedule showing EMI, principal, interest, and outstanding balance."),
             ("moon.fill", "Dark mode support", "Toggle dark mode from the sidebar for comfortable viewing in any lighting condition."),
+            ("exclamationmark.triangle.fill", "Smart validation", "The app alerts you with a clear message if you try to save without entering required fields — no silent failures."),
         ]),
         ("Expenses & Outflow", "#E87D2B", [
-            ("chart.pie.fill", "Track monthly expenses", "Log every expense by category to understand your spending patterns. View the pie chart breakdown and export monthly reports as PDF."),
-            ("arrow.up.forward.circle.fill", "Monitor monthly outflow", "Track EMIs, subscriptions, and bills in Monthly Outflow. Mark recurring items as fixed so they appear in every month automatically."),
+            ("chart.pie.fill", "Track monthly expenses", "Log every expense by category to understand your spending patterns. View the pie chart breakdown and export monthly reports as PDF or CSV."),
+            ("pencil.circle.fill", "Edit & delete entries", "Tap the pencil icon on any expense or outflow entry to update it, or the × icon to remove it. Full control over your records."),
+            ("ellipsis.circle.fill", "Custom expense categories", "When you select 'Other' as a category, a text field appears so you can type your own category name — Donation, Gift, or anything you need."),
+            ("arrow.up.forward.circle.fill", "Monitor monthly outflow", "Track EMIs, subscriptions, and bills in Monthly Outflow with salary tracking to see how much you have left after all outflows."),
             ("chart.bar.fill", "Yearly graphical overview", "Tap the chart icon in Expenses or Outflow to see a full-year bar chart overview — identify high-spend months and track your trends."),
-            ("dollarsign.circle.fill", "Multi-currency support", "Switch currencies in Settings — supports INR, USD, EUR, GBP, AED, SAR, CAD, AUD, SGD, JPY, and RD$. All calculators and trackers update automatically."),
+            ("dollarsign.circle.fill", "Multi-currency support", "Switch currencies in Settings — supports 12 currencies including INR, USD, EUR, GBP, AED, SAR, CAD, AUD, SGD, JPY & RD$. All calculators and trackers update automatically."),
         ]),
         ("Loan Tips", "#185FA5", [
             ("house.fill", "Prepay your home loan", "Even a small extra payment towards the principal each month reduces total interest dramatically. Use Custom Amortization to see exactly how much you save."),
@@ -1524,11 +1532,13 @@ struct AboutView: View {
         ("house.fill", "10+ Loan Calculators", "Home, vehicle, personal, education, business, gold, LAP, agricultural, consumer durable & credit line — each with custom amortization and what-if EMI analysis"),
         ("chart.line.uptrend.xyaxis", "Investment Tools", "SIP, lump sum mutual fund, SWP, FD & RD calculators with detailed growth projections"),
         ("percent", "Tax & Benefits", "Income tax (old vs new regime), NPS, PF & gratuity calculators for Indian tax planning"),
-        ("chart.pie.fill", "Expense Tracker", "Track monthly expenses by category with pie chart breakdown, yearly graphical overview & PDF/CSV export"),
-        ("arrow.up.forward.circle.fill", "Monthly Outflow", "Manage recurring & one-time outflows with salary tracking, fixed items & month-wise views"),
+        ("chart.pie.fill", "Expense Tracker", "Track monthly expenses by category with pie chart breakdown, custom categories, yearly overview & PDF/CSV export. Edit or delete any entry."),
+        ("arrow.up.forward.circle.fill", "Monthly Outflow", "Track EMIs, subscriptions & bills month-wise with salary tracking, edit support & detailed reports"),
         ("slider.horizontal.3", "Custom Amortization", "Enter a higher EMI on any loan to instantly see months saved, interest saved & the revised schedule"),
         ("note.text", "Smart Notes", "Create styled notes with custom font sizes, colors, bold & italic formatting"),
         ("star.fill", "Save & Export", "Bookmark any calculation, favourite calculators, and export all saved data as PDF or CSV"),
+        ("person.crop.circle.fill", "Onboarding & Profile", "Personalised welcome screen on first launch — set your name, age & preferred currency right away"),
+        ("lock.shield.fill", "Privacy Screen", "App content is automatically hidden when you switch away — your financial data stays private"),
     ]
 
     var body: some View {
@@ -1555,7 +1565,7 @@ struct AboutView: View {
                 }
 
                 // Description
-                Text("Finance Toolkit is an all-in-one financial calculator suite built for users worldwide. Whether you're planning a home purchase, comparing investment options, tracking monthly expenses, or analysing loan repayments - this app has you covered with accurate, easy-to-use tools that work in 11 currencies across the globe.")
+                Text("Finance Toolkit is an all-in-one financial calculator suite built for users worldwide. Whether you're planning a home purchase, comparing investment options, tracking monthly expenses, or analysing loan repayments - this app has you covered with accurate, easy-to-use tools that work in 12 currencies across the globe. A personalised onboarding experience gets you started in seconds, and a built-in privacy screen keeps your data safe.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -1600,9 +1610,12 @@ struct AboutView: View {
                         .font(.headline)
                         .foregroundStyle(Color.navy)
 
-                    aboutHighlightRow(icon: "globe", text: "Works worldwide — supports 11 currencies including INR, USD, EUR, GBP, AED, SAR, CAD, AUD, SGD, JPY & RD$")
+                    aboutHighlightRow(icon: "globe", text: "Works worldwide — supports 12 currencies including INR, USD, EUR, GBP, AED, SAR, CAD, AUD, SGD, JPY, DOP & more")
                     aboutHighlightRow(icon: "function", text: "Universal financial math — EMI, SIP, FD, RD, SWP & amortization calculations work for any currency or country")
                     aboutHighlightRow(icon: "chart.bar.fill", text: "Yearly graphical overviews for expenses and outflow with month-wise bar charts")
+                    aboutHighlightRow(icon: "pencil.circle.fill", text: "Edit & delete expenses and outflow entries — full control over your financial records")
+                    aboutHighlightRow(icon: "eye.slash.fill", text: "Privacy screen hides content automatically when you leave the app")
+                    aboutHighlightRow(icon: "person.badge.plus", text: "Guided onboarding — set your name, age & currency on first launch")
                     aboutHighlightRow(icon: "moon.fill", text: "Dark mode support with adaptive UI")
                     aboutHighlightRow(icon: "doc.richtext", text: "Export reports as PDF or CSV — share with advisors or keep for records")
                     aboutHighlightRow(icon: "lock.shield.fill", text: "100% offline — your data stays on your device, no sign-up required")
@@ -1619,7 +1632,7 @@ struct AboutView: View {
                         .font(.headline)
                         .foregroundStyle(Color.navy)
 
-                    Text("Loan calculators, investment tools (SIP, FD, RD, SWP), expense tracking, outflow management, notes, and custom amortization work universally in any currency.\n\nTax Calculator (Old vs New Regime), NPS, PF, and Gratuity calculators are tailored for Indian tax laws and labour regulations.")
+                    Text("Loan calculators, investment tools (SIP, FD, RD, SWP), expense tracking with custom categories, outflow management, notes, privacy screen, onboarding, and custom amortization work universally in any currency.\n\nTax Calculator (Old vs New Regime), NPS, PF, and Gratuity calculators are tailored for Indian tax laws and labour regulations.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

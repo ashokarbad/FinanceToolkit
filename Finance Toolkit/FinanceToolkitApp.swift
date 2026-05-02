@@ -6,24 +6,9 @@ import SwiftUI
 
 @main
 struct FinanceToolkitApp: App {
-    @Environment(\.scenePhase) private var scenePhase
-    @State private var showPrivacy = false
-
     var body: some Scene {
         WindowGroup {
-            ZStack {
-                LaunchScreenView()
-
-                if showPrivacy {
-                    PrivacyScreen()
-                        .transition(.opacity)
-                }
-            }
-            .onChange(of: scenePhase) { _, phase in
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    showPrivacy = phase != .active
-                }
-            }
+            LaunchScreenView()
         }
     }
 }

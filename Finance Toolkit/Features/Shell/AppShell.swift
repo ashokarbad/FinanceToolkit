@@ -8,12 +8,27 @@ struct FinCalcRootView: View {
     @AppStorage("darkMode") private var darkMode = false
     @StateObject private var vm = CalculatorViewModel()
     @StateObject private var savedStore = SavedStore.shared
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var showPrivacy = false
 
     var body: some View {
-        FinCalcAppShell()
-            .environmentObject(vm)
-            .environmentObject(savedStore)
-            .preferredColorScheme(darkMode ? .dark : .light)
+        ZStack {
+            FinCalcAppShell()
+                .environmentObject(vm)
+                .environmentObject(savedStore)
+                .preferredColorScheme(darkMode ? .dark : .light)
+
+            if showPrivacy {
+                PrivacyScreen()
+                    .transition(.opacity)
+                    .zIndex(999)
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showPrivacy = phase != .active
+            }
+        }
     }
 }
 

@@ -46,13 +46,6 @@ final class OutflowStore: ObservableObject {
         }
     }
 
-    func toggleFixed(id: UUID) {
-        if let idx = items.firstIndex(where: { $0.id == id }) {
-            items[idx].isFixed.toggle()
-            persist()
-        }
-    }
-
     func delete(at offsets: IndexSet) {
         items.remove(atOffsets: offsets)
         persist()
@@ -279,6 +272,7 @@ struct MonthlyOutflowView: View {
     @State private var shareCSVURL: URL?
     @State private var deleteItemID: UUID?
     @State private var showDeleteAlert = false
+    @State private var editingOutflow: OutflowItem?
     @State private var salaryText = ""
     @State private var editingSalary = false
     @State private var selectedMonth = Date()
@@ -291,16 +285,12 @@ struct MonthlyOutflowView: View {
     private var currentMonthItems: [OutflowItem] {
         let cal = Calendar.current
         return store.items.filter {
-            $0.isFixed || cal.isDate($0.date, equalTo: selectedMonth, toGranularity: .month)
+            cal.isDate($0.date, equalTo: selectedMonth, toGranularity: .month)
         }
     }
 
     private var totalOutflow: Double {
         currentMonthItems.reduce(0) { $0 + $1.amount }
-    }
-
-    private var fixedTotal: Double {
-        currentMonthItems.filter(\.isFixed).reduce(0) { $0 + $1.amount }
     }
 
     private var remainingAfterOutflow: Double {
@@ -331,11 +321,6 @@ struct MonthlyOutflowView: View {
 
                 // Total outflow card
                 totalCard
-
-                // Fixed outflows section
-                if currentMonthItems.contains(where: \.isFixed) {
-                    fixedOutflowsSection
-                }
 
                 // Bar chart
                 if !currentMonthItems.isEmpty {
@@ -388,6 +373,9 @@ struct MonthlyOutflowView: View {
         }
         .sheet(isPresented: $showAddSheet) {
             AddOutflowSheet(store: store, initialDate: selectedMonth)
+        }
+        .sheet(item: $editingOutflow) { item in
+            AddOutflowSheet(store: store, editingOutflow: item)
         }
         .sheet(isPresented: $showYearlySheet) {
             YearlyOutflowOverview(store: store, selectedMonth: selectedMonth, currency: currency)
@@ -448,11 +436,11 @@ struct MonthlyOutflowView: View {
             csv += "Remaining,\(String(format: "%.2f", remainingAfterOutflow))\n\n"
         }
 
-        csv += "Category,Item,Amount (\(currency)),Fixed\n"
+        csv += "Category,Item,Amount (\(currency))\n"
         for group in groupedItems {
             for item in group.items {
                 let escaped = item.label.replacingOccurrences(of: ",", with: " ")
-                csv += "\(group.category),\(escaped),\(String(format: "%.2f", item.amount)),\(item.isFixed ? "Yes" : "No")\n"
+                csv += "\(group.category),\(escaped),\(String(format: "%.2f", item.amount))\n"
             }
         }
         csv += "\nCategory Summary\nCategory,Total,Percentage\n"
@@ -609,64 +597,6 @@ struct MonthlyOutflowView: View {
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.navy.opacity(0.2), lineWidth: 0.5))
     }
 
-    private var fixedItems: [OutflowItem] {
-        currentMonthItems.filter(\.isFixed)
-    }
-
-    // MARK: - Fixed Outflows
-    private var fixedOutflowsSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: "pin.fill")
-                    .foregroundStyle(Color.gold)
-                Text("Fixed Monthly Outflows")
-                    .font(.headline)
-                    .foregroundStyle(Color.navy)
-                Spacer()
-                Text(fixedTotal.formatted(.currency(code: currency)))
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(Color.navy)
-            }
-
-            ForEach(fixedItems) { item in
-                fixedItemRow(item)
-            }
-        }
-        .padding(14)
-        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.ultraThinMaterial))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.gold.opacity(0.25), lineWidth: 0.5))
-    }
-
-    @ViewBuilder
-    private func fixedItemRow(_ item: OutflowItem) -> some View {
-        let cat = OutflowCategory(rawValue: item.category) ?? .other
-        HStack(spacing: 10) {
-            Image(systemName: "pin.fill")
-                .font(.system(size: 8))
-                .foregroundStyle(Color.gold)
-            Image(systemName: cat.icon)
-                .font(.system(size: 11))
-                .foregroundStyle(cat.color)
-                .frame(width: 22, height: 22)
-                .background(RoundedRectangle(cornerRadius: 5).fill(cat.color.opacity(0.1)))
-            Text(item.label)
-                .font(.caption)
-            Spacer()
-            Text(item.amount.formatted(.currency(code: currency)))
-                .font(.caption.weight(.semibold))
-
-            Button {
-                deleteItemID = item.id
-                showDeleteAlert = true
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
-            .buttonStyle(.plain)
-        }
-    }
-
     // MARK: - Bar Chart
     private var barChartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -741,11 +671,6 @@ struct MonthlyOutflowView: View {
     @ViewBuilder
     private func outflowItemRow(_ item: OutflowItem) -> some View {
         HStack {
-            if item.isFixed {
-                Image(systemName: "pin.fill")
-                    .font(.system(size: 8))
-                    .foregroundStyle(Color.gold)
-            }
             Text(item.label)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -754,11 +679,11 @@ struct MonthlyOutflowView: View {
                 .font(.caption.weight(.medium))
 
             Button {
-                withAnimation { store.toggleFixed(id: item.id) }
+                editingOutflow = item
             } label: {
-                Image(systemName: item.isFixed ? "pin.slash.fill" : "pin.fill")
+                Image(systemName: "pencil.circle.fill")
                     .font(.system(size: 10))
-                    .foregroundStyle(item.isFixed ? .secondary : Color.gold)
+                    .foregroundStyle(.blue.opacity(0.5))
             }
             .buttonStyle(.plain)
 
@@ -843,10 +768,6 @@ struct YearlyOutflowOverview: View {
         Calendar.current.component(.year, from: selectedMonth)
     }
 
-    private var fixedTotal: Double {
-        store.items.filter(\.isFixed).reduce(0) { $0 + $1.amount }
-    }
-
     private var monthlyData: [(month: String, total: Double, monthIndex: Int)] {
         let cal = Calendar.current
         let formatter = DateFormatter()
@@ -856,12 +777,10 @@ struct YearlyOutflowOverview: View {
             comps.year = year
             comps.month = monthNum
             let monthDate = cal.date(from: comps) ?? Date()
-            let nonFixedTotal = store.items.filter {
-                !$0.isFixed &&
+            let total = store.items.filter {
                 cal.component(.year, from: $0.date) == year &&
                 cal.component(.month, from: $0.date) == monthNum
             }.reduce(0) { $0 + $1.amount }
-            let total = nonFixedTotal + fixedTotal
             guard total > 0 else { return nil }
             return (month: formatter.string(from: monthDate), total: total, monthIndex: monthNum)
         }
@@ -1036,18 +955,23 @@ struct YearlyOutflowOverview: View {
 struct AddOutflowSheet: View {
     @ObservedObject var store: OutflowStore
     var initialDate: Date = Date()
+    var editingOutflow: OutflowItem?
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedCategory: OutflowCategory = .homeLoan
     @State private var label = ""
     @State private var amount = ""
-    @State private var isFixed = false
     @State private var date = Date()
     @State private var showDatePicker = false
+    @State private var showValidationAlert = false
+    @State private var validationMessage = ""
+
+    private var isEditMode: Bool { editingOutflow != nil }
 
     init(store: OutflowStore, initialDate: Date = Date()) {
         self.store = store
         self.initialDate = initialDate
+        self.editingOutflow = nil
         let cal = Calendar.current
         let components = cal.dateComponents([.year, .month], from: initialDate)
         let now = Date()
@@ -1059,11 +983,21 @@ struct AddOutflowSheet: View {
         }
     }
 
+    init(store: OutflowStore, editingOutflow: OutflowItem) {
+        self.store = store
+        self.editingOutflow = editingOutflow
+        self.initialDate = editingOutflow.date
+        _selectedCategory = State(initialValue: OutflowCategory(rawValue: editingOutflow.category) ?? .other)
+        _label = State(initialValue: editingOutflow.label)
+        _amount = State(initialValue: String(format: "%.2f", editingOutflow.amount))
+        _date = State(initialValue: editingOutflow.date)
+    }
+
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    SectionHeader(systemImage: "arrow.up.forward.circle.fill", title: "New Outflow", color: .navy)
+                    SectionHeader(systemImage: isEditMode ? "pencil.circle.fill" : "arrow.up.forward.circle.fill", title: isEditMode ? "Edit Outflow" : "New Outflow", color: .navy)
                 }
 
                 Section("Category") {
@@ -1102,40 +1036,45 @@ struct AddOutflowSheet: View {
                         }
                     }
                     .buttonStyle(.plain)
-                    Toggle(isOn: $isFixed) {
-                        Label("Fixed Monthly Outflow", systemImage: "pin.fill")
-                            .font(.subheadline)
-                    }
-                    .tint(.gold)
                 }
 
                 Section {
                     Button {
-                        guard let amt = Double(amount), amt > 0 else { return }
-                        let item = OutflowItem(
-                            label: label.isEmpty ? selectedCategory.rawValue : label,
-                            amount: amt,
-                            category: selectedCategory.rawValue,
-                            isFixed: isFixed,
-                            date: date
-                        )
-                        store.add(item)
+                        guard let amt = Double(amount), amt > 0 else {
+                            validationMessage = "Please enter a valid amount greater than 0."
+                            showValidationAlert = true
+                            return
+                        }
+                        if isEditMode, var existing = editingOutflow {
+                            existing.label = label.isEmpty ? selectedCategory.rawValue : label
+                            existing.amount = amt
+                            existing.category = selectedCategory.rawValue
+                            existing.date = date
+                            store.update(existing)
+                        } else {
+                            let item = OutflowItem(
+                                label: label.isEmpty ? selectedCategory.rawValue : label,
+                                amount: amt,
+                                category: selectedCategory.rawValue,
+                                date: date
+                            )
+                            store.add(item)
+                        }
                         dismiss()
                     } label: {
                         HStack {
                             Spacer()
-                            Label("Add Outflow", systemImage: "plus.circle.fill")
+                            Label(isEditMode ? "Update Outflow" : "Add Outflow", systemImage: isEditMode ? "checkmark.circle.fill" : "plus.circle.fill")
                                 .font(.headline)
                             Spacer()
                         }
                         .padding(.vertical, 6)
                     }
-                    .disabled(Double(amount) == nil || (Double(amount) ?? 0) <= 0)
                     .tint(.navy)
                 }
             }
             .keyboardDoneToolbar()
-            .navigationTitle("Add Outflow")
+            .navigationTitle(isEditMode ? "Edit Outflow" : "Add Outflow")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -1145,6 +1084,11 @@ struct AddOutflowSheet: View {
             .sheet(isPresented: $showDatePicker) {
                 DatePickerSheet(selectedDate: $date)
                     .presentationDetents([.medium])
+            }
+            .alert("Invalid Input", isPresented: $showValidationAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(validationMessage)
             }
         }
     }

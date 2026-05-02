@@ -79,6 +79,13 @@ final class ExpenseStore: ObservableObject {
         persist()
     }
 
+    func update(_ entry: ExpenseEntry) {
+        if let idx = expenses.firstIndex(where: { $0.id == entry.id }) {
+            expenses[idx] = entry
+            persist()
+        }
+    }
+
     func delete(at offsets: IndexSet) {
         expenses.remove(atOffsets: offsets)
         persist()
@@ -291,6 +298,7 @@ struct ExpensesTrackerView: View {
     @State private var selectedMonth = Date()
     @State private var deleteEntryID: UUID?
     @State private var showDeleteAlert = false
+    @State private var editingExpense: ExpenseEntry?
 
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
@@ -374,6 +382,9 @@ struct ExpensesTrackerView: View {
         }
         .sheet(isPresented: $showAddSheet) {
             AddExpenseSheet(store: store, initialDate: selectedMonth)
+        }
+        .sheet(item: $editingExpense) { expense in
+            AddExpenseSheet(store: store, editingExpense: expense)
         }
         .sheet(isPresented: $showYearlySheet) {
             YearlyExpensesOverview(store: store, selectedMonth: selectedMonth, currency: currency)
@@ -607,6 +618,15 @@ struct ExpensesTrackerView: View {
                         Spacer()
                         Text(entry.amount.formatted(.currency(code: currency)))
                             .font(.subheadline.weight(.semibold))
+
+                        Button {
+                            editingExpense = entry
+                        } label: {
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.blue.opacity(0.5))
+                        }
+                        .buttonStyle(.plain)
 
                         Button {
                             deleteEntryID = entry.id
@@ -850,22 +870,35 @@ struct YearlyExpensesOverview: View {
 struct AddExpenseSheet: View {
     @ObservedObject var store: ExpenseStore
     var initialDate: Date = Date()
+    var editingExpense: ExpenseEntry?
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedCategory: ExpenseCategory = .groceries
+    @State private var customCategoryName = ""
     @State private var amount = ""
     @State private var date = Date()
     @State private var showDatePicker = false
+    @State private var showValidationAlert = false
+    @State private var validationMessage = ""
+
+    private var isEditMode: Bool { editingExpense != nil }
+
+    private var resolvedCategory: String {
+        if selectedCategory == .other {
+            let trimmed = customCategoryName.trimmingCharacters(in: .whitespaces)
+            return trimmed.isEmpty ? ExpenseCategory.other.rawValue : trimmed
+        }
+        return selectedCategory.rawValue
+    }
 
     init(store: ExpenseStore, initialDate: Date = Date()) {
         self.store = store
         self.initialDate = initialDate
-        // Set default date to a day in the selected month
+        self.editingExpense = nil
         let cal = Calendar.current
         let components = cal.dateComponents([.year, .month], from: initialDate)
         let now = Date()
         let nowComponents = cal.dateComponents([.year, .month], from: now)
-        // If selected month is current month, use today; otherwise use 1st of that month
         if components.year == nowComponents.year && components.month == nowComponents.month {
             _date = State(initialValue: now)
         } else {
@@ -873,11 +906,25 @@ struct AddExpenseSheet: View {
         }
     }
 
+    init(store: ExpenseStore, editingExpense: ExpenseEntry) {
+        self.store = store
+        self.editingExpense = editingExpense
+        self.initialDate = editingExpense.date
+        let cat = ExpenseCategory(rawValue: editingExpense.category)
+        _selectedCategory = State(initialValue: cat ?? .other)
+        // If the category doesn't match any enum case, it's a custom "Other" name
+        if cat == nil {
+            _customCategoryName = State(initialValue: editingExpense.category)
+        }
+        _amount = State(initialValue: String(format: "%.2f", editingExpense.amount))
+        _date = State(initialValue: editingExpense.date)
+    }
+
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    SectionHeader(systemImage: "plus.circle.fill", title: "New Expense", color: .navy)
+                    SectionHeader(systemImage: isEditMode ? "pencil.circle.fill" : "plus.circle.fill", title: isEditMode ? "Edit Expense" : "New Expense", color: .navy)
                 }
 
                 Section("Category") {
@@ -887,6 +934,15 @@ struct AddExpenseSheet: View {
                         }
                     }
                     .pickerStyle(.menu)
+
+                    if selectedCategory == .other {
+                        HStack {
+                            Text("Name")
+                            Spacer()
+                            TextField("e.g. Donation, Gift", text: $customCategoryName)
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
                 }
 
                 Section("Details") {
@@ -914,25 +970,35 @@ struct AddExpenseSheet: View {
 
                 Section {
                     Button {
-                        guard let amt = Double(amount), amt > 0 else { return }
-                        let entry = ExpenseEntry(category: selectedCategory.rawValue, amount: amt, date: date)
-                        store.add(entry)
+                        guard let amt = Double(amount), amt > 0 else {
+                            validationMessage = "Please enter a valid amount greater than 0."
+                            showValidationAlert = true
+                            return
+                        }
+                        if isEditMode, var existing = editingExpense {
+                            existing.category = resolvedCategory
+                            existing.amount = amt
+                            existing.date = date
+                            store.update(existing)
+                        } else {
+                            let entry = ExpenseEntry(category: resolvedCategory, amount: amt, date: date)
+                            store.add(entry)
+                        }
                         dismiss()
                     } label: {
                         HStack {
                             Spacer()
-                            Label("Add Expense", systemImage: "plus.circle.fill")
+                            Label(isEditMode ? "Update Expense" : "Add Expense", systemImage: isEditMode ? "checkmark.circle.fill" : "plus.circle.fill")
                                 .font(.headline)
                             Spacer()
                         }
                         .padding(.vertical, 6)
                     }
-                    .disabled(Double(amount) == nil || (Double(amount) ?? 0) <= 0)
                     .tint(.navy)
                 }
             }
             .keyboardDoneToolbar()
-            .navigationTitle("Add Expense")
+            .navigationTitle(isEditMode ? "Edit Expense" : "Add Expense")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -942,6 +1008,11 @@ struct AddExpenseSheet: View {
             .sheet(isPresented: $showDatePicker) {
                 DatePickerSheet(selectedDate: $date)
                     .presentationDetents([.medium])
+            }
+            .alert("Invalid Input", isPresented: $showValidationAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(validationMessage)
             }
         }
     }

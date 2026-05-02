@@ -31,7 +31,9 @@ private struct FloatingCircle: Identifiable {
 }
 
 struct LaunchScreenView: View {
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @State private var showMain = false
+    @State private var showOnboarding = false
     @State private var logoScale: CGFloat = 0.5
     @State private var logoOpacity: Double = 0
     @State private var logoRotation: Double = -30
@@ -129,6 +131,13 @@ struct LaunchScreenView: View {
             }
         }
         .onAppear { runAnimations() }
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingView {
+                hasCompletedOnboarding = true
+                showOnboarding = false
+                showMain = true
+            }
+        }
         .fullScreenCover(isPresented: $showMain) {
             FinCalcRootView()
         }
@@ -302,7 +311,11 @@ struct LaunchScreenView: View {
     private var ctaButton: some View {
         Button {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
-                showMain = true
+                if hasCompletedOnboarding {
+                    showMain = true
+                } else {
+                    showOnboarding = true
+                }
             }
         } label: {
             HStack(spacing: 12) {
@@ -360,6 +373,156 @@ struct LaunchScreenView: View {
         // Pulse ring: continuous
         withAnimation(.easeInOut(duration: 1.8).repeatForever(autoreverses: true).delay(1.0)) {
             pulseScale = 1.12
+        }
+    }
+}
+
+// MARK: - Onboarding View
+struct OnboardingView: View {
+    var onComplete: () -> Void
+
+    @AppStorage("profileName") private var profileName = ""
+    @AppStorage("profileAge") private var profileAge = ""
+    @AppStorage("selectedCurrency") private var selectedCurrency = CurrencySettings.selectedCode
+
+    @State private var name = ""
+    @State private var age = ""
+    @State private var currency = CurrencySettings.selectedCode
+    @State private var showValidation = false
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack {
+                LinearGradient(
+                    gradient: Gradient(stops: [
+                        .init(color: Color(hex: "#0D4A7F"), location: 0.0),
+                        .init(color: Color(hex: "#063159"), location: 0.5),
+                        .init(color: Color(hex: "#031E3A"), location: 1.0)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 28) {
+                        Spacer().frame(height: 20)
+
+                        // App logo
+                        Image("AppLogo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 80, height: 80)
+                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            .shadow(color: .black.opacity(0.3), radius: 10, y: 4)
+
+                        VStack(spacing: 8) {
+                            Text("Welcome to")
+                                .font(.subheadline)
+                                .foregroundStyle(.white.opacity(0.7))
+                            Text("Finance Toolkit")
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                            Text("Let's set up your profile")
+                                .font(.subheadline)
+                                .foregroundStyle(Color.goldLight)
+                        }
+
+                        // Profile fields
+                        VStack(spacing: 16) {
+                            // Name field
+                            VStack(alignment: .leading, spacing: 6) {
+                                Label("Your Name", systemImage: "person.fill")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.white.opacity(0.8))
+                                TextField("Enter your name", text: $name)
+                                    .font(.body)
+                                    .padding(12)
+                                    .background(RoundedRectangle(cornerRadius: 10).fill(.white.opacity(0.12)))
+                                    .foregroundStyle(.white)
+                                    .tint(Color.goldLight)
+                            }
+
+                            // Age field
+                            VStack(alignment: .leading, spacing: 6) {
+                                Label("Your Age", systemImage: "calendar")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.white.opacity(0.8))
+                                TextField("Enter your age", text: $age)
+                                    .font(.body)
+                                    .padding(12)
+                                    .background(RoundedRectangle(cornerRadius: 10).fill(.white.opacity(0.12)))
+                                    .foregroundStyle(.white)
+                                    .keyboardType(.numberPad)
+                                    .tint(Color.goldLight)
+                            }
+
+                            // Currency picker
+                            VStack(alignment: .leading, spacing: 6) {
+                                Label("Preferred Currency", systemImage: "banknote.fill")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.white.opacity(0.8))
+                                Picker("Currency", selection: $currency) {
+                                    ForEach(CurrencySettings.supportedCurrencies, id: \.code) { c in
+                                        Text("\(c.symbol) \(c.name) (\(c.code))").tag(c.code)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                .padding(8)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(RoundedRectangle(cornerRadius: 10).fill(.white.opacity(0.12)))
+                                .tint(Color.goldLight)
+                            }
+                        }
+                        .padding(.horizontal, 28)
+
+                        // Continue button
+                        Button {
+                            let trimmed = name.trimmingCharacters(in: .whitespaces)
+                            guard !trimmed.isEmpty else {
+                                showValidation = true
+                                return
+                            }
+                            profileName = trimmed
+                            profileAge = age
+                            selectedCurrency = currency
+                            onComplete()
+                        } label: {
+                            HStack(spacing: 10) {
+                                Text("Continue")
+                                    .font(.headline)
+                                Image(systemName: "arrow.right.circle.fill")
+                                    .font(.title3)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(
+                                Capsule()
+                                    .fill(LinearGradient(
+                                        colors: [Color.goldLight, Color.gold],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    ))
+                            )
+                            .foregroundStyle(Color(hex: "#031E3A"))
+                            .shadow(color: Color.gold.opacity(0.4), radius: 16, y: 8)
+                        }
+                        .padding(.horizontal, 32)
+
+                        Text("You can update these anytime in Profile settings.")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.5))
+                            .multilineTextAlignment(.center)
+
+                        Spacer()
+                    }
+                }
+            }
+        }
+        .alert("Please Enter Your Name", isPresented: $showValidation) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Your name is required to continue.")
         }
     }
 }
