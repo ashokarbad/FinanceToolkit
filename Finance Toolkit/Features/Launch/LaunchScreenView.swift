@@ -20,8 +20,6 @@ private let featurePills: [FeaturePill] = [
     FeaturePill(icon: "note.text", label: "Notes", color: Color(hex: "#8B5CF6")),
 ]
 
-// Note: pill.label is localized at display time via L()
-
 // MARK: - Floating Circle
 private struct FloatingCircle: Identifiable {
     let id = UUID()
@@ -157,16 +155,16 @@ struct LaunchScreenView: View {
 
             // App name + tagline
             VStack(spacing: 8) {
-                Text(L("Finance Toolkit"))
+                Text("Finance Toolkit")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
 
-                Text(L("Calculators · Expenses · Outflow · Notes"))
+                Text("Calculators · Expenses · Outflow · Notes")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color.goldLight)
                     .multilineTextAlignment(.center)
 
-                Text(L("Loans, SIP, Mutual Fund, FD, RD, Tax,\nNPS, PF, Gratuity & Multi-Currency Support"))
+                Text("Loans, SIP, Mutual Fund, FD, RD, Tax,\nNPS, PF, Gratuity & Multi-Currency Support")
                     .font(.caption)
                     .foregroundStyle(Color.navySoft.opacity(0.70))
                     .multilineTextAlignment(.center)
@@ -203,12 +201,12 @@ struct LaunchScreenView: View {
             VStack(spacing: 12) {
                 logoView(size: 76, iconSize: 40)
 
-                Text(L("Finance Toolkit"))
+                Text("Finance Toolkit")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .opacity(textOpacity)
 
-                Text(L("Calculators · Expenses · Outflow · Notes"))
+                Text("Calculators · Expenses · Outflow · Notes")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(Color.goldLight)
                     .opacity(textOpacity)
@@ -271,7 +269,7 @@ struct LaunchScreenView: View {
                     Image(systemName: pill.icon)
                         .font(.system(size: 10))
                         .foregroundStyle(pill.color)
-                    Text(L(pill.label))
+                    Text(pill.label)
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(.white.opacity(0.9))
                 }
@@ -294,7 +292,7 @@ struct LaunchScreenView: View {
                     Image(systemName: pill.icon)
                         .font(.system(size: 9))
                         .foregroundStyle(pill.color)
-                    Text(L(pill.label))
+                    Text(pill.label)
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(.white.opacity(0.9))
                 }
@@ -321,7 +319,7 @@ struct LaunchScreenView: View {
             }
         } label: {
             HStack(spacing: 12) {
-                Text(L("Get Started"))
+                Text("Get Started")
                     .font(.headline)
                 Image(systemName: "arrow.right.circle.fill")
                     .font(.title3)
@@ -419,13 +417,13 @@ struct OnboardingView: View {
                             .shadow(color: .black.opacity(0.3), radius: 10, y: 4)
 
                         VStack(spacing: 8) {
-                            Text(L("Welcome to"))
+                            Text("Welcome to")
                                 .font(.subheadline)
                                 .foregroundStyle(.white.opacity(0.7))
-                            Text(L("Finance Toolkit"))
+                            Text("Finance Toolkit")
                                 .font(.system(size: 28, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
-                            Text(L("Let's set up your profile"))
+                            Text("Let's set up your profile")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.goldLight)
                         }
@@ -434,10 +432,10 @@ struct OnboardingView: View {
                         VStack(spacing: 16) {
                             // Name field
                             VStack(alignment: .leading, spacing: 6) {
-                                Label(L("Your Name"), systemImage: "person.fill")
+                                Label("Your Name", systemImage: "person.fill")
                                     .font(.caption.weight(.semibold))
                                     .foregroundStyle(.white.opacity(0.8))
-                                TextField(L("Enter your name"), text: $name)
+                                TextField("Enter your name", text: $name)
                                     .font(.body)
                                     .padding(12)
                                     .background(RoundedRectangle(cornerRadius: 10).fill(.white.opacity(0.12)))
@@ -447,10 +445,10 @@ struct OnboardingView: View {
 
                             // Age field
                             VStack(alignment: .leading, spacing: 6) {
-                                Label(L("Your Age"), systemImage: "calendar")
+                                Label("Your Age", systemImage: "calendar")
                                     .font(.caption.weight(.semibold))
                                     .foregroundStyle(.white.opacity(0.8))
-                                TextField(L("Enter your age"), text: $age)
+                                TextField("Enter your age", text: $age)
                                     .font(.body)
                                     .padding(12)
                                     .background(RoundedRectangle(cornerRadius: 10).fill(.white.opacity(0.12)))
@@ -461,10 +459,10 @@ struct OnboardingView: View {
 
                             // Currency picker
                             VStack(alignment: .leading, spacing: 6) {
-                                Label(L("Preferred Currency"), systemImage: "banknote.fill")
+                                Label("Preferred Currency", systemImage: "banknote.fill")
                                     .font(.caption.weight(.semibold))
                                     .foregroundStyle(.white.opacity(0.8))
-                                Picker(L("Currency"), selection: $currency) {
+                                Picker("Currency", selection: $currency) {
                                     ForEach(CurrencySettings.supportedCurrencies, id: \.code) { c in
                                         Text("\(c.symbol) \(c.name) (\(c.code))").tag(c.code)
                                     }
@@ -491,7 +489,7 @@ struct OnboardingView: View {
                             onComplete()
                         } label: {
                             HStack(spacing: 10) {
-                                Text(L("Continue"))
+                                Text("Continue")
                                     .font(.headline)
                                 Image(systemName: "arrow.right.circle.fill")
                                     .font(.title3)
@@ -511,7 +509,7 @@ struct OnboardingView: View {
                         }
                         .padding(.horizontal, 32)
 
-                        Text(L("You can update these anytime in Profile settings."))
+                        Text("You can update these anytime in Profile settings.")
                             .font(.caption)
                             .foregroundStyle(.white.opacity(0.5))
                             .multilineTextAlignment(.center)
@@ -521,10 +519,10 @@ struct OnboardingView: View {
                 }
             }
         }
-        .alert(L("Please Enter Your Name"), isPresented: $showValidation) {
-            Button(L("OK"), role: .cancel) {}
+        .alert("Please Enter Your Name", isPresented: $showValidation) {
+            Button("OK", role: .cancel) {}
         } message: {
-            Text(L("Your name is required to continue."))
+            Text("Your name is required to continue.")
         }
     }
 }

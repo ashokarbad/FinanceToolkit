@@ -58,7 +58,7 @@ struct FinCalcAppShell: View {
             // Main content — pushed right when sidebar is open
             NavigationStack {
                 detailView
-                    .navigationTitle(selected.localizedTitle)
+                    .navigationTitle(selected.rawValue)
                     .navigationBarTitleDisplayMode(.large)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
@@ -216,9 +216,9 @@ struct BrandHeaderView: View {
                 .frame(width: 40, height: 40)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
-                Text(L("Finance Toolkit"))
+                Text("Finance Toolkit")
                     .font(.system(size: 15, weight: .semibold))
-                Text(L("Your financial companion"))
+                Text("Your financial companion")
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
                     .tracking(0.4)
@@ -261,7 +261,7 @@ struct SidebarRow: View {
                         .symbolRenderingMode(.multicolor)
                         .foregroundStyle(isSelected ? item.accentColor : item.accentColor.opacity(0.7))
                 }
-                Text(item.localizedTitle)
+                Text(item.rawValue)
                     .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
                     .foregroundStyle(isSelected ? item.accentColor : .primary)
                 Spacer()
@@ -299,7 +299,7 @@ struct DarkModeToggleRow: View {
                     .font(.system(size: 14))
                     .foregroundStyle(darkMode ? Color.gold : Color.orange)
             }
-            Text(L("Dark mode"))
+            Text("Dark mode")
                 .font(.system(size: 14))
                 .foregroundStyle(.primary)
             Spacer()

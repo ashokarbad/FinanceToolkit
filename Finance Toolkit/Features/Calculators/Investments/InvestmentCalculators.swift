@@ -12,29 +12,29 @@ struct SIPCalculatorView: View {
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private func makeSnapshot() -> SavedCalculation {
-        SavedCalculation(calculatorTitle: L("SIP Calculator"), icon: "calendar.badge.plus", date: Date(),
+        SavedCalculation(calculatorTitle: "SIP Calculator", icon: "calendar.badge.plus", date: Date(),
             note: "₹\(Int(vm.sipMonthly).formatted())/mo · \(sipMonths) months",
             results: [
-                .init(label: L("Total Invested"),  value: CurrencySettings.formatCurrency(vm.sipTotalInvested, code: currency),  isHighlight: false),
-                .init(label: L("Est. Returns"),    value: CurrencySettings.formatCurrency(vm.sipTotalInterest, code: currency),  isHighlight: false),
-                .init(label: L("Future Value"),    value: CurrencySettings.formatCurrency(vm.sipFutureValue, code: currency),    isHighlight: true),
+                .init(label: "Total Invested",  value: vm.sipTotalInvested.formatted(.currency(code: currency)),  isHighlight: false),
+                .init(label: "Est. Returns",    value: vm.sipTotalInterest.formatted(.currency(code: currency)),  isHighlight: false),
+                .init(label: "Future Value",    value: vm.sipFutureValue.formatted(.currency(code: currency)),    isHighlight: true),
             ])
     }
 
     var body: some View {
         Form {
             Section {
-                SectionHeader(systemImage: "calendar.badge.plus", title: L("SIP Inputs"), color: accent)
-                HStack { Text(L("Monthly Investment")); Spacer(); TextField(L("Amount"), value: $vm.sipMonthly, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                HStack { Text(L("Tenure (months)")); Spacer(); TextField(L("Months"), value: $sipMonths, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
-                HStack { Text(L("Expected Return %")); Spacer(); TextField(L("%"), value: $vm.sipExpectedReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                SectionHeader(systemImage: "calendar.badge.plus", title: "SIP Inputs", color: accent)
+                HStack { Text("Monthly Investment"); Spacer(); TextField("Amount", value: $vm.sipMonthly, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Tenure (months)"); Spacer(); TextField("Months", value: $sipMonths, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
+                HStack { Text("Expected Return %"); Spacer(); TextField("%", value: $vm.sipExpectedReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
             }
             Section {
                 ResultCard(systemImage: "chart.line.uptrend.xyaxis", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
-                    ResultRow(label: L("Total Invested"), value: CurrencySettings.formatCurrency(vm.sipTotalInvested, code: currency))
-                    ResultRow(label: L("Est. Returns"),   value: CurrencySettings.formatCurrency(vm.sipTotalInterest, code: currency))
+                    ResultRow(label: "Total Invested", value: vm.sipTotalInvested.formatted(.currency(code: currency)))
+                    ResultRow(label: "Est. Returns",   value: vm.sipTotalInterest.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: L("Future Value"),   value: CurrencySettings.formatCurrency(vm.sipFutureValue, code: currency),  isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Future Value",   value: vm.sipFutureValue.formatted(.currency(code: currency)),  isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.sipFutureValue)
                 }
             }
@@ -44,13 +44,13 @@ struct SIPCalculatorView: View {
         .onChange(of: sipMonths) { _, _ in vm.sipYears = max(1, sipMonths / 12); vm.recalculateAll() }
         .onChange(of: vm.sipMonthly) { _, _ in vm.recalculateAll() }
         .onChange(of: vm.sipExpectedReturnPercent) { _, _ in vm.recalculateAll() }
-        .navigationTitle(L("SIP Calculator"))
+        .navigationTitle("SIP Calculator")
         .navigationBarTitleDisplayMode(.large)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showInfoSheet = true } label: { Image(systemName: "info.circle") }.tint(accent) } }
         .sheet(isPresented: $showInfoSheet) {
-            InfoSheet(title: L("SIP Calculator Info"),
-                      body1: L("SIP (Systematic Investment Plan) future value uses monthly compounding of your expected annual return. Results are projections — actual mutual fund returns vary."),
-                      body2: L("Tip: Increasing your SIP amount by 10% annually (step-up SIP) can significantly improve your long-term corpus."),
+            InfoSheet(title: "SIP Calculator Info",
+                      body1: "SIP (Systematic Investment Plan) future value uses monthly compounding of your expected annual return. Results are projections — actual mutual fund returns vary.",
+                      body2: "Tip: Increasing your SIP amount by 10% annually (step-up SIP) can significantly improve your long-term corpus.",
                       accent: accent)
         }
     }
@@ -65,28 +65,28 @@ struct SWPCalculatorView: View {
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private func makeSnapshot() -> SavedCalculation {
-        SavedCalculation(calculatorTitle: L("SWP Calculator"), icon: "arrow.down.left.circle.fill", date: Date(),
+        SavedCalculation(calculatorTitle: "SWP Calculator", icon: "arrow.down.left.circle.fill", date: Date(),
             note: "Corpus ₹\(Int(vm.swpCorpus).formatted()) · Withdraw ₹\(Int(vm.swpMonthlyWithdrawal).formatted())/mo",
             results: [
-                .init(label: L("Total Withdrawn"), value: CurrencySettings.formatCurrency(vm.swpTotalWithdrawn, code: currency), isHighlight: false),
-                .init(label: L("Total Earnings"),  value: CurrencySettings.formatCurrency(vm.swpTotalEarnings, code: currency),  isHighlight: false),
-                .init(label: L("Ending Corpus"),   value: CurrencySettings.formatCurrency(vm.swpEndingCorpus, code: currency),   isHighlight: true),
+                .init(label: "Total Withdrawn", value: vm.swpTotalWithdrawn.formatted(.currency(code: currency)), isHighlight: false),
+                .init(label: "Total Earnings",  value: vm.swpTotalEarnings.formatted(.currency(code: currency)),  isHighlight: false),
+                .init(label: "Ending Corpus",   value: vm.swpEndingCorpus.formatted(.currency(code: currency)),   isHighlight: true),
             ])
     }
 
     var body: some View {
         Form {
             Section {
-                SectionHeader(systemImage: "arrow.down.left.circle.fill", title: L("SWP Inputs"), color: accent)
-                HStack { Text(L("Initial Corpus"));       Spacer(); TextField(L("Amount"), value: $vm.swpCorpus, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                HStack { Text(L("Monthly Withdrawal"));   Spacer(); TextField(L("Amount"), value: $vm.swpMonthlyWithdrawal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                HStack { Text(L("Tenure (months)"));      Spacer(); TextField(L("Months"), value: $swpMonths, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
-                HStack { Text(L("Expected Return %"));    Spacer(); TextField(L("%"), value: $vm.swpExpectedReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                SectionHeader(systemImage: "arrow.down.left.circle.fill", title: "SWP Inputs", color: accent)
+                HStack { Text("Initial Corpus");       Spacer(); TextField("Amount", value: $vm.swpCorpus, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Monthly Withdrawal");   Spacer(); TextField("Amount", value: $vm.swpMonthlyWithdrawal, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text("Tenure (months)");      Spacer(); TextField("Months", value: $swpMonths, format: .number).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
+                HStack { Text("Expected Return %");    Spacer(); TextField("%", value: $vm.swpExpectedReturnPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
             }
             if vm.swpMonthlyWithdrawal > 0 {
                 Section("Sustainable Withdrawal") {
                     let sustainableRate = vm.swpCorpus * (vm.swpExpectedReturnPercent / 100.0) / 12.0
-                    ResultRow(label: "Max Sustainable/mo", value: CurrencySettings.formatCurrency(sustainableRate, code: currency))
+                    ResultRow(label: "Max Sustainable/mo", value: sustainableRate.formatted(.currency(code: currency)))
                     Text(vm.swpMonthlyWithdrawal <= sustainableRate
                          ? "✅ Withdrawal is within sustainable limit — corpus may grow."
                          : "⚠️ Withdrawal exceeds returns — corpus will deplete over time.")
@@ -95,10 +95,10 @@ struct SWPCalculatorView: View {
             }
             Section {
                 ResultCard(systemImage: "arrow.down.left.circle.fill", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
-                    ResultRow(label: "Total Withdrawn", value: CurrencySettings.formatCurrency(vm.swpTotalWithdrawn, code: currency))
-                    ResultRow(label: "Total Earnings",  value: CurrencySettings.formatCurrency(vm.swpTotalEarnings, code: currency))
+                    ResultRow(label: "Total Withdrawn", value: vm.swpTotalWithdrawn.formatted(.currency(code: currency)))
+                    ResultRow(label: "Total Earnings",  value: vm.swpTotalEarnings.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Ending Corpus",   value: CurrencySettings.formatCurrency(vm.swpEndingCorpus, code: currency),  isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Ending Corpus",   value: vm.swpEndingCorpus.formatted(.currency(code: currency)),  isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.swpEndingCorpus)
                 }
             }
@@ -133,9 +133,9 @@ struct FDCalculatorView: View {
         SavedCalculation(calculatorTitle: "FD Calculator", icon: "building.columns.fill", date: Date(),
             note: "₹\(Int(vm.fdPrincipal).formatted()) · \(fdMonths) months",
             results: [
-                .init(label: "Principal",        value: CurrencySettings.formatCurrency(vm.fdPrincipalAmount, code: currency), isHighlight: false),
-                .init(label: "Interest Earned",  value: CurrencySettings.formatCurrency(vm.fdInterestAmount, code: currency),  isHighlight: false),
-                .init(label: "Maturity Amount",  value: CurrencySettings.formatCurrency(vm.fdMaturityAmount, code: currency),  isHighlight: true),
+                .init(label: "Principal",        value: vm.fdPrincipalAmount.formatted(.currency(code: currency)), isHighlight: false),
+                .init(label: "Interest Earned",  value: vm.fdInterestAmount.formatted(.currency(code: currency)),  isHighlight: false),
+                .init(label: "Maturity Amount",  value: vm.fdMaturityAmount.formatted(.currency(code: currency)),  isHighlight: true),
             ])
     }
 
@@ -150,10 +150,10 @@ struct FDCalculatorView: View {
             }
             Section {
                 ResultCard(systemImage: "building.columns.fill", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
-                    ResultRow(label: "Principal",       value: CurrencySettings.formatCurrency(vm.fdPrincipalAmount, code: currency))
-                    ResultRow(label: "Interest Earned", value: CurrencySettings.formatCurrency(vm.fdInterestAmount, code: currency))
+                    ResultRow(label: "Principal",       value: vm.fdPrincipalAmount.formatted(.currency(code: currency)))
+                    ResultRow(label: "Interest Earned", value: vm.fdInterestAmount.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Maturity Amount", value: CurrencySettings.formatCurrency(vm.fdMaturityAmount, code: currency), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Maturity Amount", value: vm.fdMaturityAmount.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.fdMaturityAmount)
                 }
             }
@@ -188,9 +188,9 @@ struct RDCalculatorView: View {
         SavedCalculation(calculatorTitle: "RD Calculator", icon: "calendar.circle.fill", date: Date(),
             note: "₹\(Int(vm.rdMonthlyDeposit).formatted())/mo · \(rdMonths) months",
             results: [
-                .init(label: "Total Deposited",  value: CurrencySettings.formatCurrency(vm.rdTotalDeposited, code: currency),  isHighlight: false),
-                .init(label: "Interest Earned",  value: CurrencySettings.formatCurrency(vm.rdInterestAmount, code: currency),   isHighlight: false),
-                .init(label: "Maturity Amount",  value: CurrencySettings.formatCurrency(vm.rdMaturityAmount, code: currency),   isHighlight: true),
+                .init(label: "Total Deposited",  value: vm.rdTotalDeposited.formatted(.currency(code: currency)),  isHighlight: false),
+                .init(label: "Interest Earned",  value: vm.rdInterestAmount.formatted(.currency(code: currency)),   isHighlight: false),
+                .init(label: "Maturity Amount",  value: vm.rdMaturityAmount.formatted(.currency(code: currency)),   isHighlight: true),
             ])
     }
 
@@ -205,10 +205,10 @@ struct RDCalculatorView: View {
             }
             Section {
                 ResultCard(systemImage: "calendar.circle.fill", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
-                    ResultRow(label: "Total Deposited",  value: CurrencySettings.formatCurrency(vm.rdTotalDeposited, code: currency))
-                    ResultRow(label: "Interest Earned",  value: CurrencySettings.formatCurrency(vm.rdInterestAmount, code: currency))
+                    ResultRow(label: "Total Deposited",  value: vm.rdTotalDeposited.formatted(.currency(code: currency)))
+                    ResultRow(label: "Interest Earned",  value: vm.rdInterestAmount.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Maturity Amount",  value: CurrencySettings.formatCurrency(vm.rdMaturityAmount, code: currency), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Maturity Amount",  value: vm.rdMaturityAmount.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.rdMaturityAmount)
                 }
             }
@@ -243,9 +243,9 @@ struct LumpSumMFView: View {
         SavedCalculation(calculatorTitle: "MF Lump Sum", icon: "chart.pie.fill", date: Date(),
             note: "₹\(Int(vm.lumpSumAmount).formatted()) · \(lumpSumMonths) months",
             results: [
-                .init(label: "Principal",       value: CurrencySettings.formatCurrency(vm.lumpSumPrincipal, code: currency),  isHighlight: false),
-                .init(label: "Est. Returns",    value: CurrencySettings.formatCurrency(vm.lumpSumInterest, code: currency),   isHighlight: false),
-                .init(label: "Future Value",    value: CurrencySettings.formatCurrency(vm.lumpSumFutureValue, code: currency), isHighlight: true),
+                .init(label: "Principal",       value: vm.lumpSumPrincipal.formatted(.currency(code: currency)),  isHighlight: false),
+                .init(label: "Est. Returns",    value: vm.lumpSumInterest.formatted(.currency(code: currency)),   isHighlight: false),
+                .init(label: "Future Value",    value: vm.lumpSumFutureValue.formatted(.currency(code: currency)), isHighlight: true),
             ])
     }
 
@@ -259,10 +259,10 @@ struct LumpSumMFView: View {
             }
             Section {
                 ResultCard(systemImage: "chart.line.uptrend.xyaxis", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
-                    ResultRow(label: "Principal",       value: CurrencySettings.formatCurrency(vm.lumpSumPrincipal, code: currency))
-                    ResultRow(label: "Est. Returns",    value: CurrencySettings.formatCurrency(vm.lumpSumInterest, code: currency))
+                    ResultRow(label: "Principal",       value: vm.lumpSumPrincipal.formatted(.currency(code: currency)))
+                    ResultRow(label: "Est. Returns",    value: vm.lumpSumInterest.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Future Value",    value: CurrencySettings.formatCurrency(vm.lumpSumFutureValue, code: currency), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Future Value",    value: vm.lumpSumFutureValue.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.lumpSumFutureValue)
                 }
             }

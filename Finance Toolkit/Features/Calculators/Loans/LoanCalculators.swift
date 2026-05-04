@@ -30,10 +30,10 @@ struct VehiclePersonalLoanView: View {
         SavedCalculation(calculatorTitle: title, icon: isVehicle ? "car.fill" : "person.fill", date: Date(),
             note: "Net Loan ₹\(Int(netLoanAmount).formatted()) · \(vm.tenureMonths) months",
             results: [
-                .init(label: "EMI",            value: CurrencySettings.formatCurrency(emi, code: currency),            isHighlight: true),
-                .init(label: "Net Loan",        value: CurrencySettings.formatCurrency(netLoanAmount, code: currency),  isHighlight: false),
-                .init(label: "Total Interest",  value: CurrencySettings.formatCurrency(totalInterest, code: currency),  isHighlight: false),
-                .init(label: "Total Outflow",   value: CurrencySettings.formatCurrency(totalOutflow, code: currency),   isHighlight: true),
+                .init(label: "EMI",            value: emi.formatted(.currency(code: currency)),            isHighlight: true),
+                .init(label: "Net Loan",        value: netLoanAmount.formatted(.currency(code: currency)),  isHighlight: false),
+                .init(label: "Total Interest",  value: totalInterest.formatted(.currency(code: currency)),  isHighlight: false),
+                .init(label: "Total Outflow",   value: totalOutflow.formatted(.currency(code: currency)),   isHighlight: true),
             ])
     }
 
@@ -53,18 +53,18 @@ struct VehiclePersonalLoanView: View {
             }
             Section {
                 ResultCard(systemImage: isVehicle ? "car.fill" : "person.fill", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
-                    ResultRow(label: "Net Loan Amount",  value: CurrencySettings.formatCurrency(netLoanAmount, code: currency))
-                    ResultRow(label: "Processing Fee",   value: CurrencySettings.formatCurrency(processingFeeAmount, code: currency))
+                    ResultRow(label: "Net Loan Amount",  value: netLoanAmount.formatted(.currency(code: currency)))
+                    ResultRow(label: "Processing Fee",   value: processingFeeAmount.formatted(.currency(code: currency)))
                     if isVehicle {
-                        ResultRow(label: "Insurance",    value: CurrencySettings.formatCurrency(insuranceAmount, code: currency))
-                        ResultRow(label: "RTO Charges",  value: CurrencySettings.formatCurrency(rtoCharges, code: currency))
+                        ResultRow(label: "Insurance",    value: insuranceAmount.formatted(.currency(code: currency)))
+                        ResultRow(label: "RTO Charges",  value: rtoCharges.formatted(.currency(code: currency)))
                     }
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "EMI",              value: CurrencySettings.formatCurrency(emi, code: currency),        isHighlight: true, accentColor: accent)
+                    ResultRow(label: "EMI",              value: emi.formatted(.currency(code: currency)),        isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: emi)
-                    ResultRow(label: "Total Interest",   value: CurrencySettings.formatCurrency(totalInterest, code: currency))
+                    ResultRow(label: "Total Interest",   value: totalInterest.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Total Outflow",    value: CurrencySettings.formatCurrency(totalOutflow, code: currency), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Total Outflow",    value: totalOutflow.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: totalOutflow)
                 }
             }
@@ -127,10 +127,10 @@ struct EducationLoanView: View {
         SavedCalculation(calculatorTitle: "Education Loan", icon: "book.fill", date: Date(),
             note: "Principal ₹\(Int(vm.principal).formatted()) · Moratorium \(moratoriumMonths)m",
             results: [
-                .init(label: "Principal after Moratorium", value: CurrencySettings.formatCurrency(principalAfterMoratorium, code: currency), isHighlight: false),
-                .init(label: "EMI", value: CurrencySettings.formatCurrency(emi, code: currency), isHighlight: true),
-                .init(label: "Total Interest", value: CurrencySettings.formatCurrency(totalInterest, code: currency), isHighlight: false),
-                .init(label: "Total Paid", value: CurrencySettings.formatCurrency(totalEMIPaid, code: currency), isHighlight: true),
+                .init(label: "Principal after Moratorium", value: principalAfterMoratorium.formatted(.currency(code: currency)), isHighlight: false),
+                .init(label: "EMI", value: emi.formatted(.currency(code: currency)), isHighlight: true),
+                .init(label: "Total Interest", value: totalInterest.formatted(.currency(code: currency)), isHighlight: false),
+                .init(label: "Total Paid", value: totalEMIPaid.formatted(.currency(code: currency)), isHighlight: true),
             ])
     }
 
@@ -149,13 +149,13 @@ struct EducationLoanView: View {
             }
             Section {
                 ResultCard(systemImage: "book.fill", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
-                    ResultRow(label: "Principal after Moratorium", value: CurrencySettings.formatCurrency(principalAfterMoratorium, code: currency))
+                    ResultRow(label: "Principal after Moratorium", value: principalAfterMoratorium.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "EMI",               value: CurrencySettings.formatCurrency(emi, code: currency),          isHighlight: true, accentColor: accent)
+                    ResultRow(label: "EMI",               value: emi.formatted(.currency(code: currency)),          isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: emi)
-                    ResultRow(label: "Total Interest",    value: CurrencySettings.formatCurrency(totalInterest, code: currency))
+                    ResultRow(label: "Total Interest",    value: totalInterest.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Total Paid",        value: CurrencySettings.formatCurrency(totalEMIPaid, code: currency),  isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Total Paid",        value: totalEMIPaid.formatted(.currency(code: currency)),  isHighlight: true, accentColor: accent)
                 }
             }
             CustomAmortizationSection(
@@ -233,18 +233,18 @@ struct BusinessLoanView: View {
             Section {
                 ResultCard(systemImage: "briefcase.fill", accentColor: accent, onSave: {
                     SavedStore.shared.save(calculation: SavedCalculation(calculatorTitle: "Business Loan (\(loanPurpose))", icon: "briefcase.fill", date: Date(), note: "", results: [
-                        .init(label: "EMI", value: CurrencySettings.formatCurrency(emi, code: currency), isHighlight: true),
-                        .init(label: "Processing Fee", value: CurrencySettings.formatCurrency(processingFee, code: currency), isHighlight: false),
-                        .init(label: "Total Interest", value: CurrencySettings.formatCurrency(totalInterest, code: currency), isHighlight: false),
-                        .init(label: "Total Outflow", value: CurrencySettings.formatCurrency(totalPaid, code: currency), isHighlight: true),
+                        .init(label: "EMI", value: emi.formatted(.currency(code: currency)), isHighlight: true),
+                        .init(label: "Processing Fee", value: processingFee.formatted(.currency(code: currency)), isHighlight: false),
+                        .init(label: "Total Interest", value: totalInterest.formatted(.currency(code: currency)), isHighlight: false),
+                        .init(label: "Total Outflow", value: totalPaid.formatted(.currency(code: currency)), isHighlight: true),
                     ]))
                 }) {
-                    ResultRow(label: "EMI",             value: CurrencySettings.formatCurrency(emi, code: currency),           isHighlight: true, accentColor: accent)
+                    ResultRow(label: "EMI",             value: emi.formatted(.currency(code: currency)),           isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: emi)
-                    ResultRow(label: "Processing Fee",  value: CurrencySettings.formatCurrency(processingFee, code: currency))
-                    ResultRow(label: "Total Interest",  value: CurrencySettings.formatCurrency(totalInterest, code: currency))
+                    ResultRow(label: "Processing Fee",  value: processingFee.formatted(.currency(code: currency)))
+                    ResultRow(label: "Total Interest",  value: totalInterest.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Total Outflow",   value: CurrencySettings.formatCurrency(totalPaid, code: currency),      isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Total Outflow",   value: totalPaid.formatted(.currency(code: currency)),      isHighlight: true, accentColor: accent)
                 }
             }
             CustomAmortizationSection(
@@ -314,28 +314,28 @@ struct GoldLoanView: View {
                 }
             }
             Section("Eligible Loan Amount") {
-                ResultRow(label: "Gold Value",       value: CurrencySettings.formatCurrency(goldValue, code: currency))
+                ResultRow(label: "Gold Value",       value: goldValue.formatted(.currency(code: currency)))
                 ResultRow(label: "LTV Applied",      value: "\(Int(ltvPercent))%")
-                ResultRow(label: "Loan Eligible",    value: CurrencySettings.formatCurrency(principalFromLTV, code: currency), isHighlight: true, accentColor: accent)
+                ResultRow(label: "Loan Eligible",    value: principalFromLTV.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
             }
             Section {
                 ResultCard(systemImage: "sparkles", accentColor: accent, onSave: {
                     SavedStore.shared.save(calculation: SavedCalculation(calculatorTitle: "Gold Loan", icon: "sparkles", date: Date(), note: "Gold ₹\(Int(goldValue).formatted()) · LTV \(Int(ltvPercent))%", results: [
-                        .init(label: loanType == 0 ? "EMI" : "Monthly Interest", value: CurrencySettings.formatCurrency((loanType == 0 ? emiAmount : monthlyInterestOnly), code: currency), isHighlight: true),
-                        .init(label: "Total Interest", value: CurrencySettings.formatCurrency(totalInterest, code: currency), isHighlight: false),
-                        .init(label: "Total Outflow", value: CurrencySettings.formatCurrency(totalPaid, code: currency), isHighlight: true),
+                        .init(label: loanType == 0 ? "EMI" : "Monthly Interest", value: (loanType == 0 ? emiAmount : monthlyInterestOnly).formatted(.currency(code: currency)), isHighlight: true),
+                        .init(label: "Total Interest", value: totalInterest.formatted(.currency(code: currency)), isHighlight: false),
+                        .init(label: "Total Outflow", value: totalPaid.formatted(.currency(code: currency)), isHighlight: true),
                     ]))
                 }) {
                     if loanType == 0 {
-                        ResultRow(label: "EMI", value: CurrencySettings.formatCurrency(emiAmount, code: currency), isHighlight: true, accentColor: accent)
+                        ResultRow(label: "EMI", value: emiAmount.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                             .contentTransition(.numericText()).animation(.snappy, value: emiAmount)
                     } else {
-                        ResultRow(label: "Monthly Interest", value: CurrencySettings.formatCurrency(monthlyInterestOnly, code: currency), isHighlight: true, accentColor: accent)
-                        ResultRow(label: "Principal at End", value: CurrencySettings.formatCurrency(principalFromLTV, code: currency))
+                        ResultRow(label: "Monthly Interest", value: monthlyInterestOnly.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        ResultRow(label: "Principal at End", value: principalFromLTV.formatted(.currency(code: currency)))
                     }
-                    ResultRow(label: "Total Interest", value: CurrencySettings.formatCurrency(totalInterest, code: currency))
+                    ResultRow(label: "Total Interest", value: totalInterest.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Total Outflow", value: CurrencySettings.formatCurrency(totalPaid, code: currency), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Total Outflow", value: totalPaid.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: totalPaid)
                 }
             }
@@ -409,20 +409,20 @@ struct LAPLoanView: View {
             Section {
                 ResultCard(systemImage: "building.2.fill", accentColor: accent, onSave: {
                     SavedStore.shared.save(calculation: SavedCalculation(calculatorTitle: "Loan Against Property (LAP)", icon: "building.2.fill", date: Date(), note: "\(propertyType) · LTV \(Int(ltvPercent))%", results: [
-                        .init(label: "Eligible Principal", value: CurrencySettings.formatCurrency(principalFromLTV, code: currency), isHighlight: false),
-                        .init(label: "EMI", value: CurrencySettings.formatCurrency(emi, code: currency), isHighlight: true),
-                        .init(label: "Total Interest", value: CurrencySettings.formatCurrency(totalInterest, code: currency), isHighlight: false),
-                        .init(label: "Total Outflow", value: CurrencySettings.formatCurrency(totalOutflow, code: currency), isHighlight: true),
+                        .init(label: "Eligible Principal", value: principalFromLTV.formatted(.currency(code: currency)), isHighlight: false),
+                        .init(label: "EMI", value: emi.formatted(.currency(code: currency)), isHighlight: true),
+                        .init(label: "Total Interest", value: totalInterest.formatted(.currency(code: currency)), isHighlight: false),
+                        .init(label: "Total Outflow", value: totalOutflow.formatted(.currency(code: currency)), isHighlight: true),
                     ]))
                 }) {
-                    ResultRow(label: "Eligible Principal (LTV)", value: CurrencySettings.formatCurrency(principalFromLTV, code: currency), isHighlight: false, accentColor: accent)
-                    ResultRow(label: "Processing Fee",           value: CurrencySettings.formatCurrency(processingFee, code: currency))
+                    ResultRow(label: "Eligible Principal (LTV)", value: principalFromLTV.formatted(.currency(code: currency)), isHighlight: false, accentColor: accent)
+                    ResultRow(label: "Processing Fee",           value: processingFee.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "EMI",                      value: CurrencySettings.formatCurrency(emi, code: currency),           isHighlight: true, accentColor: accent)
+                    ResultRow(label: "EMI",                      value: emi.formatted(.currency(code: currency)),           isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: emi)
-                    ResultRow(label: "Total Interest",           value: CurrencySettings.formatCurrency(totalInterest, code: currency))
+                    ResultRow(label: "Total Interest",           value: totalInterest.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Total Outflow",            value: CurrencySettings.formatCurrency(totalOutflow, code: currency),   isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Total Outflow",            value: totalOutflow.formatted(.currency(code: currency)),   isHighlight: true, accentColor: accent)
                 }
             }
             CustomAmortizationSection(
@@ -488,21 +488,21 @@ struct AgriculturalLoanView: View {
             }
             Section("Repayment Info") {
                 ResultRow(label: "Repayment Months",      value: "\(repayMonths) months")
-                ResultRow(label: "Principal (post-morat.)", value: CurrencySettings.formatCurrency(principalGrown, code: currency))
+                ResultRow(label: "Principal (post-morat.)", value: principalGrown.formatted(.currency(code: currency)))
                 Text("Align EMIs with your crop cycle harvest for better cash-flow management.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section {
                 ResultCard(systemImage: "leaf.fill", accentColor: accent, onSave: {
                     SavedStore.shared.save(calculation: SavedCalculation(calculatorTitle: "Agricultural Loan (\(cropCycle))", icon: "leaf.fill", date: Date(), note: "", results: [
-                        .init(label: "EMI", value: CurrencySettings.formatCurrency(emi, code: currency), isHighlight: true),
-                        .init(label: "Total Paid", value: CurrencySettings.formatCurrency(totalPaid, code: currency), isHighlight: true),
+                        .init(label: "EMI", value: emi.formatted(.currency(code: currency)), isHighlight: true),
+                        .init(label: "Total Paid", value: totalPaid.formatted(.currency(code: currency)), isHighlight: true),
                     ]))
                 }) {
-                    ResultRow(label: "EMI (monthly)", value: CurrencySettings.formatCurrency(emi, code: currency), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "EMI (monthly)", value: emi.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: emi)
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Total Paid (EMIs)", value: CurrencySettings.formatCurrency(totalPaid, code: currency))
+                    ResultRow(label: "Total Paid (EMIs)", value: totalPaid.formatted(.currency(code: currency)))
                 }
             }
             CustomAmortizationSection(
@@ -562,11 +562,11 @@ struct CreditLineOverdraftView: View {
             }
             Section {
                 ResultCard(systemImage: "creditcard.fill", accentColor: accent) {
-                    ResultRow(label: "Utilized Amount",          value: CurrencySettings.formatCurrency(utilizedAmount, code: currency))
+                    ResultRow(label: "Utilized Amount",          value: utilizedAmount.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Monthly Interest (approx)", value: CurrencySettings.formatCurrency(monthlyInterest, code: currency), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Monthly Interest (approx)", value: monthlyInterest.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: monthlyInterest)
-                    ResultRow(label: "Interest over \(averageMonths) months", value: CurrencySettings.formatCurrency(totalInterest6Months, code: currency))
+                    ResultRow(label: "Interest over \(averageMonths) months", value: totalInterest6Months.formatted(.currency(code: currency)))
                 }
             }
         }
@@ -627,21 +627,21 @@ struct ConsumerDurableLoanView: View {
             Section {
                 ResultCard(systemImage: "cart.fill", accentColor: accent, onSave: {
                     SavedStore.shared.save(calculation: SavedCalculation(calculatorTitle: "Consumer Durable / EMI", icon: "cart.fill", date: Date(), note: noCostEMI ? "No-cost EMI" : "Standard EMI", results: [
-                        .init(label: "EMI", value: CurrencySettings.formatCurrency(emi, code: currency), isHighlight: true),
-                        .init(label: "Implied Interest", value: CurrencySettings.formatCurrency(impliedInterest, code: currency), isHighlight: false),
-                        .init(label: "Total Outflow", value: CurrencySettings.formatCurrency(totalPayment, code: currency), isHighlight: true),
+                        .init(label: "EMI", value: emi.formatted(.currency(code: currency)), isHighlight: true),
+                        .init(label: "Implied Interest", value: impliedInterest.formatted(.currency(code: currency)), isHighlight: false),
+                        .init(label: "Total Outflow", value: totalPayment.formatted(.currency(code: currency)), isHighlight: true),
                     ]))
                 }) {
-                    ResultRow(label: "Net Loan Amount",  value: CurrencySettings.formatCurrency(netLoanAmount, code: currency))
-                    ResultRow(label: "Processing Fee",   value: CurrencySettings.formatCurrency(processingFeeAmount, code: currency))
+                    ResultRow(label: "Net Loan Amount",  value: netLoanAmount.formatted(.currency(code: currency)))
+                    ResultRow(label: "Processing Fee",   value: processingFeeAmount.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "EMI",              value: CurrencySettings.formatCurrency(emi, code: currency),         isHighlight: true, accentColor: accent)
+                    ResultRow(label: "EMI",              value: emi.formatted(.currency(code: currency)),         isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: emi)
                     if !noCostEMI {
-                        ResultRow(label: "Implied Interest", value: CurrencySettings.formatCurrency(impliedInterest, code: currency))
+                        ResultRow(label: "Implied Interest", value: impliedInterest.formatted(.currency(code: currency)))
                     }
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Total Outflow",    value: CurrencySettings.formatCurrency(totalPayment, code: currency), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Total Outflow",    value: totalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                 }
             }
             if !noCostEMI {

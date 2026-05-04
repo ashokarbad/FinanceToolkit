@@ -49,10 +49,10 @@ struct DashboardView: View {
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 5..<12: return L("Good Morning")
-        case 12..<17: return L("Good Afternoon")
-        case 17..<21: return L("Good Evening")
-        default: return L("Good Night")
+        case 5..<12: return "Good Morning"
+        case 12..<17: return "Good Afternoon"
+        case 17..<21: return "Good Evening"
+        default: return "Good Night"
         }
     }
 
@@ -85,7 +85,7 @@ struct DashboardView: View {
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
-                        Text(profileName.isEmpty ? L("Welcome back!") : profileName)
+                        Text(profileName.isEmpty ? "Welcome back!" : profileName)
                             .font(.title3.bold())
                             .foregroundStyle(.primary)
                     }
@@ -102,9 +102,9 @@ struct DashboardView: View {
                 // Expenses hero card (full width)
                 Button { navigateTo?(.expenses) } label: {
                     DashboardHeroCard(
-                        title: L("Monthly Expenses"),
-                        value: CurrencySettings.formatCurrency(currentMonthExpenseTotal, code: currency),
-                        subtitle: "\(currentMonthExpenseCount) \(L("transactions this month"))",
+                        title: "Monthly Expenses",
+                        value: currentMonthExpenseTotal.formatted(.currency(code: currency)),
+                        subtitle: "\(currentMonthExpenseCount) transactions this month",
                         icon: "chart.pie.fill",
                         gradient: [Color(hex: "#E87D2B"), Color(hex: "#F5A623")]
                     )
@@ -114,9 +114,9 @@ struct DashboardView: View {
                 // Outflow hero card (full width)
                 Button { navigateTo?(.outflow) } label: {
                     DashboardHeroCard(
-                        title: L("Monthly Outflow"),
-                        value: CurrencySettings.formatCurrency(currentMonthOutflowTotal, code: currency),
-                        subtitle: "\(currentMonthOutflowCount) \(L("items this month"))",
+                        title: "Monthly Outflow",
+                        value: currentMonthOutflowTotal.formatted(.currency(code: currency)),
+                        subtitle: "\(currentMonthOutflowCount) items this month",
                         icon: "arrow.up.forward.circle.fill",
                         gradient: [Color(hex: "#1D9E75"), Color(hex: "#34D399")]
                     )
@@ -127,7 +127,7 @@ struct DashboardView: View {
                 HStack(spacing: 12) {
                     Button { navigateTo?(.saved) } label: {
                         DashboardCompactCard(
-                            title: L("Saved"),
+                            title: "Saved",
                             value: "\(store.calculations.count)",
                             icon: "bookmark.fill",
                             color: .navy
@@ -137,7 +137,7 @@ struct DashboardView: View {
 
                     Button { navigateTo?(.calculators) } label: {
                         DashboardCompactCard(
-                            title: L("Favourites"),
+                            title: "Favourites",
                             value: "\(store.savedIDs.count)",
                             icon: "star.fill",
                             color: .gold
@@ -147,7 +147,7 @@ struct DashboardView: View {
 
                     Button { navigateTo?(.notes) } label: {
                         DashboardCompactCard(
-                            title: L("Notes"),
+                            title: "Notes",
                             value: "\(noteStore.notes.count)",
                             icon: "note.text",
                             color: Color(hex: "#8B5CF6")
@@ -158,7 +158,7 @@ struct DashboardView: View {
 
                 // Quick actions
                 VStack(alignment: .leading, spacing: 10) {
-                    Text(L("Quick Actions"))
+                    Text("Quick Actions")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
@@ -166,13 +166,13 @@ struct DashboardView: View {
                         .padding(.leading, 4)
 
                     HStack(spacing: 12) {
-                        DashboardActionButton(icon: "plus.circle.fill", label: L("Add Expense"), color: Color(hex: "#E87D2B")) {
+                        DashboardActionButton(icon: "plus.circle.fill", label: "Add Expense", color: Color(hex: "#E87D2B")) {
                             navigateTo?(.expenses)
                         }
-                        DashboardActionButton(icon: "arrow.up.circle.fill", label: L("Add Outflow"), color: .teal) {
+                        DashboardActionButton(icon: "arrow.up.circle.fill", label: "Add Outflow", color: .teal) {
                             navigateTo?(.outflow)
                         }
-                        DashboardActionButton(icon: "square.grid.2x2.fill", label: L("Calculators"), color: .navy) {
+                        DashboardActionButton(icon: "square.grid.2x2.fill", label: "Calculators", color: .navy) {
                             navigateTo?(.calculators)
                         }
                     }
@@ -347,10 +347,10 @@ struct SavedView: View {
                             .font(.system(size: 30, weight: .light))
                             .foregroundStyle(Color.navy.opacity(0.4))
                     }
-                    Text(L("No saved calculations"))
+                    Text("No saved calculations")
                         .font(.headline)
                         .foregroundStyle(.secondary)
-                    Text(L("Tap \"Save\" on any calculator result to bookmark it here."))
+                    Text("Tap \"Save\" on any calculator result to bookmark it here.")
                         .font(.subheadline)
                         .foregroundStyle(.tertiary)
                         .multilineTextAlignment(.center)
@@ -365,7 +365,7 @@ struct SavedView: View {
                         VStack(spacing: 14) {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(L("Total Saved"))
+                                    Text("Total Saved")
                                         .font(.caption.weight(.medium))
                                         .foregroundStyle(.white.opacity(0.8))
                                     Text("\(totalSaved)")
@@ -388,7 +388,7 @@ struct SavedView: View {
                             if !calculatorBreakdown.isEmpty {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 8) {
-                                        ForEach(calculatorBreakdown.prefix(3), id: \.name) { item in
+                                        ForEach(calculatorBreakdown.prefix(5), id: \.name) { item in
                                             HStack(spacing: 4) {
                                                 Image(systemName: item.icon)
                                                     .font(.system(size: 9))
@@ -431,12 +431,12 @@ struct SavedView: View {
                             Button {
                                 shareAllPDFURL = generateSavedPDF(calculations: store.calculations)
                             } label: {
-                                Label(L("Export as PDF"), systemImage: "doc.richtext")
+                                Label("Export as PDF", systemImage: "doc.richtext")
                             }
                             Button {
                                 shareCSVURL = generateSavedCSV(calculations: store.calculations)
                             } label: {
-                                Label(L("Export as Excel (CSV)"), systemImage: "tablecells")
+                                Label("Export as Excel (CSV)", systemImage: "tablecells")
                             }
                         } label: {
                             Image(systemName: "square.and.arrow.up")
@@ -560,7 +560,7 @@ struct SavedView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 11))
-                        Text(L("Share"))
+                        Text("Share")
                             .font(.caption2.weight(.medium))
                     }
                     .foregroundStyle(Color.navy)
@@ -579,7 +579,7 @@ struct SavedView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "note.text.badge.plus")
                             .font(.system(size: 11))
-                        Text(L("Note"))
+                        Text("Note")
                             .font(.caption2.weight(.medium))
                     }
                     .foregroundStyle(Color(hex: "#8B5CF6"))
@@ -600,7 +600,7 @@ struct SavedView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "trash")
                             .font(.system(size: 11))
-                        Text(L("Delete"))
+                        Text("Delete")
                             .font(.caption2.weight(.medium))
                     }
                     .foregroundStyle(.red.opacity(0.8))
@@ -663,7 +663,7 @@ struct SavedView: View {
         ]
 
         // Title
-        let title = calculations.count == 1 ? L("Saved Calculation") : L("Saved Calculations") + " (\(calculations.count))"
+        let title = calculations.count == 1 ? "Saved Calculation" : "Saved Calculations (\(calculations.count))"
         NSAttributedString(string: title, attributes: titleAttr)
             .draw(at: CGPoint(x: margin, y: y))
         y += 34
@@ -671,7 +671,7 @@ struct SavedView: View {
         for calc in calculations {
             if y > pageH - 100 {
                 // Footer on current page
-                NSAttributedString(string: L("Generated by Finance Toolkit"), attributes: footerAttr)
+                NSAttributedString(string: "Generated by Finance Toolkit", attributes: footerAttr)
                     .draw(at: CGPoint(x: margin, y: pageH - 30))
                 UIGraphicsBeginPDFPage()
                 y = topMarginNewPage
@@ -697,7 +697,7 @@ struct SavedView: View {
             let valueX = margin + contentW * 0.65
             for entry in calc.results {
                 if y > pageH - 60 {
-                    NSAttributedString(string: L("Generated by Finance Toolkit"), attributes: footerAttr)
+                    NSAttributedString(string: "Generated by Finance Toolkit", attributes: footerAttr)
                         .draw(at: CGPoint(x: margin, y: pageH - 30))
                     UIGraphicsBeginPDFPage()
                     y = topMarginNewPage
@@ -713,7 +713,7 @@ struct SavedView: View {
             // User note
             if let userNote = calc.userNote, !userNote.text.isEmpty {
                 if y > pageH - 80 {
-                    NSAttributedString(string: L("Generated by Finance Toolkit"), attributes: footerAttr)
+                    NSAttributedString(string: "Generated by Finance Toolkit", attributes: footerAttr)
                         .draw(at: CGPoint(x: margin, y: pageH - 30))
                     UIGraphicsBeginPDFPage()
                     y = topMarginNewPage
@@ -804,12 +804,12 @@ struct NoteEditorSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(L("Note")) {
+                Section("Note") {
                     TextEditor(text: $existingNote.text)
                         .frame(minHeight: 100)
                         .overlay(alignment: .topLeading) {
                             if existingNote.text.isEmpty {
-                                Text(L("Add your note here..."))
+                                Text("Add your note here...")
                                     .foregroundStyle(.tertiary)
                                     .padding(.top, 8)
                                     .padding(.leading, 4)
@@ -818,8 +818,8 @@ struct NoteEditorSheet: View {
                         }
                 }
 
-                Section(L("Font Size")) {
-                    Picker(L("Size"), selection: $existingNote.fontSize) {
+                Section("Font Size") {
+                    Picker("Size", selection: $existingNote.fontSize) {
                         ForEach(fontSizes, id: \.self) { size in
                             Text("\(size)pt").tag(size)
                         }
@@ -827,17 +827,17 @@ struct NoteEditorSheet: View {
                     .pickerStyle(.segmented)
                 }
 
-                Section(L("Style")) {
+                Section("Style") {
                     HStack(spacing: 16) {
                         Toggle(isOn: $existingNote.isBold) {
-                            Label(L("Bold"), systemImage: "bold")
+                            Label("Bold", systemImage: "bold")
                                 .font(.subheadline)
                         }
                         .toggleStyle(.button)
                         .tint(.navy)
 
                         Toggle(isOn: $existingNote.isItalic) {
-                            Label(L("Italic"), systemImage: "italic")
+                            Label("Italic", systemImage: "italic")
                                 .font(.subheadline)
                         }
                         .toggleStyle(.button)
@@ -847,7 +847,7 @@ struct NoteEditorSheet: View {
                     }
                 }
 
-                Section(L("Color")) {
+                Section("Color") {
                     HStack(spacing: 12) {
                         ForEach(colorOptions, id: \.hex) { option in
                             Button {
@@ -871,7 +871,7 @@ struct NoteEditorSheet: View {
 
                 // Preview
                 if !existingNote.text.isEmpty {
-                    Section(L("Preview")) {
+                    Section("Preview") {
                         Text(existingNote.text)
                             .font(.system(size: CGFloat(existingNote.fontSize),
                                           weight: existingNote.isBold ? .bold : .regular))
@@ -887,7 +887,7 @@ struct NoteEditorSheet: View {
                     } label: {
                         HStack {
                             Spacer()
-                            Label(L("Save Note"), systemImage: "checkmark.circle.fill")
+                            Label("Save Note", systemImage: "checkmark.circle.fill")
                                 .font(.headline)
                             Spacer()
                         }
@@ -896,14 +896,14 @@ struct NoteEditorSheet: View {
                     .tint(.navy)
                 }
             }
-            .navigationTitle(L("Add Note"))
+            .navigationTitle("Add Note")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(L("Cancel")) { dismiss() }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(L("Done")) {
+                    Button("Done") {
                         store.updateNote(id: calculationID, note: existingNote)
                         dismiss()
                     }
@@ -938,15 +938,15 @@ struct NotesListView: View {
                     Image(systemName: "note.text")
                         .font(.system(size: 44, weight: .light))
                         .foregroundStyle(.tertiary)
-                    Text(L("No notes yet"))
+                    Text("No notes yet")
                         .font(.headline)
                         .foregroundStyle(.secondary)
-                    Text(L("Tap + to create your first note with custom styling."))
+                    Text("Tap + to create your first note with custom styling.")
                         .font(.subheadline)
                         .foregroundStyle(.tertiary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
-                    Button(L("Create Note")) { showNewNote = true }
+                    Button("Create Note") { showNewNote = true }
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color(hex: "#8B5CF6"))
                 }
@@ -980,15 +980,15 @@ struct NotesListView: View {
                 QuickNoteEditorSheet(store: store, note: note)
             }
         }
-        .alert(L("Delete Note"), isPresented: $showDeleteAlert) {
-            Button(L("Delete"), role: .destructive) {
+        .alert("Delete Note", isPresented: $showDeleteAlert) {
+            Button("Delete", role: .destructive) {
                 if let id = deleteNoteID {
                     withAnimation { store.delete(id: id) }
                 }
             }
-            Button(L("Cancel"), role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text(L("Are you sure you want to delete this note?"))
+            Text("Are you sure you want to delete this note?")
         }
     }
 
@@ -1000,7 +1000,7 @@ struct NotesListView: View {
                     Text(note.title)
                         .font(.subheadline.weight(.semibold))
                 } else {
-                    Text(L("Untitled Note"))
+                    Text("Untitled Note")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.tertiary)
                 }
@@ -1027,7 +1027,7 @@ struct NotesListView: View {
                 deleteNoteID = note.id
                 showDeleteAlert = true
             } label: {
-                Label(L("Delete"), systemImage: "trash")
+                Label("Delete", systemImage: "trash")
             }
         }
     }
@@ -1064,11 +1064,11 @@ struct QuickNoteEditorSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(L("Title")) {
-                    TextField(L("Note title"), text: $title)
+                Section("Title") {
+                    TextField("Note title", text: $title)
                 }
 
-                Section(L("Content")) {
+                Section("Content") {
                     TextEditor(text: $styledNote.text)
                         .font(.system(size: CGFloat(styledNote.fontSize),
                                       weight: styledNote.isBold ? .bold : .regular))
@@ -1077,7 +1077,7 @@ struct QuickNoteEditorSheet: View {
                         .frame(minHeight: 150)
                         .overlay(alignment: .topLeading) {
                             if styledNote.text.isEmpty {
-                                Text(L("Write your note here..."))
+                                Text("Write your note here...")
                                     .foregroundStyle(.tertiary)
                                     .font(.system(size: CGFloat(styledNote.fontSize)))
                                     .padding(.top, 8)
@@ -1087,8 +1087,8 @@ struct QuickNoteEditorSheet: View {
                         }
                 }
 
-                Section(L("Font Size")) {
-                    Picker(L("Size"), selection: $styledNote.fontSize) {
+                Section("Font Size") {
+                    Picker("Size", selection: $styledNote.fontSize) {
                         ForEach(fontSizes, id: \.self) { size in
                             Text("\(size)pt").tag(size)
                         }
@@ -1096,17 +1096,17 @@ struct QuickNoteEditorSheet: View {
                     .pickerStyle(.segmented)
                 }
 
-                Section(L("Style")) {
+                Section("Style") {
                     HStack(spacing: 16) {
                         Toggle(isOn: $styledNote.isBold) {
-                            Label(L("Bold"), systemImage: "bold")
+                            Label("Bold", systemImage: "bold")
                                 .font(.subheadline)
                         }
                         .toggleStyle(.button)
                         .tint(Color(hex: "#8B5CF6"))
 
                         Toggle(isOn: $styledNote.isItalic) {
-                            Label(L("Italic"), systemImage: "italic")
+                            Label("Italic", systemImage: "italic")
                                 .font(.subheadline)
                         }
                         .toggleStyle(.button)
@@ -1116,7 +1116,7 @@ struct QuickNoteEditorSheet: View {
                     }
                 }
 
-                Section(L("Color")) {
+                Section("Color") {
                     HStack(spacing: 12) {
                         ForEach(colorOptions, id: \.hex) { option in
                             Button {
@@ -1144,7 +1144,7 @@ struct QuickNoteEditorSheet: View {
                     } label: {
                         HStack {
                             Spacer()
-                            Label(note == nil ? L("Create Note") : L("Update Note"), systemImage: "checkmark.circle.fill")
+                            Label(note == nil ? "Create Note" : "Update Note", systemImage: "checkmark.circle.fill")
                                 .font(.headline)
                             Spacer()
                         }
@@ -1154,14 +1154,14 @@ struct QuickNoteEditorSheet: View {
                     .tint(Color(hex: "#8B5CF6"))
                 }
             }
-            .navigationTitle(note == nil ? L("New Note") : L("Edit Note"))
+            .navigationTitle(note == nil ? "New Note" : "Edit Note")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(L("Cancel")) { dismiss() }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(L("Done")) { saveNote() }
+                    Button("Done") { saveNote() }
                         .fontWeight(.semibold)
                         .disabled(styledNote.text.isEmpty)
                 }
@@ -1186,50 +1186,50 @@ struct QuickNoteEditorSheet: View {
 
 // MARK: - Tips & FAQ
 struct TipsFAQView: View {
-    private var sections: [(heading: String, color: String, tips: [(icon: String, title: String, detail: String)])] {[
-        (L("App Features"), "#8B5CF6", [
-            ("person.badge.plus", L("Personalised onboarding"), L("On first launch, a welcome screen lets you set your name, age, and preferred currency — so everything is ready from the start.")),
-            ("eye.slash.fill", L("Privacy screen"), L("When you leave the app or switch to another, your financial data is automatically hidden behind a privacy screen. No extra setup needed.")),
-            ("bookmark.fill", L("Save & compare results"), L("Save any calculation result for future reference. Access all saved items from the Dashboard or Saved section.")),
-            ("square.and.arrow.up.fill", L("Export as PDF or CSV"), L("Share or export individual calculations or all saved items as a formatted PDF or CSV file from the Saved section.")),
-            ("star.fill", L("Favourite calculators"), L("Star your most-used calculators for quick access. Favourites appear at the top of the Calculators screen.")),
-            ("note.text", L("Use Notes for quick reminders"), L("Create styled notes with custom font sizes, colors, bold and italic formatting. Perfect for financial planning reminders.")),
-            ("list.number", L("View amortization schedules"), L("Every loan calculator includes a month-by-month amortization schedule showing EMI, principal, interest, and outstanding balance.")),
-            ("moon.fill", L("Dark mode support"), L("Toggle dark mode from the sidebar for comfortable viewing in any lighting condition.")),
-            ("exclamationmark.triangle.fill", L("Smart validation"), L("The app alerts you with a clear message if you try to save without entering required fields — no silent failures.")),
+    private let sections: [(heading: String, color: String, tips: [(icon: String, title: String, detail: String)])] = [
+        ("App Features", "#8B5CF6", [
+            ("person.badge.plus", "Personalised onboarding", "On first launch, a welcome screen lets you set your name, age, and preferred currency — so everything is ready from the start."),
+            ("eye.slash.fill", "Privacy screen", "When you leave the app or switch to another, your financial data is automatically hidden behind a privacy screen. No extra setup needed."),
+            ("bookmark.fill", "Save & compare results", "Save any calculation result for future reference. Access all saved items from the Dashboard or Saved section."),
+            ("square.and.arrow.up.fill", "Export as PDF or CSV", "Share or export individual calculations or all saved items as a formatted PDF or CSV file from the Saved section."),
+            ("star.fill", "Favourite calculators", "Star your most-used calculators for quick access. Favourites appear at the top of the Calculators screen."),
+            ("note.text", "Use Notes for quick reminders", "Create styled notes with custom font sizes, colors, bold and italic formatting. Perfect for financial planning reminders."),
+            ("list.number", "View amortization schedules", "Every loan calculator includes a month-by-month amortization schedule showing EMI, principal, interest, and outstanding balance."),
+            ("moon.fill", "Dark mode support", "Toggle dark mode from the sidebar for comfortable viewing in any lighting condition."),
+            ("exclamationmark.triangle.fill", "Smart validation", "The app alerts you with a clear message if you try to save without entering required fields — no silent failures."),
         ]),
-        (L("Expenses & Outflow"), "#E87D2B", [
-            ("chart.pie.fill", L("Track monthly expenses"), L("Log every expense by category to understand your spending patterns. View the pie chart breakdown and export monthly reports as PDF or CSV.")),
-            ("pencil.circle.fill", L("Edit & delete entries"), L("Tap the pencil icon on any expense or outflow entry to update it, or the × icon to remove it. Full control over your records.")),
-            ("ellipsis.circle.fill", L("Custom expense categories"), L("When you select 'Other' as a category, a text field appears so you can type your own category name — Donation, Gift, or anything you need.")),
-            ("arrow.up.forward.circle.fill", L("Monitor monthly outflow"), L("Track EMIs, subscriptions, and bills in Monthly Outflow with salary tracking to see how much you have left after all outflows.")),
-            ("chart.bar.fill", L("Yearly graphical overview"), L("Tap the chart icon in Expenses or Outflow to see a full-year bar chart overview — identify high-spend months and track your trends.")),
-            ("dollarsign.circle.fill", L("Multi-currency support"), L("Switch currencies in Settings — supports 12 currencies including INR, USD, EUR, GBP, AED, SAR, CAD, AUD, SGD, JPY & RD$. All calculators and trackers update automatically.")),
+        ("Expenses & Outflow", "#E87D2B", [
+            ("chart.pie.fill", "Track monthly expenses", "Log every expense by category to understand your spending patterns. View the pie chart breakdown and export monthly reports as PDF or CSV."),
+            ("pencil.circle.fill", "Edit & delete entries", "Tap the pencil icon on any expense or outflow entry to update it, or the × icon to remove it. Full control over your records."),
+            ("ellipsis.circle.fill", "Custom expense categories", "When you select 'Other' as a category, a text field appears so you can type your own category name — Donation, Gift, or anything you need."),
+            ("arrow.up.forward.circle.fill", "Monitor monthly outflow", "Track EMIs, subscriptions, and bills in Monthly Outflow with salary tracking to see how much you have left after all outflows."),
+            ("chart.bar.fill", "Yearly graphical overview", "Tap the chart icon in Expenses or Outflow to see a full-year bar chart overview — identify high-spend months and track your trends."),
+            ("dollarsign.circle.fill", "Multi-currency support", "Switch currencies in Settings — supports 12 currencies including INR, USD, EUR, GBP, AED, SAR, CAD, AUD, SGD, JPY & RD$. All calculators and trackers update automatically."),
         ]),
-        (L("Loan Tips"), "#185FA5", [
-            ("house.fill", L("Prepay your home loan"), L("Even a small extra payment towards the principal each month reduces total interest dramatically. Use Custom Amortization to see exactly how much you save.")),
-            ("slider.horizontal.3", L("Try Custom Amortization"), L("Available on all loan calculators — enter a higher EMI to instantly see how many months and how much interest you save compared to the standard schedule.")),
-            ("car.fill", L("Maximise your down payment"), L("A larger down payment on vehicle or consumer durable loans reduces EMI and total interest. The Vehicle Loan calculator shows the net loan after down payment.")),
-            ("book.fill", L("Pay interest during moratorium"), L("For education and agricultural loans, paying interest during the moratorium period prevents the outstanding balance from growing, resulting in lower future EMIs.")),
-            ("sparkles", L("Understand gold loan LTV"), L("RBI caps gold loan LTV at 75%. Compare EMI repayment vs bullet (interest-only) mode in the Gold Loan calculator to pick the best option.")),
-            ("building.2.fill", L("LAP for lower rates"), L("Loan Against Property offers lower interest rates than personal loans since it's secured. Use the LAP calculator to compare outflow at different LTV percentages.")),
-            ("creditcard.fill", L("Avoid high-interest debt"), L("Credit card and overdraft interest (24–42% p.a.) compounds fast. Use the Credit Line calculator to see the true cost, and pay off quickly.")),
-            ("cart.fill", L("No-cost EMI isn't free"), L("Consumer durable no-cost EMI may have hidden processing fees. Compare total outflow of standard EMI vs no-cost EMI using the calculator.")),
+        ("Loan Tips", "#185FA5", [
+            ("house.fill", "Prepay your home loan", "Even a small extra payment towards the principal each month reduces total interest dramatically. Use Custom Amortization to see exactly how much you save."),
+            ("slider.horizontal.3", "Try Custom Amortization", "Available on all loan calculators — enter a higher EMI to instantly see how many months and how much interest you save compared to the standard schedule."),
+            ("car.fill", "Maximise your down payment", "A larger down payment on vehicle or consumer durable loans reduces EMI and total interest. The Vehicle Loan calculator shows the net loan after down payment."),
+            ("book.fill", "Pay interest during moratorium", "For education and agricultural loans, paying interest during the moratorium period prevents the outstanding balance from growing, resulting in lower future EMIs."),
+            ("sparkles", "Understand gold loan LTV", "RBI caps gold loan LTV at 75%. Compare EMI repayment vs bullet (interest-only) mode in the Gold Loan calculator to pick the best option."),
+            ("building.2.fill", "LAP for lower rates", "Loan Against Property offers lower interest rates than personal loans since it's secured. Use the LAP calculator to compare outflow at different LTV percentages."),
+            ("creditcard.fill", "Avoid high-interest debt", "Credit card and overdraft interest (24–42% p.a.) compounds fast. Use the Credit Line calculator to see the true cost, and pay off quickly."),
+            ("cart.fill", "No-cost EMI isn't free", "Consumer durable no-cost EMI may have hidden processing fees. Compare total outflow of standard EMI vs no-cost EMI using the calculator."),
         ]),
-        (L("Investment Tips"), "#BA7517", [
-            ("calendar.badge.plus", L("Start SIPs early"), L("Even small monthly investments grow significantly over 15–20 years thanks to compounding. The SIP calculator shows the power of time on your returns.")),
-            ("chart.pie.fill", L("Lump sum vs SIP"), L("Use the Mutual Fund Lump Sum calculator for one-time investments and compare with SIP returns. Lump sum works better in bullish markets, SIP averages out volatility.")),
-            ("arrow.down.left.circle.fill", L("SWP for retirement income"), L("Use SWP from a mutual fund corpus to create a monthly pension-like income stream without selling your entire investment at once.")),
-            ("building.columns.fill", L("FD for safety"), L("Fixed deposits offer guaranteed returns with zero market risk. Use the FD calculator to compare maturity amounts across different tenures and rates.")),
-            ("calendar.circle.fill", L("RD builds discipline"), L("Recurring Deposits enforce a monthly savings habit with guaranteed returns. Great for short-term goals — use the RD calculator to plan ahead.")),
+        ("Investment Tips", "#BA7517", [
+            ("calendar.badge.plus", "Start SIPs early", "Even small monthly investments grow significantly over 15–20 years thanks to compounding. The SIP calculator shows the power of time on your returns."),
+            ("chart.pie.fill", "Lump sum vs SIP", "Use the Mutual Fund Lump Sum calculator for one-time investments and compare with SIP returns. Lump sum works better in bullish markets, SIP averages out volatility."),
+            ("arrow.down.left.circle.fill", "SWP for retirement income", "Use SWP from a mutual fund corpus to create a monthly pension-like income stream without selling your entire investment at once."),
+            ("building.columns.fill", "FD for safety", "Fixed deposits offer guaranteed returns with zero market risk. Use the FD calculator to compare maturity amounts across different tenures and rates."),
+            ("calendar.circle.fill", "RD builds discipline", "Recurring Deposits enforce a monthly savings habit with guaranteed returns. Great for short-term goals — use the RD calculator to plan ahead."),
         ]),
-        (L("Tax & Benefits"), "#1D9E75", [
-            ("percent", L("Compare tax regimes"), L("Use the Tax Calculator to check which regime — Old or New — saves you more tax based on your salary, HRA, and deductions under 80C, 80D, etc.")),
-            ("shield.fill", L("Max out NPS for tax benefits"), L("NPS gives an extra ₹50K deduction under 80CCD(1B) beyond ₹1.5L under 80C. The NPS calculator shows your corpus and annuity at retirement.")),
-            ("banknote.fill", L("Track your PF balance"), L("EPF earns ~8.1% p.a. tax-free — one of the best guaranteed-return instruments. Use the PF calculator with both employee and employer contributions.")),
-            ("gift.fill", L("Know your gratuity entitlement"), L("After 5 years of service, gratuity up to ₹20L is tax-exempt. The Gratuity calculator shows your exact entitlement based on last drawn basic salary.")),
+        ("Tax & Benefits", "#1D9E75", [
+            ("percent", "Compare tax regimes", "Use the Tax Calculator to check which regime — Old or New — saves you more tax based on your salary, HRA, and deductions under 80C, 80D, etc."),
+            ("shield.fill", "Max out NPS for tax benefits", "NPS gives an extra ₹50K deduction under 80CCD(1B) beyond ₹1.5L under 80C. The NPS calculator shows your corpus and annuity at retirement."),
+            ("banknote.fill", "Track your PF balance", "EPF earns ~8.1% p.a. tax-free — one of the best guaranteed-return instruments. Use the PF calculator with both employee and employer contributions."),
+            ("gift.fill", "Know your gratuity entitlement", "After 5 years of service, gratuity up to ₹20L is tax-exempt. The Gratuity calculator shows your exact entitlement based on last drawn basic salary."),
         ]),
-    ]}
+    ]
 
     var body: some View {
         List {
@@ -1281,10 +1281,10 @@ struct ProfileView: View {
                             .foregroundStyle(.white)
                     }
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(name.isEmpty ? L("Your Name") : name)
+                        Text(name.isEmpty ? "Your Name" : name)
                             .font(.headline)
                             .foregroundStyle(name.isEmpty ? .tertiary : .primary)
-                        Text(city.isEmpty ? L("City") : city)
+                        Text(city.isEmpty ? "City" : city)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -1292,18 +1292,18 @@ struct ProfileView: View {
                 .padding(.vertical, 4)
             }
 
-            Section(L("Personal Details")) {
-                HStack { Text(L("Full Name")); Spacer(); TextField(L("Enter name"), text: $name).multilineTextAlignment(.trailing) }
-                HStack { Text(L("Age")); Spacer(); TextField(L("Age"), text: $age).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
-                HStack { Text(L("City")); Spacer(); TextField(L("City"), text: $city).multilineTextAlignment(.trailing) }
+            Section("Personal Details") {
+                HStack { Text("Full Name"); Spacer(); TextField("Enter name", text: $name).multilineTextAlignment(.trailing) }
+                HStack { Text("Age"); Spacer(); TextField("Age", text: $age).multilineTextAlignment(.trailing).keyboardType(.numberPad) }
+                HStack { Text("City"); Spacer(); TextField("City", text: $city).multilineTextAlignment(.trailing) }
             }
 
-            Section(L("Activity")) {
+            Section("Activity") {
                 Button {
                     navigateTo?(.saved)
                 } label: {
                     HStack {
-                        Label(L("Saved Calculations"), systemImage: "bookmark.fill")
+                        Label("Saved Calculations", systemImage: "bookmark.fill")
                             .foregroundStyle(.primary)
                         Spacer()
                         Text("\(store.calculations.count)")
@@ -1319,7 +1319,7 @@ struct ProfileView: View {
                     navigateTo?(.calculators)
                 } label: {
                     HStack {
-                        Label(L("Favourites"), systemImage: "star.fill")
+                        Label("Favourites", systemImage: "star.fill")
                             .foregroundStyle(.primary)
                         Spacer()
                         Text("\(store.savedIDs.count)")
@@ -1348,31 +1348,14 @@ struct ProfileView: View {
 struct SettingsView: View {
     @Binding var darkMode: Bool
     @AppStorage("selectedCurrency") private var selectedCurrency = CurrencySettings.selectedCode
-    @ObservedObject private var langManager = AppLanguageManager.shared
     @Environment(\.requestReview) private var requestReview
 
     var body: some View {
         Form {
-            Section(L("Appearance")) {
-                Toggle(L("Dark Mode"), isOn: $darkMode)
+            Section("Appearance") {
+                Toggle("Dark Mode", isOn: $darkMode)
             }
-            Section(L("Language")) {
-                Picker(selection: Binding(
-                    get: { langManager.currentLanguage },
-                    set: { langManager.setLanguage($0) }
-                )) {
-                    ForEach(AppLanguageCode.allCases) { lang in
-                        HStack(spacing: 8) {
-                            Text(lang.flag)
-                            Text(lang.displayName)
-                        }
-                        .tag(lang)
-                    }
-                } label: {
-                    Label(L("App Language"), systemImage: "globe")
-                }
-            }
-            Section(L("Currency")) {
+            Section("Currency") {
                 Picker(selection: $selectedCurrency) {
                     ForEach(CurrencySettings.supportedCurrencies, id: \.code) { curr in
                         HStack {
@@ -1385,15 +1368,15 @@ struct SettingsView: View {
                         .tag(curr.code)
                     }
                 } label: {
-                    Label(L("Currency"), systemImage: "coloncurrencysign.circle")
+                    Label("Currency", systemImage: "coloncurrencysign.circle")
                 }
             }
-            Section(L("Support")) {
+            Section("Support") {
                 Button {
                     requestReview()
                 } label: {
                     HStack {
-                        Label(L("Rate this App"), systemImage: "star.fill")
+                        Label("Rate this App", systemImage: "star.fill")
                             .foregroundStyle(.primary)
                         Spacer()
                         Image(systemName: "arrow.up.right.square")
@@ -1403,9 +1386,9 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
             }
-            Section(L("Data")) {
+            Section("Data") {
                 HStack {
-                    Label(L("App Version"), systemImage: "info.circle")
+                    Label("App Version", systemImage: "info.circle")
                     Spacer()
                     Text("1.0.0")
                         .foregroundStyle(.secondary)
@@ -1423,7 +1406,7 @@ struct FeedbackView: View {
     @State private var email = ""
     @State private var submitted = false
     @State private var showMailError = false
-    private var types: [String] { [L("Bug Report"), L("Feature Request"), L("General Query"), L("Other")] }
+    private let types = ["Bug Report", "Feature Request", "General Query", "Other"]
     private let supportEmail = "ashokarbad@gmail.com"
 
     var body: some View {
@@ -1432,13 +1415,13 @@ struct FeedbackView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 52))
                     .foregroundStyle(.teal)
-                Text(L("Thank you!"))
+                Text("Thank you!")
                     .font(.title2.bold())
-                Text(L("Your feedback has been sent.\nWe will get back to you if needed."))
+                Text("Your feedback has been sent.\nWe will get back to you if needed.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                Button(L("Submit Another")) {
+                Button("Submit Another") {
                     withAnimation { resetForm() }
                 }
                 .buttonStyle(.bordered)
@@ -1449,13 +1432,13 @@ struct FeedbackView: View {
         } else {
             Form {
                 Section {
-                    SectionHeader(systemImage: "envelope.fill", title: L("Feedback / Queries"), color: .navy)
-                    Picker(L("Type"), selection: $feedbackType) {
+                    SectionHeader(systemImage: "envelope.fill", title: "Feedback / Queries", color: .navy)
+                    Picker("Type", selection: $feedbackType) {
                         ForEach(0..<types.count, id: \.self) { Text(types[$0]).tag($0) }
                     }
-                    HStack { Text(L("Subject")); Spacer(); TextField(L("Brief subject"), text: $subject).multilineTextAlignment(.trailing) }
+                    HStack { Text("Subject"); Spacer(); TextField("Brief subject", text: $subject).multilineTextAlignment(.trailing) }
                     HStack {
-                        Text(L("Email (optional)"))
+                        Text("Email (optional)")
                         Spacer()
                         TextField("", text: $email, prompt: Text("you@example.com").foregroundStyle(.quaternary))
                             .multilineTextAlignment(.trailing)
@@ -1464,12 +1447,12 @@ struct FeedbackView: View {
                     }
                 }
 
-                Section(L("Your Message")) {
+                Section("Your Message") {
                     TextEditor(text: $message)
                         .frame(minHeight: 120)
                         .overlay(alignment: .topLeading) {
                             if message.isEmpty {
-                                Text(L("Describe your feedback, bug, or question..."))
+                                Text("Describe your feedback, bug, or question...")
                                     .foregroundStyle(.tertiary)
                                     .padding(.top, 8)
                                     .padding(.leading, 4)
@@ -1484,7 +1467,7 @@ struct FeedbackView: View {
                     } label: {
                         HStack {
                             Spacer()
-                            Label(L("Submit Feedback"), systemImage: "paperplane.fill")
+                            Label("Submit Feedback", systemImage: "paperplane.fill")
                                 .font(.headline)
                             Spacer()
                         }
@@ -1495,10 +1478,10 @@ struct FeedbackView: View {
                 }
             }
             .keyboardDoneToolbar()
-            .alert(L("Unable to Send Email"), isPresented: $showMailError) {
-                Button(L("OK"), role: .cancel) { }
+            .alert("Unable to Send Email", isPresented: $showMailError) {
+                Button("OK", role: .cancel) { }
             } message: {
-                Text(L("Could not open the mail app. Please send your feedback manually to") + " \(supportEmail).")
+                Text("Could not open the mail app. Please send your feedback manually to \(supportEmail).")
             }
         }
     }
@@ -1545,18 +1528,18 @@ struct FeedbackView: View {
 struct AboutView: View {
     @Environment(\.requestReview) private var requestReview
 
-    private var features: [(icon: String, title: String, desc: String)] {[
-        ("house.fill", L("10+ Loan Calculators"), L("Home, vehicle, personal, education, business, gold, LAP, agricultural, consumer durable & credit line — each with custom amortization and what-if EMI analysis")),
-        ("chart.line.uptrend.xyaxis", L("Investment Tools"), L("SIP, lump sum mutual fund, SWP, FD & RD calculators with detailed growth projections")),
-        ("percent", L("Tax & Benefits"), L("Income tax (old vs new regime), NPS, PF & gratuity calculators for Indian tax planning")),
-        ("chart.pie.fill", L("Expense Tracker"), L("Track monthly expenses by category with pie chart breakdown, custom categories, yearly overview & PDF/CSV export. Edit or delete any entry.")),
-        ("arrow.up.forward.circle.fill", L("Monthly Outflow"), L("Track EMIs, subscriptions & bills month-wise with salary tracking, edit support & detailed reports")),
-        ("slider.horizontal.3", L("Custom Amortization"), L("Enter a higher EMI on any loan to instantly see months saved, interest saved & the revised schedule")),
-        ("note.text", L("Smart Notes"), L("Create styled notes with custom font sizes, colors, bold & italic formatting")),
-        ("star.fill", L("Save & Export"), L("Bookmark any calculation, favourite calculators, and export all saved data as PDF or CSV")),
-        ("person.crop.circle.fill", L("Onboarding & Profile"), L("Personalised welcome screen on first launch — set your name, age & preferred currency right away")),
-        ("lock.shield.fill", L("Privacy Screen"), L("App content is automatically hidden when you switch away — your financial data stays private")),
-    ]}
+    private let features: [(icon: String, title: String, desc: String)] = [
+        ("house.fill", "10+ Loan Calculators", "Home, vehicle, personal, education, business, gold, LAP, agricultural, consumer durable & credit line — each with custom amortization and what-if EMI analysis"),
+        ("chart.line.uptrend.xyaxis", "Investment Tools", "SIP, lump sum mutual fund, SWP, FD & RD calculators with detailed growth projections"),
+        ("percent", "Tax & Benefits", "Income tax (old vs new regime), NPS, PF & gratuity calculators for Indian tax planning"),
+        ("chart.pie.fill", "Expense Tracker", "Track monthly expenses by category with pie chart breakdown, custom categories, yearly overview & PDF/CSV export. Edit or delete any entry."),
+        ("arrow.up.forward.circle.fill", "Monthly Outflow", "Track EMIs, subscriptions & bills month-wise with salary tracking, edit support & detailed reports"),
+        ("slider.horizontal.3", "Custom Amortization", "Enter a higher EMI on any loan to instantly see months saved, interest saved & the revised schedule"),
+        ("note.text", "Smart Notes", "Create styled notes with custom font sizes, colors, bold & italic formatting"),
+        ("star.fill", "Save & Export", "Bookmark any calculation, favourite calculators, and export all saved data as PDF or CSV"),
+        ("person.crop.circle.fill", "Onboarding & Profile", "Personalised welcome screen on first launch — set your name, age & preferred currency right away"),
+        ("lock.shield.fill", "Privacy Screen", "App content is automatically hidden when you switch away — your financial data stays private"),
+    ]
 
     var body: some View {
         ScrollView {
@@ -1571,18 +1554,18 @@ struct AboutView: View {
                     .padding(.top, 30)
 
                 VStack(spacing: 6) {
-                    Text(L("Finance Toolkit"))
+                    Text("Finance Toolkit")
                         .font(.title.bold())
-                    Text(L("Version 1.0"))
+                    Text("Version 1.0")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
-                    Text(L("Your Complete Financial Companion"))
+                    Text("Your Complete Financial Companion")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
 
                 // Description
-                Text(L("Finance Toolkit is an all-in-one financial calculator suite built for users worldwide. Whether you're planning a home purchase, comparing investment options, tracking monthly expenses, or analysing loan repayments - this app has you covered with accurate, easy-to-use tools that work in 12 currencies across the globe. A personalised onboarding experience gets you started in seconds, and a built-in privacy screen keeps your data safe."))
+                Text("Finance Toolkit is an all-in-one financial calculator suite built for users worldwide. Whether you're planning a home purchase, comparing investment options, tracking monthly expenses, or analysing loan repayments - this app has you covered with accurate, easy-to-use tools that work in 12 currencies across the globe. A personalised onboarding experience gets you started in seconds, and a built-in privacy screen keeps your data safe.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -1590,7 +1573,7 @@ struct AboutView: View {
 
                 // Features Grid
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(L("Features"))
+                    Text("Features")
                         .font(.headline)
                         .foregroundStyle(Color.navy)
                         .padding(.horizontal, 16)
@@ -1623,20 +1606,20 @@ struct AboutView: View {
 
                 // Highlights
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(L("Highlights"))
+                    Text("Highlights")
                         .font(.headline)
                         .foregroundStyle(Color.navy)
 
-                    aboutHighlightRow(icon: "globe", text: L("Works worldwide — supports 12 currencies including INR, USD, EUR, GBP, AED, SAR, CAD, AUD, SGD, JPY, DOP & more"))
-                    aboutHighlightRow(icon: "function", text: L("Universal financial math — EMI, SIP, FD, RD, SWP & amortization calculations work for any currency or country"))
-                    aboutHighlightRow(icon: "chart.bar.fill", text: L("Yearly graphical overviews for expenses and outflow with month-wise bar charts"))
-                    aboutHighlightRow(icon: "pencil.circle.fill", text: L("Edit & delete expenses and outflow entries — full control over your financial records"))
-                    aboutHighlightRow(icon: "eye.slash.fill", text: L("Privacy screen hides content automatically when you leave the app"))
-                    aboutHighlightRow(icon: "person.badge.plus", text: L("Guided onboarding — set your name, age & currency on first launch"))
-                    aboutHighlightRow(icon: "moon.fill", text: L("Dark mode support with adaptive UI"))
-                    aboutHighlightRow(icon: "doc.richtext", text: L("Export reports as PDF or CSV — share with advisors or keep for records"))
-                    aboutHighlightRow(icon: "lock.shield.fill", text: L("100% offline — your data stays on your device, no sign-up required"))
-                    aboutHighlightRow(icon: "ipad.and.iphone", text: L("Optimized for iPhone & iPad with landscape support"))
+                    aboutHighlightRow(icon: "globe", text: "Works worldwide — supports 12 currencies including INR, USD, EUR, GBP, AED, SAR, CAD, AUD, SGD, JPY, DOP & more")
+                    aboutHighlightRow(icon: "function", text: "Universal financial math — EMI, SIP, FD, RD, SWP & amortization calculations work for any currency or country")
+                    aboutHighlightRow(icon: "chart.bar.fill", text: "Yearly graphical overviews for expenses and outflow with month-wise bar charts")
+                    aboutHighlightRow(icon: "pencil.circle.fill", text: "Edit & delete expenses and outflow entries — full control over your financial records")
+                    aboutHighlightRow(icon: "eye.slash.fill", text: "Privacy screen hides content automatically when you leave the app")
+                    aboutHighlightRow(icon: "person.badge.plus", text: "Guided onboarding — set your name, age & currency on first launch")
+                    aboutHighlightRow(icon: "moon.fill", text: "Dark mode support with adaptive UI")
+                    aboutHighlightRow(icon: "doc.richtext", text: "Export reports as PDF or CSV — share with advisors or keep for records")
+                    aboutHighlightRow(icon: "lock.shield.fill", text: "100% offline — your data stays on your device, no sign-up required")
+                    aboutHighlightRow(icon: "ipad.and.iphone", text: "Optimized for iPhone & iPad with landscape support")
                 }
                 .padding(16)
                 .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.ultraThinMaterial))
@@ -1645,11 +1628,11 @@ struct AboutView: View {
 
                 // Global note
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(L("Global & Indian Features"))
+                    Text("Global & Indian Features")
                         .font(.headline)
                         .foregroundStyle(Color.navy)
 
-                    Text(L("Loan calculators, investment tools (SIP, FD, RD, SWP), expense tracking with custom categories, outflow management, notes, privacy screen, onboarding, and custom amortization work universally in any currency.\n\nTax Calculator (Old vs New Regime), NPS, PF, and Gratuity calculators are tailored for Indian tax laws and labour regulations."))
+                    Text("Loan calculators, investment tools (SIP, FD, RD, SWP), expense tracking with custom categories, outflow management, notes, privacy screen, onboarding, and custom amortization work universally in any currency.\n\nTax Calculator (Old vs New Regime), NPS, PF, and Gratuity calculators are tailored for Indian tax laws and labour regulations.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -1662,7 +1645,7 @@ struct AboutView: View {
                 Button {
                     requestReview()
                 } label: {
-                    Label(L("Rate this App"), systemImage: "star.fill")
+                    Label("Rate this App", systemImage: "star.fill")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 24)
@@ -1674,10 +1657,10 @@ struct AboutView: View {
 
                 // Footer
                 VStack(spacing: 4) {
-                    Text(L("Made with care for users everywhere"))
+                    Text("Made with care for users everywhere")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(L("© 2025 Finance Toolkit. All rights reserved."))
+                    Text("© 2025 Finance Toolkit. All rights reserved.")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }

@@ -32,7 +32,7 @@ struct PrivacyScreen: View {
                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                     .shadow(color: .black.opacity(0.3), radius: 10, y: 4)
 
-                Text(L("Finance Toolkit"))
+                Text("Finance Toolkit")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
             }

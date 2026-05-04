@@ -60,10 +60,10 @@ struct HomeLoanView: View {
             date: Date(),
             note: "Principal ₹\(Int(vm.principal).formatted()) · \(vm.tenureMonths) months",
             results: [
-                .init(label: "EMI",            value: CurrencySettings.formatCurrency(vm.emi, code: currency),               isHighlight: true),
-                .init(label: "Principal",      value: CurrencySettings.formatCurrency(vm.principal, code: currency),          isHighlight: false),
-                .init(label: "Total Interest", value: CurrencySettings.formatCurrency(vm.loanTotalInterest, code: currency),  isHighlight: false),
-                .init(label: "Total Paid",     value: CurrencySettings.formatCurrency(vm.loanTotalPayment, code: currency),   isHighlight: true),
+                .init(label: "EMI",            value: vm.emi.formatted(.currency(code: currency)),               isHighlight: true),
+                .init(label: "Principal",      value: vm.principal.formatted(.currency(code: currency)),          isHighlight: false),
+                .init(label: "Total Interest", value: vm.loanTotalInterest.formatted(.currency(code: currency)),  isHighlight: false),
+                .init(label: "Total Paid",     value: vm.loanTotalPayment.formatted(.currency(code: currency)),   isHighlight: true),
             ]
         )
     }
@@ -72,23 +72,23 @@ struct HomeLoanView: View {
         Form {
             // Inputs
             Section {
-                SectionHeader(systemImage: "house.fill", title: L("Loan Details"), color: accent)
+                SectionHeader(systemImage: "house.fill", title: "Loan Details", color: accent)
                 HStack {
-                    Text(L("Loan Amount"))
+                    Text("Loan Amount")
                     Spacer()
-                    TextField(L("Amount"), value: $vm.principal, format: .number)
+                    TextField("Amount", value: $vm.principal, format: .number)
                         .multilineTextAlignment(.trailing).keyboardType(.decimalPad)
                 }
                 HStack {
-                    Text(L("Annual Rate %"))
+                    Text("Annual Rate %")
                     Spacer()
-                    TextField(L("Rate"), value: $vm.annualRatePercent, format: .number)
+                    TextField("Rate", value: $vm.annualRatePercent, format: .number)
                         .multilineTextAlignment(.trailing).keyboardType(.decimalPad)
                 }
                 HStack {
-                    Text(L("Tenure (months)"))
+                    Text("Tenure (months)")
                     Spacer()
-                    TextField(L("Months"), value: $vm.tenureMonths, format: .number)
+                    TextField("Months", value: $vm.tenureMonths, format: .number)
                         .multilineTextAlignment(.trailing).keyboardType(.numberPad)
                 }
             }
@@ -98,39 +98,39 @@ struct HomeLoanView: View {
                 ResultCard(systemImage: "house.fill", accentColor: accent, onSave: {
                     SavedStore.shared.save(calculation: makeSnapshot())
                 }) {
-                    ResultRow(label: L("Monthly EMI"),    value: CurrencySettings.formatCurrency(vm.emi, code: currency),              isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Monthly EMI",    value: vm.emi.formatted(.currency(code: currency)),              isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.emi)
-                    ResultRow(label: L("Principal"),       value: CurrencySettings.formatCurrency(vm.principal, code: currency))
-                    ResultRow(label: L("Total Interest"),  value: CurrencySettings.formatCurrency(vm.loanTotalInterest, code: currency))
+                    ResultRow(label: "Principal",       value: vm.principal.formatted(.currency(code: currency)))
+                    ResultRow(label: "Total Interest",  value: vm.loanTotalInterest.formatted(.currency(code: currency)))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: L("Total Paid"),      value: CurrencySettings.formatCurrency(vm.loanTotalPayment, code: currency), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Total Paid",      value: vm.loanTotalPayment.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.loanTotalPayment)
                 }
             }
 
             // Custom Amortization section
             Section {
-                SectionHeader(systemImage: "slider.horizontal.3", title: L("Custom Amortization"), color: accent)
-                Toggle(L("Use Custom EMI"), isOn: $customEMIEnabled)
+                SectionHeader(systemImage: "slider.horizontal.3", title: "Custom Amortization", color: accent)
+                Toggle("Use Custom EMI", isOn: $customEMIEnabled)
                 if customEMIEnabled {
                     HStack {
-                        Text(L("Your EMI"))
+                        Text("Your EMI")
                         Spacer()
-                        TextField(L("EMI"), value: $customEMI, format: .number)
+                        TextField("EMI", value: $customEMI, format: .number)
                             .multilineTextAlignment(.trailing).keyboardType(.decimalPad)
                     }
                     if customEMI > 0 && customEMI >= minimumEMI {
                         VStack(alignment: .leading, spacing: 6) {
-                            ResultRow(label: L("Custom EMI"), value: CurrencySettings.formatCurrency(activeEMI, code: currency), isHighlight: true, accentColor: accent)
-                            ResultRow(label: L("New Tenure"), value: "\(customAmortization.count) \(L("months"))")
-                            ResultRow(label: L("New Total Interest"), value: CurrencySettings.formatCurrency(customTotalInterest, code: currency))
-                            ResultRow(label: L("New Total Paid"), value: CurrencySettings.formatCurrency(customTotalPaid, code: currency))
+                            ResultRow(label: "Custom EMI", value: activeEMI.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                            ResultRow(label: "New Tenure", value: "\(customAmortization.count) months")
+                            ResultRow(label: "New Total Interest", value: customTotalInterest.formatted(.currency(code: currency)))
+                            ResultRow(label: "New Total Paid", value: customTotalPaid.formatted(.currency(code: currency)))
                             if tenureSaved > 0 || interestSaved > 0 {
                                 Divider().padding(.vertical, 2)
                                 HStack {
                                     Image(systemName: "arrow.down.circle.fill")
                                         .foregroundStyle(.teal)
-                                    Text(L("You save \(tenureSaved) months & \(CurrencySettings.formatCurrency(interestSaved, code: currency)) interest"))
+                                    Text("You save \(tenureSaved) months & \(interestSaved.formatted(.currency(code: currency))) interest")
                                         .font(.caption.weight(.medium))
                                         .foregroundStyle(.teal)
                                 }
@@ -138,7 +138,7 @@ struct HomeLoanView: View {
                         }
                         .padding(.vertical, 4)
                     } else if customEMI > 0 {
-                        Text(L("EMI must be at least \(CurrencySettings.formatCurrency(minimumEMI, code: currency)) to cover monthly interest."))
+                        Text("EMI must be at least \(minimumEMI.formatted(.currency(code: currency))) to cover monthly interest.")
                             .font(.caption).foregroundStyle(.red)
                     }
                 }
@@ -152,7 +152,7 @@ struct HomeLoanView: View {
                     HStack {
                         Image(systemName: "list.number")
                             .foregroundStyle(accent)
-                        Text(L("View Amortization Schedule"))
+                        Text("View Amortization Schedule")
                             .foregroundStyle(accent)
                         Spacer()
                         Image(systemName: showAmortization ? "chevron.up" : "chevron.down")
@@ -177,7 +177,7 @@ struct HomeLoanView: View {
         .onChange(of: vm.principal)         { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = vm.emi } }
         .onChange(of: vm.annualRatePercent) { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = vm.emi } }
         .onChange(of: vm.tenureMonths)      { _, _ in vm.recalculateAll(); if !customEMIEnabled { customEMI = vm.emi } }
-        .navigationTitle(L("Home Loan"))
+        .navigationTitle("Home Loan")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -188,9 +188,9 @@ struct HomeLoanView: View {
         }
         .sheet(isPresented: $showInfoSheet) {
             InfoSheet(
-                title: L("Home Loan Calculator"),
-                body1: L("EMI = P × r × (1+r)^n / [(1+r)^n − 1], where P = principal, r = monthly rate, n = months. The amortisation schedule shows month-by-month breakdown of principal, interest and outstanding balance."),
-                body2: L("Use Custom Amortization to enter a higher EMI and see how many months and how much interest you save. Prepaying even small extra amounts towards principal can cut total interest dramatically."),
+                title: "Home Loan Calculator",
+                body1: "EMI = P × r × (1+r)^n / [(1+r)^n − 1], where P = principal, r = monthly rate, n = months. The amortisation schedule shows month-by-month breakdown of principal, interest and outstanding balance.",
+                body2: "Use Custom Amortization to enter a higher EMI and see how many months and how much interest you save. Prepaying even small extra amounts towards principal can cut total interest dramatically.",
                 accent: accent
             )
         }
