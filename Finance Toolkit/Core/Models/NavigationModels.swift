@@ -30,6 +30,10 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    var localizedTitle: String {
+        L(rawValue)
+    }
+
     var icon: String {
         switch self {
         case .calculators: return "square.grid.2x2.fill"

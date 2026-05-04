@@ -229,12 +229,13 @@ struct AmortizationScheduleView: View {
     }
 
     private func shortCurrency(_ value: Double) -> String {
+        let sym = CurrencySettings.symbol(for: currency)
         if value >= 1_00_000 {
-            return String(format: "₹%.1fL", value / 1_00_000)
+            return String(format: "%@%.1fL", sym, value / 1_00_000)
         } else if value >= 1_000 {
-            return String(format: "₹%.0fK", value / 1_000)
+            return String(format: "%@%.0fK", sym, value / 1_000)
         }
-        return String(format: "₹%.0f", value)
+        return String(format: "%@%.0f", sym, value)
     }
 }
 
@@ -339,16 +340,16 @@ struct CustomAmortizationSection: View {
                 }
                 if customEMI > 0 && customEMI >= minimumEMI {
                     VStack(alignment: .leading, spacing: 6) {
-                        ResultRow(label: "Custom EMI", value: activeEMI.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                        ResultRow(label: "Custom EMI", value: CurrencySettings.formatCurrency(activeEMI, code: currency), isHighlight: true, accentColor: accent)
                         ResultRow(label: "New Tenure", value: "\(customSchedule.count) months")
-                        ResultRow(label: "New Total Interest", value: customTotalInterest.formatted(.currency(code: currency)))
-                        ResultRow(label: "New Total Paid", value: customTotalPaid.formatted(.currency(code: currency)))
+                        ResultRow(label: "New Total Interest", value: CurrencySettings.formatCurrency(customTotalInterest, code: currency))
+                        ResultRow(label: "New Total Paid", value: CurrencySettings.formatCurrency(customTotalPaid, code: currency))
                         if tenureSaved > 0 || interestSaved > 0 {
                             Divider().padding(.vertical, 2)
                             HStack {
                                 Image(systemName: "arrow.down.circle.fill")
                                     .foregroundStyle(.teal)
-                                Text("You save \(tenureSaved) months & \(interestSaved.formatted(.currency(code: currency))) interest")
+                                Text("You save \(tenureSaved) months & \(CurrencySettings.formatCurrency(interestSaved, code: currency)) interest")
                                     .font(.caption.weight(.medium))
                                     .foregroundStyle(.teal)
                             }
@@ -356,7 +357,7 @@ struct CustomAmortizationSection: View {
                     }
                     .padding(.vertical, 4)
                 } else if customEMI > 0 {
-                    Text("EMI must be at least \(minimumEMI.formatted(.currency(code: currency))) to cover monthly interest.")
+                    Text("EMI must be at least \(CurrencySettings.formatCurrency(minimumEMI, code: currency)) to cover monthly interest.")
                         .font(.caption).foregroundStyle(.red)
                 }
             }

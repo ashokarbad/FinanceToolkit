@@ -26,6 +26,18 @@ struct CurrencySettings {
     static func symbol(for code: String) -> String {
         supportedCurrencies.first(where: { $0.code == code })?.symbol ?? "₹"
     }
+
+    /// Formats a value with the currency symbol always placed before the amount.
+    /// This avoids locale-dependent symbol positioning from `.formatted(.currency(code:))`.
+    static func formatCurrency(_ value: Double, code: String) -> String {
+        let sym = symbol(for: code)
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        numberFormatter.minimumFractionDigits = 2
+        numberFormatter.maximumFractionDigits = 2
+        let formatted = numberFormatter.string(from: NSNumber(value: value)) ?? String(format: "%.2f", value)
+        return "\(sym)\(formatted)"
+    }
 }
 
 // MARK: - Hex initialiser

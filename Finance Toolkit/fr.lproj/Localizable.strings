@@ -1,0 +1,409 @@
+/* 
+  Localizable.strings (French - Français)
+  Finance Toolkit
+*/
+
+// MARK: - Symbols & Numbers
+
+"%" = "%";
+"10+ Loan Calculators" = "10+ Calculateurs de prêt";
+"100% offline — your data stays on your device, no sign-up required" = "100 % hors ligne — vos données restent sur votre appareil, aucune inscription requise";
+
+// MARK: - A
+
+"Activity" = "Activité";
+"Add Expense" = "Ajouter une dépense";
+"Add Note" = "Ajouter une note";
+"Add Outflow" = "Ajouter une sortie";
+"Add expenses to see your yearly overview here." = "Ajoutez des dépenses pour voir votre aperçu annuel ici.";
+"Add outflow items to see your yearly overview here." = "Ajoutez des sorties pour voir votre aperçu annuel ici.";
+"Add your monthly EMIs, credit card bills, and other recurring outflows to see your total monthly commitments." = "Ajoutez vos EMI mensuels, factures de carte de crédit et autres sorties récurrentes pour voir le total de vos engagements mensuels.";
+"Add your note here..." = "Ajoutez votre note ici...";
+"Age" = "Âge";
+"Agricultural Loan" = "Prêt agricole";
+"All Outflows" = "Toutes les sorties";
+"Amount" = "Montant";
+"Annual Rate %" = "Taux annuel %";
+"App Features" = "Fonctionnalités de l'app";
+"App Language" = "Langue de l'app";
+"App Version" = "Version de l'app";
+"App content is automatically hidden when you switch away — your financial data stays private" = "Le contenu de l'app est automatiquement masqué lorsque vous la quittez — vos données financières restent privées";
+"Appearance" = "Apparence";
+"Are you sure you want to delete this note?" = "Êtes-vous sûr de vouloir supprimer cette note ?";
+"Are you sure you want to remove this expense entry?" = "Êtes-vous sûr de vouloir supprimer cette entrée de dépense ?";
+"Are you sure you want to remove this outflow item?" = "Êtes-vous sûr de vouloir supprimer cette sortie ?";
+"Avoid high-interest debt" = "Évitez les dettes à taux élevé";
+
+// MARK: - B
+
+"Basic Salary" = "Salaire de base";
+"Bold" = "Gras";
+"Brief subject" = "Sujet bref";
+"Bug Report" = "Signaler un bug";
+"Business Loan" = "Prêt professionnel";
+"By Category" = "Par catégorie";
+
+// MARK: - C
+
+"Calculators" = "Calculateurs";
+"Calculators · Expenses · Outflow · Notes" = "Calculateurs · Dépenses · Sorties · Notes";
+"Cancel" = "Annuler";
+"Category" = "Catégorie";
+"Category / Item" = "Catégorie / Article";
+"Category Breakdown" = "Répartition par catégorie";
+"Category Summary" = "Résumé par catégorie";
+"Cess" = "Cess";
+"Cess %" = "Cess %";
+"City" = "Ville";
+"Color" = "Couleur";
+"Compare tax regimes" = "Comparez les régimes fiscaux";
+"Consumer Durable / EMI" = "Biens durables / EMI";
+"Content" = "Contenu";
+"Continue" = "Continuer";
+"Could not open the mail app. Please send your feedback manually to" = "Impossible d'ouvrir l'application de messagerie. Veuillez envoyer vos commentaires manuellement à";
+"Create Note" = "Créer une note";
+"Credit Line / Overdraft" = "Ligne de crédit / Découvert";
+"Currency" = "Devise";
+"Custom Amortization" = "Amortissement personnalisé";
+"Custom EMI" = "EMI personnalisé";
+"Custom expense categories" = "Catégories de dépenses personnalisées";
+
+// MARK: - D
+
+"Dark Mode" = "Mode sombre";
+"Dark mode" = "Mode sombre";
+"Dark mode support" = "Prise en charge du mode sombre";
+"Dark mode support with adaptive UI" = "Prise en charge du mode sombre avec interface adaptative";
+"Data" = "Données";
+"Date" = "Date";
+"Delete" = "Supprimer";
+"Delete Expense" = "Supprimer la dépense";
+"Delete Item" = "Supprimer l'article";
+"Delete Note" = "Supprimer la note";
+"Describe your feedback, bug, or question..." = "Décrivez vos commentaires, bug ou question...";
+"Details" = "Détails";
+"Done" = "Terminé";
+
+// MARK: - E
+
+"EMI" = "EMI";
+"Edit & delete entries" = "Modifier et supprimer des entrées";
+"Edit Expense" = "Modifier la dépense";
+"Edit Note" = "Modifier la note";
+"Edit Outflow" = "Modifier la sortie";
+"Education Loan" = "Prêt étudiant";
+"Email (optional)" = "E-mail (facultatif)";
+"Ending Corpus" = "Capital final";
+"Enter name" = "Entrez le nom";
+"Enter salary" = "Entrez le salaire";
+"Enter your age" = "Entrez votre âge";
+"Enter your name" = "Entrez votre nom";
+"Expected Return %" = "Rendement attendu %";
+"Expense Tracker" = "Suivi des dépenses";
+"Expenses & Outflow" = "Dépenses et sorties";
+"Export as Excel (CSV)" = "Exporter en Excel (CSV)";
+"Export as PDF" = "Exporter en PDF";
+"Export as PDF or CSV" = "Exporter en PDF ou CSV";
+
+// MARK: - F
+
+"FD Calculator" = "Calculateur FD";
+"FD for safety" = "FD pour la sécurité";
+"Favourite calculators" = "Calculateurs favoris";
+"Favourites" = "Favoris";
+"Feature Request" = "Demande de fonctionnalité";
+"Features" = "Fonctionnalités";
+"Feedback / Queries" = "Commentaires / Questions";
+"Finance Toolkit" = "Finance Toolkit";
+"Fixed deposit · maturity" = "Dépôt fixe · échéance";
+"Font Size" = "Taille de police";
+"Full Name" = "Nom complet";
+"Future Value" = "Valeur future";
+
+// MARK: - G
+
+"General Query" = "Question générale";
+"Generated by Finance Toolkit" = "Généré par Finance Toolkit";
+"Get Started" = "Commencer";
+"Global & Indian Features" = "Fonctionnalités globales et indiennes";
+"Gold Loan" = "Prêt sur or";
+"Good Afternoon" = "Bon après-midi";
+"Good Evening" = "Bonsoir";
+"Good Morning" = "Bonjour";
+"Good Night" = "Bonne nuit";
+"Gratuity Calculator" = "Calculateur de gratification";
+"Gross" = "Brut";
+"Gross Income" = "Revenu brut";
+
+// MARK: - H
+
+"HRA Exemption" = "Exonération HRA";
+"Highest" = "Le plus élevé";
+"Highlights" = "Points clés";
+"Home Loan" = "Prêt immobilier";
+"Home Loan Calculator" = "Calculateur de prêt immobilier";
+
+// MARK: - I
+
+"Income Details" = "Détails des revenus";
+"Initial Corpus" = "Capital initial";
+"Invalid Input" = "Saisie invalide";
+"Investment Tips" = "Conseils d'investissement";
+"Investment Tools" = "Outils d'investissement";
+"Investments" = "Investissements";
+"Italic" = "Italique";
+"Item" = "Article";
+
+// MARK: - K
+
+"Know your gratuity entitlement" = "Connaissez vos droits à la gratification";
+
+// MARK: - L
+
+"LAP for lower rates" = "LAP pour des taux plus bas";
+"Label" = "Libellé";
+"Language" = "Langue";
+"Let's set up your profile" = "Configurons votre profil";
+"Loan Against Property" = "Prêt hypothécaire";
+"Loan Amount" = "Montant du prêt";
+"Loan Details" = "Détails du prêt";
+"Loan Tips" = "Conseils sur les prêts";
+"Loans" = "Prêts";
+"Lowest" = "Le plus bas";
+"Lump sum vs SIP" = "Somme forfaitaire vs SIP";
+
+// MARK: - M
+
+"Made with care for users everywhere" = "Conçu avec soin pour les utilisateurs du monde entier";
+"Max out NPS for tax benefits" = "Maximisez le NPS pour les avantages fiscaux";
+"Maximise your down payment" = "Maximisez votre apport initial";
+"Monitor monthly outflow" = "Suivez les sorties mensuelles";
+"Month-wise Breakdown" = "Répartition par mois";
+"Monthly Average" = "Moyenne mensuelle";
+"Monthly EMI" = "EMI mensuel";
+"Monthly Expenses" = "Dépenses mensuelles";
+"Monthly Expenses Report" = "Rapport des dépenses mensuelles";
+"Monthly Investment" = "Investissement mensuel";
+"Monthly Outflow" = "Sorties mensuelles";
+"Monthly Outflow Report" = "Rapport des sorties mensuelles";
+"Monthly Salary" = "Salaire mensuel";
+"Monthly Withdrawal" = "Retrait mensuel";
+"Months" = "Mois";
+"More Calculators" = "Plus de calculateurs";
+"Multi-currency support" = "Prise en charge multi-devises";
+"Mutual Fund (Lump Sum)" = "Fonds commun de placement (Somme forfaitaire)";
+
+// MARK: - N
+
+"NPS Calculator" = "Calculateur NPS";
+"Name" = "Nom";
+"New" = "Nouveau";
+"New Expense" = "Nouvelle dépense";
+"New Note" = "Nouvelle note";
+"New Outflow" = "Nouvelle sortie";
+"New Regime" = "Nouveau régime";
+"New Tenure" = "Nouvelle durée";
+"New Total Interest" = "Nouveaux intérêts totaux";
+"New Total Paid" = "Nouveau total payé";
+"No expense data for" = "Aucune donnée de dépense pour";
+"No expenses recorded this month" = "Aucune dépense enregistrée ce mois-ci";
+"No notes yet" = "Aucune note pour l'instant";
+"No outflow data for" = "Aucune donnée de sortie pour";
+"No outflows added yet" = "Aucune sortie ajoutée pour l'instant";
+"No saved calculations" = "Aucun calcul enregistré";
+"No-cost EMI isn't free" = "L'EMI sans frais n'est pas gratuit";
+"Note" = "Note";
+"Note title" = "Titre de la note";
+"Notes" = "Notes";
+
+// MARK: - O
+
+"OK" = "OK";
+"Old" = "Ancien";
+"Old Regime" = "Ancien régime";
+"Other" = "Autre";
+"Other Deductions" = "Autres déductions";
+"Other Income" = "Autres revenus";
+"Outflow %" = "Sortie %";
+"Outflow Breakdown" = "Répartition des sorties";
+
+// MARK: - P
+
+"PF Calculator" = "Calculateur PF";
+"Pay interest during moratorium" = "Payez les intérêts pendant le moratoire";
+"Percentage" = "Pourcentage";
+"Personal Details" = "Informations personnelles";
+"Personal Loan" = "Prêt personnel";
+"Personalised onboarding" = "Intégration personnalisée";
+"Please Enter Your Name" = "Veuillez entrer votre nom";
+"Please enter a valid amount greater than 0." = "Veuillez entrer un montant valide supérieur à 0.";
+"Preferred Currency" = "Devise préférée";
+"Prepay your home loan" = "Remboursez votre prêt immobilier par anticipation";
+"Preview" = "Aperçu";
+"Principal" = "Capital";
+"Privacy Screen" = "Écran de confidentialité";
+"Privacy screen" = "Écran de confidentialité";
+
+// MARK: - Q
+
+"Quick Actions" = "Actions rapides";
+
+// MARK: - R
+
+"RD Calculator" = "Calculateur RD";
+"RD builds discipline" = "Le RD développe la discipline";
+"Rate" = "Taux";
+"Rate this App" = "Évaluer cette app";
+"Recent Entries" = "Entrées récentes";
+"Regime" = "Régime";
+"Remaining" = "Restant";
+"Remaining after outflows" = "Restant après les sorties";
+
+// MARK: - S
+
+"SIP Calculator" = "Calculateur SIP";
+"SWP Calculator" = "Calculateur SWP";
+"SWP for retirement income" = "SWP pour un revenu de retraite";
+"Save" = "Enregistrer";
+"Save & Export" = "Enregistrer et exporter";
+"Save & compare results" = "Enregistrez et comparez les résultats";
+"Save Note" = "Enregistrer la note";
+"Saved" = "Enregistré";
+"Saved Calculation" = "Calcul enregistré";
+"Saved Calculations" = "Calculs enregistrés";
+"Search calculators…" = "Rechercher des calculateurs…";
+"Section 80C" = "Section 80C";
+"Section 80D" = "Section 80D";
+"Select Date" = "Sélectionner la date";
+"Selected Month" = "Mois sélectionné";
+"Share" = "Partager";
+"Size" = "Taille";
+"Smart Notes" = "Notes intelligentes";
+"Smart validation" = "Validation intelligente";
+"Spending Breakdown" = "Répartition des dépenses";
+"Standard Deduction" = "Déduction forfaitaire";
+"Start SIPs early" = "Commencez les SIP tôt";
+"Style" = "Style";
+"Subject" = "Objet";
+"Submit Another" = "Soumettre un autre";
+"Submit Feedback" = "Envoyer un commentaire";
+"Support" = "Assistance";
+
+// MARK: - T
+
+"Tap + to create your first note with custom styling." = "Appuyez sur + pour créer votre première note avec un style personnalisé.";
+"Tap to set" = "Appuyez pour définir";
+"Tax & Benefits" = "Impôts et avantages";
+"Tax (before cess)" = "Impôt (avant cess)";
+"Tax Calculator" = "Calculateur d'impôts";
+"Tax Payable" = "Impôt à payer";
+"Tax Regime" = "Régime fiscal";
+"Taxable Income" = "Revenu imposable";
+"Tenure (months)" = "Durée (mois)";
+"Thank you!" = "Merci !";
+"Title" = "Titre";
+"Total" = "Total";
+"Total Deductions" = "Déductions totales";
+"Total Earnings" = "Revenus totaux";
+"Total Expenses" = "Dépenses totales";
+"Total Interest" = "Intérêts totaux";
+"Total Invested" = "Total investi";
+"Total Monthly Outflow" = "Sorties mensuelles totales";
+"Total Outflow" = "Sorties totales";
+"Total Paid" = "Total payé";
+"Total Saved" = "Total économisé";
+"Total Withdrawn" = "Total retiré";
+"Track monthly expenses" = "Suivez les dépenses mensuelles";
+"Track your PF balance" = "Suivez votre solde PF";
+"Try Custom Amortization" = "Essayez l'amortissement personnalisé";
+"Type" = "Type";
+
+// MARK: - U
+
+"Unable to Send Email" = "Impossible d'envoyer l'e-mail";
+"Understand gold loan LTV" = "Comprendre le LTV du prêt sur or";
+"Untitled Note" = "Note sans titre";
+"Update Expense" = "Mettre à jour la dépense";
+"Update Note" = "Mettre à jour la note";
+"Update Outflow" = "Mettre à jour la sortie";
+"Use Custom EMI" = "Utiliser un EMI personnalisé";
+"Use Notes for quick reminders" = "Utilisez les notes pour des rappels rapides";
+
+// MARK: - V
+
+"Vehicle Loan" = "Prêt automobile";
+"Version 1.0" = "Version 1.0";
+"View Amortization Schedule" = "Voir le tableau d'amortissement";
+"View amortization schedules" = "Voir les tableaux d'amortissement";
+
+// MARK: - W
+
+"Welcome back!" = "Bon retour !";
+"Welcome to" = "Bienvenue sur";
+"Write your note here..." = "Écrivez votre note ici...";
+
+// MARK: - Y
+
+"Year Total" = "Total annuel";
+"Yearly Expenses" = "Dépenses annuelles";
+"Yearly Outflow" = "Sorties annuelles";
+"Yearly graphical overview" = "Aperçu graphique annuel";
+"Your Age" = "Votre âge";
+"Your Complete Financial Companion" = "Votre compagnon financier complet";
+"Your EMI" = "Votre EMI";
+"Your Message" = "Votre message";
+"Your Name" = "Votre nom";
+"Your financial companion" = "Votre compagnon financier";
+
+// MARK: - Lowercase
+
+"categories" = "catégories";
+"e.g. Donation, Gift" = "ex. Don, Cadeau";
+"e.g. SBI Home Loan" = "ex. Prêt immobilier SBI";
+"entries this month" = "entrées ce mois-ci";
+"items this month" = "articles ce mois-ci";
+"months" = "mois";
+"transactions this month" = "transactions ce mois-ci";
+
+// MARK: - Footer / Copyright
+
+"© 2025 Finance Toolkit. All rights reserved." = "© 2025 Finance Toolkit. Tous droits réservés.";
+
+// MARK: - Tips & FAQ Long Descriptions (Investment)
+
+"Start investing early through SIPs to benefit from the power of compounding. Even small monthly amounts grow significantly over long periods." = "Commencez à investir tôt via les SIP pour profiter de la puissance des intérêts composés. Même de petits montants mensuels croissent considérablement sur de longues périodes.";
+"Compare lump sum vs SIP investment strategies. SIPs help average out market volatility through rupee cost averaging." = "Comparez les stratégies d'investissement en somme forfaitaire et en SIP. Les SIP aident à lisser la volatilité du marché grâce à la moyenne des coûts en roupies.";
+"Keep a portion of your portfolio in Fixed Deposits for capital safety and guaranteed returns, especially for short-term goals." = "Conservez une partie de votre portefeuille en dépôts fixes pour la sécurité du capital et des rendements garantis, surtout pour les objectifs à court terme.";
+"Recurring Deposits help build financial discipline. Automate monthly savings to build a corpus over time." = "Les dépôts récurrents aident à développer la discipline financière. Automatisez l'épargne mensuelle pour constituer un capital au fil du temps.";
+"Use a Systematic Withdrawal Plan (SWP) to generate regular retirement income from your mutual fund investments." = "Utilisez un plan de retrait systématique (SWP) pour générer un revenu de retraite régulier à partir de vos investissements en fonds communs de placement.";
+"Maximize your NPS contributions to get additional tax deductions under Section 80CCD(1B), over and above the 80C limit." = "Maximisez vos cotisations NPS pour obtenir des déductions fiscales supplémentaires en vertu de la section 80CCD(1B), au-delà de la limite 80C.";
+"Track your Provident Fund balance regularly to plan for retirement. PF offers guaranteed returns with tax benefits." = "Suivez régulièrement le solde de votre fonds de prévoyance pour planifier votre retraite. Le PF offre des rendements garantis avec des avantages fiscaux.";
+
+// MARK: - Tips & FAQ Long Descriptions (Loans)
+
+"Try to maximize your down payment when taking a home loan. A higher down payment means lower EMIs and less interest paid overall." = "Essayez de maximiser votre apport initial lors d'un prêt immobilier. Un apport plus élevé signifie des EMI plus bas et moins d'intérêts payés au total.";
+"Make prepayments on your home loan whenever possible. Even small additional payments can significantly reduce your total interest outgo." = "Effectuez des remboursements anticipés sur votre prêt immobilier dès que possible. Même de petits paiements supplémentaires peuvent réduire considérablement vos intérêts totaux.";
+"Avoid high-interest personal loans and credit card debt. Always compare interest rates and prefer secured loans for lower rates." = "Évitez les prêts personnels à taux élevé et les dettes de carte de crédit. Comparez toujours les taux d'intérêt et préférez les prêts garantis pour des taux plus bas.";
+"No-cost EMI schemes often include hidden charges or inflated product prices. Always compare the total cost before opting for such plans." = "Les offres EMI sans frais incluent souvent des frais cachés ou des prix de produits gonflés. Comparez toujours le coût total avant d'opter pour de tels plans.";
+"Always pay interest during the moratorium period of education loans. This prevents interest capitalization and reduces your total repayment." = "Payez toujours les intérêts pendant la période de moratoire des prêts étudiants. Cela empêche la capitalisation des intérêts et réduit votre remboursement total.";
+"Loan Against Property (LAP) typically offers lower interest rates than personal loans. Use it wisely for business or large expenses." = "Le prêt hypothécaire (LAP) offre généralement des taux d'intérêt plus bas que les prêts personnels. Utilisez-le judicieusement pour des dépenses professionnelles ou importantes.";
+"Understand the Loan-to-Value (LTV) ratio for gold loans. Lenders typically offer 75% of the gold's market value." = "Comprenez le ratio prêt-valeur (LTV) pour les prêts sur or. Les prêteurs offrent généralement 75 % de la valeur marchande de l'or.";
+
+// MARK: - Tips & FAQ Long Descriptions (Tax)
+
+"Compare both Old and New tax regimes using the calculator. The best regime depends on your deductions and exemptions." = "Comparez les régimes fiscaux ancien et nouveau à l'aide du calculateur. Le meilleur régime dépend de vos déductions et exonérations.";
+"Know your gratuity entitlement after 5 years of service. Gratuity is calculated based on your last drawn salary and years of service." = "Connaissez vos droits à la gratification après 5 ans de service. La gratification est calculée en fonction de votre dernier salaire perçu et de vos années de service.";
+
+// MARK: - About / Feature Descriptions
+
+"All calculations run locally on your device. No data is collected, stored, or shared with any server." = "Tous les calculs s'exécutent localement sur votre appareil. Aucune donnée n'est collectée, stockée ou partagée avec un serveur.";
+"Your financial data is protected with automatic privacy screen when the app goes to background." = "Vos données financières sont protégées par un écran de confidentialité automatique lorsque l'app passe en arrière-plan.";
+"Track your daily expenses with custom categories, monthly summaries, and yearly graphical overviews." = "Suivez vos dépenses quotidiennes avec des catégories personnalisées, des résumés mensuels et des aperçus graphiques annuels.";
+"Monitor your monthly outflows including EMIs, subscriptions, and recurring payments in one place." = "Surveillez vos sorties mensuelles, y compris les EMI, abonnements et paiements récurrents, en un seul endroit.";
+"Create and organize notes with rich text formatting, custom colors, and font styles." = "Créez et organisez des notes avec mise en forme enrichie, couleurs personnalisées et styles de police.";
+"Export your financial reports as PDF or CSV files for record keeping and analysis." = "Exportez vos rapports financiers en fichiers PDF ou CSV pour l'archivage et l'analyse.";
+"Save calculator results for future reference and compare different scenarios side by side." = "Enregistrez les résultats des calculateurs pour référence future et comparez différents scénarios côte à côte.";
+"Support for multiple currencies to suit users across different regions." = "Prise en charge de plusieurs devises pour les utilisateurs de différentes régions.";
+"Personalised setup experience to customize the app for your financial needs." = "Expérience de configuration personnalisée pour adapter l'app à vos besoins financiers.";
+"Input validation ensures accurate calculations every time." = "La validation des saisies garantit des calculs précis à chaque fois.";
+"Seamlessly adapts to light and dark mode for comfortable viewing." = "S'adapte parfaitement aux modes clair et sombre pour un affichage confortable.";

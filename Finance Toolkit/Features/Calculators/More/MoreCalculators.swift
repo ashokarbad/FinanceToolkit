@@ -11,46 +11,46 @@ struct TaxCalculatorView: View {
     @AppStorage("selectedCurrency") private var currency = CurrencySettings.selectedCode
 
     private func makeSnapshot() -> SavedCalculation {
-        SavedCalculation(calculatorTitle: "Tax Calculator", icon: "percent", date: Date(),
-            note: "\(vm.taxRegime == 0 ? "Old" : "New") Regime · Gross ₹\(Int(vm.taxGrossIncome).formatted())",
+        SavedCalculation(calculatorTitle: L("Tax Calculator"), icon: "percent", date: Date(),
+            note: "\(vm.taxRegime == 0 ? L("Old") : L("New")) \(L("Regime")) · \(L("Gross")) ₹\(Int(vm.taxGrossIncome).formatted())",
             results: [
-                .init(label: "Gross Income",       value: vm.taxGrossIncome.formatted(.currency(code: currency)),              isHighlight: false),
-                .init(label: "Total Deductions",   value: vm.taxTotalDeductions.formatted(.currency(code: currency)),          isHighlight: false),
-                .init(label: "Taxable Income",     value: vm.taxTaxableIncomeComputed.formatted(.currency(code: currency)),    isHighlight: false),
-                .init(label: "Tax Payable",        value: vm.taxPayable.formatted(.currency(code: currency)),                  isHighlight: true),
+                .init(label: L("Gross Income"),       value: CurrencySettings.formatCurrency(vm.taxGrossIncome, code: currency),              isHighlight: false),
+                .init(label: L("Total Deductions"),   value: CurrencySettings.formatCurrency(vm.taxTotalDeductions, code: currency),          isHighlight: false),
+                .init(label: L("Taxable Income"),     value: CurrencySettings.formatCurrency(vm.taxTaxableIncomeComputed, code: currency),    isHighlight: false),
+                .init(label: L("Tax Payable"),        value: CurrencySettings.formatCurrency(vm.taxPayable, code: currency),                  isHighlight: true),
             ])
     }
 
     var body: some View {
         Form {
             Section {
-                SectionHeader(systemImage: "percent", title: "Income Details", color: accent)
-                Picker("Tax Regime", selection: $vm.taxRegime) {
-                    Text("Old Regime").tag(0)
-                    Text("New Regime").tag(1)
+                SectionHeader(systemImage: "percent", title: L("Income Details"), color: accent)
+                Picker(L("Tax Regime"), selection: $vm.taxRegime) {
+                    Text(L("Old Regime")).tag(0)
+                    Text(L("New Regime")).tag(1)
                 }
                 .pickerStyle(.segmented)
-                HStack { Text("Basic Salary");           Spacer(); TextField("Amount", value: $vm.taxBasicSalary, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                HStack { Text("Other Income");           Spacer(); TextField("Amount", value: $vm.taxOtherIncome, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                HStack { Text("Standard Deduction");     Spacer(); TextField("Amount", value: $vm.taxStandardDeduction, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text(L("Basic Salary"));           Spacer(); TextField(L("Amount"), value: $vm.taxBasicSalary, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text(L("Other Income"));           Spacer(); TextField(L("Amount"), value: $vm.taxOtherIncome, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text(L("Standard Deduction"));     Spacer(); TextField(L("Amount"), value: $vm.taxStandardDeduction, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 if vm.taxRegime == 0 {
-                    HStack { Text("HRA Exemption");      Spacer(); TextField("Amount", value: $vm.taxHRAExempt, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                    HStack { Text("Section 80C");        Spacer(); TextField("Amount", value: $vm.taxDeduction80C, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                    HStack { Text("Section 80D");        Spacer(); TextField("Amount", value: $vm.taxDeduction80D, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
-                    HStack { Text("Other Deductions");   Spacer(); TextField("Amount", value: $vm.taxOtherDeductions, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                    HStack { Text(L("HRA Exemption"));      Spacer(); TextField(L("Amount"), value: $vm.taxHRAExempt, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                    HStack { Text(L("Section 80C"));        Spacer(); TextField(L("Amount"), value: $vm.taxDeduction80C, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                    HStack { Text(L("Section 80D"));        Spacer(); TextField(L("Amount"), value: $vm.taxDeduction80D, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                    HStack { Text(L("Other Deductions"));   Spacer(); TextField(L("Amount"), value: $vm.taxOtherDeductions, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
                 }
-                HStack { Text("Cess %");                 Spacer(); TextField("%", value: $vm.taxCessPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
+                HStack { Text(L("Cess %"));                 Spacer(); TextField(L("%"), value: $vm.taxCessPercent, format: .number).multilineTextAlignment(.trailing).keyboardType(.decimalPad) }
             }
             Section {
                 ResultCard(systemImage: "percent", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
-                    ResultRow(label: "Gross Income",       value: vm.taxGrossIncome.formatted(.currency(code: currency)))
-                    ResultRow(label: "Total Deductions",   value: vm.taxTotalDeductions.formatted(.currency(code: currency)))
-                    ResultRow(label: "Taxable Income",     value: vm.taxTaxableIncomeComputed.formatted(.currency(code: currency)))
+                    ResultRow(label: L("Gross Income"),       value: CurrencySettings.formatCurrency(vm.taxGrossIncome, code: currency))
+                    ResultRow(label: L("Total Deductions"),   value: CurrencySettings.formatCurrency(vm.taxTotalDeductions, code: currency))
+                    ResultRow(label: L("Taxable Income"),     value: CurrencySettings.formatCurrency(vm.taxTaxableIncomeComputed, code: currency))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Tax (before cess)",  value: vm.taxBeforeCess.formatted(.currency(code: currency)))
-                    ResultRow(label: "Cess (\(Int(vm.taxCessPercent))%)", value: vm.taxCessAmount.formatted(.currency(code: currency)))
+                    ResultRow(label: L("Tax (before cess)"),  value: CurrencySettings.formatCurrency(vm.taxBeforeCess, code: currency))
+                    ResultRow(label: "\(L("Cess")) (\(Int(vm.taxCessPercent))%)", value: CurrencySettings.formatCurrency(vm.taxCessAmount, code: currency))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Tax Payable",        value: vm.taxPayable.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                    ResultRow(label: L("Tax Payable"),        value: CurrencySettings.formatCurrency(vm.taxPayable, code: currency), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.taxPayable)
                 }
             }
@@ -89,10 +89,10 @@ struct NPSCalculatorView: View {
         SavedCalculation(calculatorTitle: "NPS Calculator", icon: "shield.fill", date: Date(),
             note: "₹\(Int(vm.npsMonthlyContribution).formatted())/mo · \(npsMonths) months",
             results: [
-                .init(label: "Corpus at Maturity",     value: vm.npsCorpusAtMaturity.formatted(.currency(code: currency)),       isHighlight: true),
-                .init(label: "Annuity Purchase",       value: vm.npsAnnuityPurchase.formatted(.currency(code: currency)),        isHighlight: false),
-                .init(label: "Lumpsum Withdrawal",     value: vm.npsLumpsumWithdrawal.formatted(.currency(code: currency)),      isHighlight: false),
-                .init(label: "Est. Annual Pension",    value: vm.npsEstimatedAnnualPension.formatted(.currency(code: currency)), isHighlight: true),
+                .init(label: "Corpus at Maturity",     value: CurrencySettings.formatCurrency(vm.npsCorpusAtMaturity, code: currency),       isHighlight: true),
+                .init(label: "Annuity Purchase",       value: CurrencySettings.formatCurrency(vm.npsAnnuityPurchase, code: currency),        isHighlight: false),
+                .init(label: "Lumpsum Withdrawal",     value: CurrencySettings.formatCurrency(vm.npsLumpsumWithdrawal, code: currency),      isHighlight: false),
+                .init(label: "Est. Annual Pension",    value: CurrencySettings.formatCurrency(vm.npsEstimatedAnnualPension, code: currency), isHighlight: true),
             ])
     }
 
@@ -108,13 +108,13 @@ struct NPSCalculatorView: View {
             }
             Section {
                 ResultCard(systemImage: "shield.fill", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
-                    ResultRow(label: "Corpus at Maturity",  value: vm.npsCorpusAtMaturity.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Corpus at Maturity",  value: CurrencySettings.formatCurrency(vm.npsCorpusAtMaturity, code: currency), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.npsCorpusAtMaturity)
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Annuity Purchase",    value: vm.npsAnnuityPurchase.formatted(.currency(code: currency)))
-                    ResultRow(label: "Lumpsum Withdrawal",  value: vm.npsLumpsumWithdrawal.formatted(.currency(code: currency)))
+                    ResultRow(label: "Annuity Purchase",    value: CurrencySettings.formatCurrency(vm.npsAnnuityPurchase, code: currency))
+                    ResultRow(label: "Lumpsum Withdrawal",  value: CurrencySettings.formatCurrency(vm.npsLumpsumWithdrawal, code: currency))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Est. Annual Pension", value: vm.npsEstimatedAnnualPension.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Est. Annual Pension", value: CurrencySettings.formatCurrency(vm.npsEstimatedAnnualPension, code: currency), isHighlight: true, accentColor: accent)
                 }
             }
         }
@@ -148,10 +148,10 @@ struct PFCalculatorView: View {
         SavedCalculation(calculatorTitle: "PF Calculator", icon: "banknote.fill", date: Date(),
             note: "Basic ₹\(Int(vm.pfBasicSalary).formatted()) · \(vm.pfYears) years",
             results: [
-                .init(label: "Employee Contribution", value: vm.pfEmployeeContribution.formatted(.currency(code: currency)), isHighlight: false),
-                .init(label: "Employer Contribution", value: vm.pfEmployerContribution.formatted(.currency(code: currency)), isHighlight: false),
-                .init(label: "Total Contribution",    value: vm.pfTotalContribution.formatted(.currency(code: currency)),    isHighlight: false),
-                .init(label: "Corpus at Maturity",    value: vm.pfCorpusAtMaturity.formatted(.currency(code: currency)),     isHighlight: true),
+                .init(label: "Employee Contribution", value: CurrencySettings.formatCurrency(vm.pfEmployeeContribution, code: currency), isHighlight: false),
+                .init(label: "Employer Contribution", value: CurrencySettings.formatCurrency(vm.pfEmployerContribution, code: currency), isHighlight: false),
+                .init(label: "Total Contribution",    value: CurrencySettings.formatCurrency(vm.pfTotalContribution, code: currency),    isHighlight: false),
+                .init(label: "Corpus at Maturity",    value: CurrencySettings.formatCurrency(vm.pfCorpusAtMaturity, code: currency),     isHighlight: true),
             ])
     }
 
@@ -177,11 +177,11 @@ struct PFCalculatorView: View {
             }
             Section {
                 ResultCard(systemImage: "banknote.fill", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
-                    ResultRow(label: "Employee Contribution", value: vm.pfEmployeeContribution.formatted(.currency(code: currency)))
-                    ResultRow(label: "Employer Contribution", value: vm.pfEmployerContribution.formatted(.currency(code: currency)))
-                    ResultRow(label: "Total Contribution",    value: vm.pfTotalContribution.formatted(.currency(code: currency)))
+                    ResultRow(label: "Employee Contribution", value: CurrencySettings.formatCurrency(vm.pfEmployeeContribution, code: currency))
+                    ResultRow(label: "Employer Contribution", value: CurrencySettings.formatCurrency(vm.pfEmployerContribution, code: currency))
+                    ResultRow(label: "Total Contribution",    value: CurrencySettings.formatCurrency(vm.pfTotalContribution, code: currency))
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Corpus at Maturity",    value: vm.pfCorpusAtMaturity.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Corpus at Maturity",    value: CurrencySettings.formatCurrency(vm.pfCorpusAtMaturity, code: currency), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.pfCorpusAtMaturity)
                 }
             }
@@ -218,9 +218,9 @@ struct GratuityCalculatorView: View {
         SavedCalculation(calculatorTitle: "Gratuity Calculator", icon: "gift.fill", date: Date(),
             note: "Basic ₹\(Int(vm.gratuityLastDrawnBasic).formatted()) · \(String(format: "%.1f", vm.gratuityYearsOfService)) years",
             results: [
-                .init(label: "Last Drawn Basic + DA", value: vm.gratuityLastDrawnBasic.formatted(.currency(code: currency)), isHighlight: false),
+                .init(label: "Last Drawn Basic + DA", value: CurrencySettings.formatCurrency(vm.gratuityLastDrawnBasic, code: currency), isHighlight: false),
                 .init(label: "Years of Service",      value: String(format: "%.1f", vm.gratuityYearsOfService),               isHighlight: false),
-                .init(label: "Gratuity Amount",       value: vm.gratuityAmount.formatted(.currency(code: currency)),          isHighlight: true),
+                .init(label: "Gratuity Amount",       value: CurrencySettings.formatCurrency(vm.gratuityAmount, code: currency),          isHighlight: true),
             ])
     }
 
@@ -237,10 +237,10 @@ struct GratuityCalculatorView: View {
             }
             Section {
                 ResultCard(systemImage: "gift.fill", accentColor: accent, onSave: { SavedStore.shared.save(calculation: makeSnapshot()) }) {
-                    ResultRow(label: "Last Drawn Basic + DA", value: vm.gratuityLastDrawnBasic.formatted(.currency(code: currency)))
+                    ResultRow(label: "Last Drawn Basic + DA", value: CurrencySettings.formatCurrency(vm.gratuityLastDrawnBasic, code: currency))
                     ResultRow(label: "Completed Years",       value: "\(Int(floor(vm.gratuityYearsOfService)))")
                     Divider().padding(.vertical, 4)
-                    ResultRow(label: "Gratuity Amount",       value: vm.gratuityAmount.formatted(.currency(code: currency)), isHighlight: true, accentColor: accent)
+                    ResultRow(label: "Gratuity Amount",       value: CurrencySettings.formatCurrency(vm.gratuityAmount, code: currency), isHighlight: true, accentColor: accent)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.gratuityAmount)
                 }
             }

@@ -12,31 +12,31 @@ struct MainCalculatorView: View {
 
     // MARK: Calculator sections
     private var loanItems: [CalcItem] {[
-        CalcItem(title: "Home Loan",               subtitle: "EMI · amortisation schedule",   icon: "house.fill",                  color: Color(hex: "#3B82F6"), bgColor: Color(hex: "#3B82F6").opacity(0.1), destination: AnyView(HomeLoanView().environmentObject(vm))),
-        CalcItem(title: "Vehicle Loan",            subtitle: "Car · bike · down payment",      icon: "car.fill",                    color: Color(hex: "#EF4444"), bgColor: Color(hex: "#EF4444").opacity(0.1), destination: AnyView(VehiclePersonalLoanView(title: "Vehicle Loan").environmentObject(vm))),
-        CalcItem(title: "Personal Loan",           subtitle: "Unsecured · quick disbursal",    icon: "person.fill",                 color: Color(hex: "#8B5CF6"), bgColor: Color(hex: "#8B5CF6").opacity(0.1), destination: AnyView(VehiclePersonalLoanView(title: "Personal Loan").environmentObject(vm))),
-        CalcItem(title: "Education Loan",          subtitle: "Moratorium · study period",      icon: "book.fill",                   color: Color(hex: "#0EA5E9"), bgColor: Color(hex: "#0EA5E9").opacity(0.1), destination: AnyView(EducationLoanView().environmentObject(vm))),
-        CalcItem(title: "Business Loan",           subtitle: "MSME · working capital",         icon: "briefcase.fill",              color: Color(hex: "#6366F1"), bgColor: Color(hex: "#6366F1").opacity(0.1), destination: AnyView(BusinessLoanView().environmentObject(vm))),
-        CalcItem(title: "Gold Loan",               subtitle: "Pledged ornaments · LTV",        icon: "sparkles",                    color: Color(hex: "#F59E0B"), bgColor: Color(hex: "#F59E0B").opacity(0.1), destination: AnyView(GoldLoanView().environmentObject(vm))),
-        CalcItem(title: "Loan Against Property",   subtitle: "LAP · collateral-backed",        icon: "building.2.fill",             color: Color(hex: "#14B8A6"), bgColor: Color(hex: "#14B8A6").opacity(0.1), destination: AnyView(LAPLoanView().environmentObject(vm))),
-        CalcItem(title: "Agricultural Loan",       subtitle: "Kisan · crop · farm credit",     icon: "leaf.fill",                   color: Color(hex: "#22C55E"), bgColor: Color(hex: "#22C55E").opacity(0.1), destination: AnyView(AgriculturalLoanView().environmentObject(vm))),
-        CalcItem(title: "Credit Line / Overdraft", subtitle: "Revolving · interest-only",      icon: "creditcard.fill",             color: Color(hex: "#EC4899"), bgColor: Color(hex: "#EC4899").opacity(0.1), destination: AnyView(CreditLineOverdraftView().environmentObject(vm))),
-        CalcItem(title: "Consumer Durable / EMI",  subtitle: "Electronics · no-cost EMI",      icon: "cart.fill",                   color: Color(hex: "#E87D2B"), bgColor: Color(hex: "#E87D2B").opacity(0.1), destination: AnyView(ConsumerDurableLoanView().environmentObject(vm))),
+        CalcItem(title: L("Home Loan"),               subtitle: L("EMI · amortisation schedule"),   icon: "house.fill",                  color: Color(hex: "#3B82F6"), bgColor: Color(hex: "#3B82F6").opacity(0.1), destination: AnyView(HomeLoanView().environmentObject(vm))),
+        CalcItem(title: L("Vehicle Loan"),            subtitle: L("Car · bike · down payment"),      icon: "car.fill",                    color: Color(hex: "#EF4444"), bgColor: Color(hex: "#EF4444").opacity(0.1), destination: AnyView(VehiclePersonalLoanView(title: L("Vehicle Loan")).environmentObject(vm))),
+        CalcItem(title: L("Personal Loan"),           subtitle: L("Unsecured · quick disbursal"),    icon: "person.fill",                 color: Color(hex: "#8B5CF6"), bgColor: Color(hex: "#8B5CF6").opacity(0.1), destination: AnyView(VehiclePersonalLoanView(title: L("Personal Loan")).environmentObject(vm))),
+        CalcItem(title: L("Education Loan"),          subtitle: L("Moratorium · study period"),      icon: "book.fill",                   color: Color(hex: "#0EA5E9"), bgColor: Color(hex: "#0EA5E9").opacity(0.1), destination: AnyView(EducationLoanView().environmentObject(vm))),
+        CalcItem(title: L("Business Loan"),           subtitle: L("MSME · working capital"),         icon: "briefcase.fill",              color: Color(hex: "#6366F1"), bgColor: Color(hex: "#6366F1").opacity(0.1), destination: AnyView(BusinessLoanView().environmentObject(vm))),
+        CalcItem(title: L("Gold Loan"),               subtitle: L("Pledged ornaments · LTV"),        icon: "sparkles",                    color: Color(hex: "#F59E0B"), bgColor: Color(hex: "#F59E0B").opacity(0.1), destination: AnyView(GoldLoanView().environmentObject(vm))),
+        CalcItem(title: L("Loan Against Property"),   subtitle: L("LAP · collateral-backed"),        icon: "building.2.fill",             color: Color(hex: "#14B8A6"), bgColor: Color(hex: "#14B8A6").opacity(0.1), destination: AnyView(LAPLoanView().environmentObject(vm))),
+        CalcItem(title: L("Agricultural Loan"),       subtitle: L("Kisan · crop · farm credit"),     icon: "leaf.fill",                   color: Color(hex: "#22C55E"), bgColor: Color(hex: "#22C55E").opacity(0.1), destination: AnyView(AgriculturalLoanView().environmentObject(vm))),
+        CalcItem(title: L("Credit Line / Overdraft"), subtitle: L("Revolving · interest-only"),      icon: "creditcard.fill",             color: Color(hex: "#EC4899"), bgColor: Color(hex: "#EC4899").opacity(0.1), destination: AnyView(CreditLineOverdraftView().environmentObject(vm))),
+        CalcItem(title: L("Consumer Durable / EMI"),  subtitle: L("Electronics · no-cost EMI"),      icon: "cart.fill",                   color: Color(hex: "#E87D2B"), bgColor: Color(hex: "#E87D2B").opacity(0.1), destination: AnyView(ConsumerDurableLoanView().environmentObject(vm))),
     ]}
 
     private var investmentItems: [CalcItem] {[
-        CalcItem(title: "SIP Calculator",          subtitle: "Monthly · goal-based planning",  icon: "calendar.badge.plus",         color: Color(hex: "#22C55E"), bgColor: Color(hex: "#22C55E").opacity(0.1), destination: AnyView(SIPCalculatorView().environmentObject(vm))),
-        CalcItem(title: "Mutual Fund (Lump Sum)",  subtitle: "One-time · CAGR returns",        icon: "chart.pie.fill",              color: Color(hex: "#F59E0B"), bgColor: Color(hex: "#F59E0B").opacity(0.1), destination: AnyView(LumpSumMFView().environmentObject(vm))),
-        CalcItem(title: "SWP Calculator",          subtitle: "Systematic withdrawal plan",     icon: "arrow.down.left.circle.fill", color: Color(hex: "#EF4444"), bgColor: Color(hex: "#EF4444").opacity(0.1), destination: AnyView(SWPCalculatorView().environmentObject(vm))),
-        CalcItem(title: "FD Calculator",           subtitle: "Fixed deposit · maturity",       icon: "building.columns.fill",       color: Color(hex: "#3B82F6"), bgColor: Color(hex: "#3B82F6").opacity(0.1), destination: AnyView(FDCalculatorView().environmentObject(vm))),
-        CalcItem(title: "RD Calculator",           subtitle: "Recurring deposit · monthly",    icon: "calendar.circle.fill",        color: Color(hex: "#8B5CF6"), bgColor: Color(hex: "#8B5CF6").opacity(0.1), destination: AnyView(RDCalculatorView().environmentObject(vm))),
+        CalcItem(title: L("SIP Calculator"),          subtitle: L("Monthly · goal-based planning"),  icon: "calendar.badge.plus",         color: Color(hex: "#22C55E"), bgColor: Color(hex: "#22C55E").opacity(0.1), destination: AnyView(SIPCalculatorView().environmentObject(vm))),
+        CalcItem(title: L("Mutual Fund (Lump Sum)"),  subtitle: L("One-time · CAGR returns"),        icon: "chart.pie.fill",              color: Color(hex: "#F59E0B"), bgColor: Color(hex: "#F59E0B").opacity(0.1), destination: AnyView(LumpSumMFView().environmentObject(vm))),
+        CalcItem(title: L("SWP Calculator"),          subtitle: L("Systematic withdrawal plan"),     icon: "arrow.down.left.circle.fill", color: Color(hex: "#EF4444"), bgColor: Color(hex: "#EF4444").opacity(0.1), destination: AnyView(SWPCalculatorView().environmentObject(vm))),
+        CalcItem(title: L("FD Calculator"),           subtitle: L("Fixed deposit · maturity"),       icon: "building.columns.fill",       color: Color(hex: "#3B82F6"), bgColor: Color(hex: "#3B82F6").opacity(0.1), destination: AnyView(FDCalculatorView().environmentObject(vm))),
+        CalcItem(title: L("RD Calculator"),           subtitle: L("Recurring deposit · monthly"),    icon: "calendar.circle.fill",        color: Color(hex: "#8B5CF6"), bgColor: Color(hex: "#8B5CF6").opacity(0.1), destination: AnyView(RDCalculatorView().environmentObject(vm))),
     ]}
 
     private var moreItems: [CalcItem] {[
-        CalcItem(title: "Tax Calculator",          subtitle: "Old vs new regime · slabs",      icon: "percent",                     color: Color(hex: "#EF4444"), bgColor: Color(hex: "#EF4444").opacity(0.1), destination: AnyView(TaxCalculatorView().environmentObject(vm))),
-        CalcItem(title: "NPS Calculator",          subtitle: "National pension · annuity",     icon: "shield.fill",                 color: Color(hex: "#6366F1"), bgColor: Color(hex: "#6366F1").opacity(0.1), destination: AnyView(NPSCalculatorView().environmentObject(vm))),
-        CalcItem(title: "PF Calculator",           subtitle: "EPF · employer · employee",      icon: "banknote.fill",               color: Color(hex: "#14B8A6"), bgColor: Color(hex: "#14B8A6").opacity(0.1), destination: AnyView(PFCalculatorView().environmentObject(vm))),
-        CalcItem(title: "Gratuity Calculator",     subtitle: "Retirement benefit · years",     icon: "gift.fill",                   color: Color(hex: "#EC4899"), bgColor: Color(hex: "#EC4899").opacity(0.1), destination: AnyView(GratuityCalculatorView().environmentObject(vm))),
+        CalcItem(title: L("Tax Calculator"),          subtitle: L("Old vs new regime · slabs"),      icon: "percent",                     color: Color(hex: "#EF4444"), bgColor: Color(hex: "#EF4444").opacity(0.1), destination: AnyView(TaxCalculatorView().environmentObject(vm))),
+        CalcItem(title: L("NPS Calculator"),          subtitle: L("National pension · annuity"),     icon: "shield.fill",                 color: Color(hex: "#6366F1"), bgColor: Color(hex: "#6366F1").opacity(0.1), destination: AnyView(NPSCalculatorView().environmentObject(vm))),
+        CalcItem(title: L("PF Calculator"),           subtitle: L("EPF · employer · employee"),      icon: "banknote.fill",               color: Color(hex: "#14B8A6"), bgColor: Color(hex: "#14B8A6").opacity(0.1), destination: AnyView(PFCalculatorView().environmentObject(vm))),
+        CalcItem(title: L("Gratuity Calculator"),     subtitle: L("Retirement benefit · years"),     icon: "gift.fill",                   color: Color(hex: "#EC4899"), bgColor: Color(hex: "#EC4899").opacity(0.1), destination: AnyView(GratuityCalculatorView().environmentObject(vm))),
     ]}
 
     // Filtered
@@ -68,23 +68,23 @@ struct MainCalculatorView: View {
                     NoResultsView(query: searchText).padding(.top, 80)
                 } else {
                     if !favouriteItems.isEmpty {
-                        calcSection(title: "Favourites", icon: "star.fill", color: .gold, items: favouriteItems)
+                        calcSection(title: L("Favourites"), icon: "star.fill", color: .gold, items: favouriteItems)
                     }
                     if !filteredLoans.isEmpty {
-                        calcSection(title: "Loans", icon: "banknote", color: .navy, items: filteredLoans)
+                        calcSection(title: L("Loans"), icon: "banknote", color: .navy, items: filteredLoans)
                     }
                     if !filteredInvestments.isEmpty {
-                        calcSection(title: "Investments", icon: "chart.line.uptrend.xyaxis", color: .gold, items: filteredInvestments)
+                        calcSection(title: L("Investments"), icon: "chart.line.uptrend.xyaxis", color: .gold, items: filteredInvestments)
                     }
                     if !filteredMore.isEmpty {
-                        calcSection(title: "More Calculators", icon: "ellipsis.circle", color: .teal, items: filteredMore)
+                        calcSection(title: L("More Calculators"), icon: "ellipsis.circle", color: .teal, items: filteredMore)
                     }
                 }
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 40)
         }
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search calculators…")
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: L("Search calculators…"))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
